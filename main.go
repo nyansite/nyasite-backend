@@ -2,7 +2,6 @@ package main
 
 import (
 	// "cute_site/models"
-
 	
 	"net/http"
 
@@ -13,8 +12,6 @@ import (
 	// "gorm.io/driver/sqlite"
 	// "gorm.io/gorm"
 
-	"crypto/rand"
-	"encoding/base64"
 )
 
 func main() {
@@ -22,6 +19,7 @@ func main() {
 	store := memstore.NewStore([]byte("just_secret"))
 	store.Options(sessions.Options{Secure: true, HttpOnly: true})
 	r.Use(sessions.Sessions("session_id", store))
+
 	// db, err := gorm.Open(sqlite.Open("test.db"), &gorm.Config{})
 	// if err != nil {
 	// 	panic("我数据库呢???我那么大一个数据库呢???还我数据库!!!")
@@ -30,18 +28,21 @@ func main() {
 	r.GET("/api/user_status", get_user_status)
 	r.POST("/api/register", post_register)
 
-	r.GET("/api/csrf_token", get_csrf_token) //生成csrf_token并存到sessions,
 	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }
 
+
+
+
 func get_user_status(c *gin.Context) {
+	
 	session := sessions.Default(c)
 	userid := 0 //userid为零表示错误
 	if session.Get("is_login") == true {
 		userid = session.Get("userid").(int)
-	} else {
-		c.AbortWithStatus(http.StatusUnauthorized) //返回401
-		return
+	// } else {
+	// 	c.AbortWithStatus(http.StatusUnauthorized) //返回401
+	// 	return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
@@ -53,17 +54,9 @@ func login(c *gin.Context) {
 
 }
 
-func get_csrf_token(c *gin.Context) { //生成csrf token,被表单携带
-	session := sessions.Default(c)
-	n, _ := rand.Prime(rand.Reader, 128)
-
-	csrf_token := base64.StdEncoding.EncodeToString(n.Bytes())
-	session.Set("csrf_token", csrf_token)
-	session.Save()
-	c.String(http.StatusOK, csrf_token)
-}
 
 func post_register(c *gin.Context) {
+	
 	session := sessions.Default(c)
 	csrf_token := session.Get("csrf_token")
 	if csrf_token == nil{
