@@ -3,6 +3,7 @@ package main
 import (
 	// "cute_site/models"
 
+	
 	"net/http"
 
 	"github.com/gin-contrib/sessions"
@@ -11,6 +12,9 @@ import (
 
 	// "gorm.io/driver/sqlite"
 	// "gorm.io/gorm"
+
+	"crypto/rand"
+	"encoding/base64"
 )
 
 func main() {
@@ -23,7 +27,9 @@ func main() {
 	// }
 
 	r.GET("/api/user_status", get_user_status)
+	r.POST("/api/register", post_register)
 
+	r.GET("/uapi/csrf_token", get_csrf_token) //不安全的api,记得nginx禁用
 	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }
 
@@ -42,10 +48,25 @@ func get_user_status(c *gin.Context) {
 	})
 }
 
-func login() {
+func login(c *gin.Context) {
 
 }
 
-func register() {
+func get_csrf_token(c *gin.Context) { //获取csrf token,被表单携带
+	session := sessions.Default(c)
+	n, _ := rand.Prime(rand.Reader, 128)
 
+	csrf_token := base64.StdEncoding.EncodeToString(n.Bytes())
+	session.Set("csrf_token", csrf_token)
+	session.Save()
+	c.String(http.StatusOK, csrf_token)
+}
+
+func post_register(c *gin.Context) {
+	session := sessions.Default(c)
+	csrf_token := session.Get("csrf_token")
+	if csrf_token == nil{
+		return
+	}
+	c.String(http.StatusOK, csrf_token.(string))
 }
