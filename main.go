@@ -20,6 +20,7 @@ import (
 func main() {
 	r := gin.Default()
 	store := memstore.NewStore([]byte("just_secret"))
+	store.Options(sessions.Options{Secure: true, HttpOnly: true})
 	r.Use(sessions.Sessions("session_id", store))
 	// db, err := gorm.Open(sqlite.Open("test.db"), &gorm.Config{})
 	// if err != nil {
@@ -29,7 +30,7 @@ func main() {
 	r.GET("/api/user_status", get_user_status)
 	r.POST("/api/register", post_register)
 
-	r.GET("/uapi/csrf_token", get_csrf_token) //不安全的api,记得nginx禁用
+	r.GET("/api/csrf_token", get_csrf_token) //生成csrf_token并存到sessions,
 	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }
 
@@ -52,7 +53,7 @@ func login(c *gin.Context) {
 
 }
 
-func get_csrf_token(c *gin.Context) { //获取csrf token,被表单携带
+func get_csrf_token(c *gin.Context) { //生成csrf token,被表单携带
 	session := sessions.Default(c)
 	n, _ := rand.Prime(rand.Reader, 128)
 
