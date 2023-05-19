@@ -3,7 +3,6 @@ package main
 import (
 	"cute_site/models"
 
-
 	"net/http"
 
 	"github.com/gin-contrib/sessions"
@@ -88,12 +87,12 @@ func register(c *gin.Context) {
 		c.AbortWithStatus(602)
 		return
 	}
-	if  db.First(&models.User{}, "Email = ?", mail).RowsAffected != 0 {
+	if db.First(&models.User{}, "Email = ?", mail).RowsAffected != 0 {
 		c.AbortWithStatus(603)
 		return
 	}
 
-	user := models.User{Name: username, Passwd: encrypt_passwd([]byte(username)), Email:mail}
+	user := models.User{Name: username, Passwd: encrypt_passwd([]byte(username)), Email: mail}
 	db.Create(&user)
 	c.AbortWithStatus(601)
 }
