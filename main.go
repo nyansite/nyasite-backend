@@ -8,13 +8,13 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/memstore"
 	"github.com/gin-gonic/gin"
-
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 
 	"crypto/rand"
 	"crypto/sha512"
 	"regexp"
+	"time"
 )
 
 var db *gorm.DB
@@ -37,6 +37,7 @@ func main() {
 	{
 		group.GET("/user_status", get_self_user_status)
 		group.GET("/user_status/:id", get_user_status)
+		group.GET("/coffee", coffee)
 
 		group.POST("/register", register)
 	}
@@ -63,6 +64,17 @@ func get_self_user_status(c *gin.Context) {
 func get_user_status(c *gin.Context) {
 	// TODO 根据id获取
 }
+
+func coffee(c *gin.Context) {	//没有人能拒绝愚人节菜单
+	if time.Now().Month() == 4 && time.Now().Day() == 1{
+		c.String(http.StatusTeapot, "我拒绝泡咖啡,因为我是茶壶")
+	}else{
+		c.String(http.StatusForbidden, "我拒绝泡咖啡,因为我是服务器")
+	}
+
+}
+
+//下面的都是post
 
 func login(c *gin.Context) {
 
