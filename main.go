@@ -2,7 +2,6 @@ package main
 
 import (
 	"cute_site/models"
-	// "fmt"
 
 
 	"net/http"
@@ -16,6 +15,7 @@ import (
 
 	"crypto/rand"
 	"crypto/sha512"
+	"regexp"
 )
 
 var db *gorm.DB
@@ -32,6 +32,8 @@ func main() {
 	if dberr != nil {
 		panic("我数据库呢???我那么大一个数据库呢???还我数据库!!!")
 	}
+	db.AutoMigrate(&models.User{}) //实际上的作用是创建表
+
 	group := r.Group("/api")
 	{
 		group.GET("/user_status", get_self_user_status)
@@ -39,7 +41,6 @@ func main() {
 
 		group.POST("/register", register)
 	}
-	
 
 	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }
@@ -71,13 +72,30 @@ func login(c *gin.Context) {
 func register(c *gin.Context) {
 	username, passwd, mail := c.PostForm("username"), c.PostForm("passwd"), c.PostForm("email")
 
-	if username == "" || passwd == "" || mail == ""{
+	if username == "" || passwd == "" || mail == "" {
+		c.AbortWithStatus(http.StatusBadRequest) //400
+		return
+	}
+
+	if reg := regexp.MustCompile(`\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*`); !reg.MatchString(mail) { //检测前端也要做一遍
 		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
+	//上面判断输入是否合法,下面判断用户是否已经存在
+
+	//601:创建成功,602:用户名重复,603:邮箱重复
+	if db.First(&models.User{}, "Name = ?", username).RowsAffected != 0 {
+		c.AbortWithStatus(602)
+		return
+	}
+	if  db.First(&models.User{}, "Email = ?", mail).RowsAffected != 0 {
+		c.AbortWithStatus(603)
+		return
+	}
+
 	user := models.User{Name: username, Passwd: encrypt_passwd([]byte(username)), Email:mail}
 	db.Create(&user)
-
+	c.AbortWithStatus(601)
 }
 
 func encrypt_passwd(passwd []byte) []byte { //加密密码,带盐
