@@ -15,6 +15,7 @@ import (
 	"crypto/sha512"
 	"regexp"
 	"time"
+	// "fmt"
 )
 
 var db *gorm.DB
@@ -40,6 +41,7 @@ func main() {
 		group.GET("/coffee", coffee)
 
 		group.POST("/register", register)
+		group.POST("/login", login)
 	}
 
 	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
@@ -65,10 +67,10 @@ func get_user_status(c *gin.Context) {
 	// TODO 根据id获取
 }
 
-func coffee(c *gin.Context) {	//没有人能拒绝愚人节菜单
-	if time.Now().Month() == 4 && time.Now().Day() == 1{
+func coffee(c *gin.Context) { //没有人能拒绝愚人节彩蛋
+	if time.Now().Month() == 4 && time.Now().Day() == 1 {
 		c.String(http.StatusTeapot, "我拒绝泡咖啡,因为我是茶壶")
-	}else{
+	} else {
 		c.String(http.StatusForbidden, "我拒绝泡咖啡,因为我是服务器")
 	}
 
@@ -77,7 +79,24 @@ func coffee(c *gin.Context) {	//没有人能拒绝愚人节菜单
 //下面的都是post
 
 func login(c *gin.Context) {
-
+	username, passwd := c.PostForm("username"), c.PostForm("passwd") //传入的用户名也有可能是邮箱
+	if username == "" || passwd == "" {
+		c.AbortWithStatus(http.StatusBadRequest) //400
+		return
+	}
+	var user models.User
+	if db.First(&user, "Name = ?", username).RowsAffected == 0{	//用户不存在
+		if db.First(&user, "Email = ?", username).RowsAffected == 0 {
+			c.AbortWithStatus(612)
+			return
+		}
+	}
+	if check_passwd(user.Passwd, []byte(passwd)){
+		c.AbortWithStatus(611)
+	}else{
+		c.AbortWithStatus(613)
+	}
+	
 }
 
 func register(c *gin.Context) {
@@ -122,6 +141,20 @@ func encrypt_passwd(passwd []byte) []byte { //加密密码,带盐
 
 func check_passwd(passwd []byte, passwd2 []byte) bool {
 	//获取盐
+	salt := passwd[64:]
+	passwd = passwd[:64]
 
-	return true
+	passwd2_sha := sha512.Sum512(passwd2)
+	saltpasswd2 := append(passwd2_sha[:], salt...)
+	safe_passwd := sha512.Sum512(saltpasswd2)
+
+	ret := true
+	for i, _ := range safe_passwd{
+		if passwd[i] != safe_passwd[i]{
+			ret = false
+			//不要break防止时间攻击
+		}
+		
+	}
+	return ret
 }

@@ -19,3 +19,7 @@
 
 # Go workspace file
 go.work
+
+
+#数据库就别上传了
+*.db
