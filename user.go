@@ -1,13 +1,11 @@
-package user
+package main
 
 import (
-	"cute_site/models"
 
 	"net/http"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 
 	"crypto/rand"
 	"crypto/sha512"
@@ -16,10 +14,10 @@ import (
 	"regexp"
 )
 
-func GetSelfUserStatus(c *gin.Context, db *gorm.DB) {
+func GetSelfUserStatus(c *gin.Context) {
 
 	session := sessions.Default(c)
-	var user models.User
+	var user User
 
 	if session.Get("is_login") == true {
 		userid := session.Get("userid")
@@ -37,14 +35,14 @@ func GetSelfUserStatus(c *gin.Context, db *gorm.DB) {
 	}
 }
 
-func GetUserStatus(c *gin.Context, db *gorm.DB) {
+func GetUserStatus(c *gin.Context) {
 	// TODO 根据id获取
 }
 
-func Login(c *gin.Context, db *gorm.DB) {
+func Login(c *gin.Context) {
 	session := sessions.Default(c)
 	if session.Get("is_login") == true {
-		c.AbortWithStatus(models.StatusAlreadyLogin)
+		c.AbortWithStatus(StatusAlreadyLogin)
 		return
 	}
 	username, passwd := c.PostForm("username"), c.PostForm("passwd") //传入的用户名也有可能是邮箱
@@ -52,13 +50,13 @@ func Login(c *gin.Context, db *gorm.DB) {
 		c.AbortWithStatus(http.StatusBadRequest) //400
 		return
 	}
-	var user models.User
+	var user User
 	if db.First(&user, "Name = ? OR Email = ?", username, username).RowsAffected == 0 { //用户不存在
-		c.AbortWithStatus(models.StatusUserNameNotExist)
+		c.AbortWithStatus(StatusUserNameNotExist)
 		return
 	}
 	if !check_passwd(user.Passwd, []byte(passwd)) {
-		c.AbortWithStatus(models.StatusPasswordError)
+		c.AbortWithStatus(StatusPasswordError)
 		return
 	}
 
@@ -66,10 +64,10 @@ func Login(c *gin.Context, db *gorm.DB) {
 	session.Set("is_login", true)
 	session.Set("level", user.Level)
 	session.Save()
-	c.AbortWithStatus(models.StatusLoginOK)
+	c.AbortWithStatus(StatusLoginOK)
 }
 
-func Register(c *gin.Context, db *gorm.DB) {
+func Register(c *gin.Context) {
 	username, passwd, mail := c.PostForm("username"), c.PostForm("passwd"), c.PostForm("email")
 
 	if username == "" || passwd == "" || mail == "" {
@@ -83,18 +81,18 @@ func Register(c *gin.Context, db *gorm.DB) {
 	}
 	//上面判断输入是否合法,下面判断用户是否已经存在
 
-	if db.First(&models.User{}, "Name = ?", username).RowsAffected != 0 {
-		c.AbortWithStatus(models.StatusRepeatUserName)
+	if db.First(&User{}, "Name = ?", username).RowsAffected != 0 {
+		c.AbortWithStatus(StatusRepeatUserName)
 		return
 	}
-	if db.First(&models.User{}, "Email = ?", mail).RowsAffected != 0 {
-		c.AbortWithStatus(models.StatusRepeatEmail)
+	if db.First(&User{}, "Email = ?", mail).RowsAffected != 0 {
+		c.AbortWithStatus(StatusRepeatEmail)
 		return
 	}
 
-	user := models.User{Name: username, Passwd: encrypt_passwd([]byte(passwd)), Email: mail}
+	user := User{Name: username, Passwd: encrypt_passwd([]byte(passwd)), Email: mail}
 	db.Create(&user)
-	c.AbortWithStatus(models.StatusUserCreatedOK)
+	c.AbortWithStatus(StatusUserCreatedOK)
 }
 
 func encrypt_passwd(passwd []byte) []byte { //加密密码,带盐
