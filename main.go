@@ -36,7 +36,7 @@ func main() {
 	}
 	
 	db.AutoMigrate(&models.User{}, &models.Video{}, &models.Comment{}, &models.Tag{}) //实际上的作用是创建表
-	tags := []models.TagText{}
+	// tags := []models.TagText{}
 	group := r.Group("/api")
 	{
 		group.GET("/user_status", get_self_user_status)
