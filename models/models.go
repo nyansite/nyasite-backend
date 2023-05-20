@@ -44,12 +44,6 @@ type TagText struct { //tag的文本,其他地方有一个切片存储
 	Text string `gorm:"unique"`
 }
 
-type Tag struct {
-	ID  uint `gorm:"primarykey"`
-	Vid uint `gorm:"index"` //对应的视频的id
-	Tid uint `gorm:"index"` //避免tag文本被多次存储
-}
-
 //论坛部分
 
 type MainPost struct {
@@ -64,15 +58,25 @@ type MainPost struct {
 
 type UnitPost struct {
 	gorm.Model
-	MainPost_p string `json:"mainpost_p"`
-	Content    string `json:"content"` //以md形式储存
-	User_p     string `json:"user_p"`
+	MainPost_p string
+	Content    string	//以md形式储存
+	User_p     string
 }
 
 // 一个mainpost下面挂着unitpost
 type Comment struct {
 	gorm.Model
-	Post_p  string `json:"post_p"`
-	Content string `json:"content"`
-	User_p  string `json:"user_p"`
+	Vid  uint `gorm:"index"` //所属的视频的id,帖子先摸了
+	Cid  uint `gorm:"index"` //楼中楼上一层的ID,不是楼中楼应该为0
+	Text string
+	/*
+		文本类型
+		0:	字符串
+		1:	markdown
+		2:	bbcode
+		3:	reStructuredText
+	*/
+	Type    uint8
+	Author  uint
+	Comment []Comment `gorm:"ForeignKey:Cid"`
 }

@@ -1,17 +1,10 @@
 package upload
 
-<<<<<<< HEAD
-import (
-	"cute_site/models"
-
-	"fmt"
-	"net/http"
-=======
 // import (
 // 	"cute_site/models"
+
 // 	"fmt"
 // 	"net/http"
->>>>>>> bfbc1858be1829a7dcc70726368a42a7bea9790d
 
 // 	"github.com/gin-gonic/gin"
 // 	"gorm.io/gorm"

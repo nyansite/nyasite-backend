@@ -2,7 +2,6 @@ package main
 
 import (
 	"cute_site/models"
-	"cute_site/post"
 
 	"net/http"
 
@@ -46,24 +45,7 @@ func main() {
 		group.POST("/register", register)
 		group.POST("/login", login)
 		//发帖跟帖评论
-		group.POST("/creatnewpost", func(c *gin.Context) {
-			post.CreatNewPost(db, c)
-		})
-		group.POST("/send", func(c *gin.Context) {
-			post.Send(db, c)
-		})
-		group.POST("/sendcomment", func(c *gin.Context) {
-			post.CommentSend(db, c)
-		})
-		group.POST("/getmainpost", func(c *gin.Context) {
-			post.GetMainPost(db, c)
-		})
-		group.POST("/getpost", func(c *gin.Context) {
-			post.GetPost(db, c)
-		})
-		group.POST("/getcomment", func(c *gin.Context) {
-			post.GetComment(db, c)
-		})
+		
 	}
 
 	r.Run(":8000") // listen and serve on 0.0.0.0:8000 (for windows "localhost:8000")
