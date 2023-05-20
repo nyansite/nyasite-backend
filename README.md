@@ -18,6 +18,10 @@
 
 注册,传入表单,属性是username/passwd/email
 
+### api/login
+
+登录,传入表单,属性是username/passwd,用户名也有可能是邮箱
+
 ## 自定义的状态码
 
 ### 6xx

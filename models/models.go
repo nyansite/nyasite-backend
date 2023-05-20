@@ -30,7 +30,7 @@ type Video struct {
 	Profile   string    //芝士简介
 	Comment   []Comment `gorm:"ForeignKey:Vid"` //评论
 	Tag       []Tag     `gorm:"ForeignKey:Tid"`
-	// Views         	uint	//这是什么
+	Views     uint      //这是播放量
 }
 
 type Tag struct {
@@ -44,6 +44,12 @@ type TagText struct { //tag的文本,其他地方有一个切片存储
 	Text string `gorm:"unique"`
 }
 
+type Tag struct {
+	ID  uint `gorm:"primarykey"`
+	Vid uint `gorm:"index"` //对应的视频的id
+	Tid uint `gorm:"index"` //避免tag文本被多次存储
+}
+
 //论坛部分
 
 type MainPost struct {
@@ -51,9 +57,9 @@ type MainPost struct {
 	Title       string `json:"title"`
 	User_p      string `json:"user_p"` //发起人
 	Views       uint   `json:"views"`
+	Likes       uint   `json:"likes"`
 	Video_p     string `json:"video_p"` //如果帖子是视频的评论区存储视频id，如果不是存储"independent"
 	ContentShow string `json:"contentshow"`
-	Likes       uint   `json:"likes"`
 }
 
 type UnitPost struct {
@@ -64,7 +70,6 @@ type UnitPost struct {
 }
 
 // 一个mainpost下面挂着unitpost
-
 type Comment struct {
 	gorm.Model
 	Post_p  string `json:"post_p"`

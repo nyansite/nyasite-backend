@@ -14,6 +14,8 @@ import (
 
 	"crypto/rand"
 	"crypto/sha512"
+	_ "encoding/json"
+	_ "fmt"
 	"regexp"
 	"time"
 )
@@ -32,8 +34,9 @@ func main() {
 	if dberr != nil {
 		panic("我数据库呢???我那么大一个数据库呢???还我数据库!!!")
 	}
-	db.AutoMigrate(&models.User{}) //实际上的作用是创建表
 
+	db.AutoMigrate(&models.User{}, &models.Video{}, &models.Comment{}, &models.Tag{}) //实际上的作用是创建表
+	// tags := []models.TagText{}
 	group := r.Group("/api")
 	{
 		group.GET("/user_status", get_self_user_status)
@@ -64,29 +67,28 @@ func main() {
 	}
 
 	r.Run(":8000") // listen and serve on 0.0.0.0:8000 (for windows "localhost:8000")
+
 }
 
 func get_self_user_status(c *gin.Context) {
 
 	session := sessions.Default(c)
-	var userid uint
-	var mail string
 	var user models.User
 
-	userid = 0 //userid为零表示错误
 	if session.Get("is_login") == true {
-		userid = session.Get("userid").(uint)
+		userid := session.Get("userid")
+		level := session.Get("level")
 		db.First(&user, userid)
-		mail = user.Email
+		mail := user.Email
+		c.JSON(http.StatusOK, gin.H{
+			"userid": userid,
+			"mail":   mail,
+			"level":  level,
+		})
 	} else {
 		c.AbortWithStatus(http.StatusUnauthorized) //返回401
 		return
 	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"userid": userid,
-		"mail":   mail,
-	})
 }
 
 func get_user_status(c *gin.Context) {
@@ -116,10 +118,8 @@ func login(c *gin.Context) {
 	}
 	var user models.User
 	if db.First(&user, "Name = ? OR Email = ?", username, username).RowsAffected == 0 { //用户不存在
-
 		c.AbortWithStatus(612)
 		return
-
 	}
 	if !check_passwd(user.Passwd, []byte(passwd)) {
 		c.AbortWithStatus(613)
@@ -128,6 +128,7 @@ func login(c *gin.Context) {
 
 	session.Set("userid", user.ID)
 	session.Set("is_login", true)
+	session.Set("level", user.Level)
 	session.Save()
 	c.AbortWithStatus(611)
 }
