@@ -65,8 +65,6 @@ func get_self_user_status(c *gin.Context) {
 		c.AbortWithStatus(http.StatusUnauthorized) //返回401
 		return
 	}
-
-	
 }
 
 func get_user_status(c *gin.Context) {
