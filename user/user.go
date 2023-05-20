@@ -44,7 +44,7 @@ func GetUserStatus(c *gin.Context, db *gorm.DB) {
 func Login(c *gin.Context, db *gorm.DB) {
 	session := sessions.Default(c)
 	if session.Get("is_login") == true {
-		c.AbortWithStatus(610)
+		c.AbortWithStatus(models.StatusAlreadyLogin)
 		return
 	}
 	username, passwd := c.PostForm("username"), c.PostForm("passwd") //传入的用户名也有可能是邮箱
@@ -54,11 +54,11 @@ func Login(c *gin.Context, db *gorm.DB) {
 	}
 	var user models.User
 	if db.First(&user, "Name = ? OR Email = ?", username, username).RowsAffected == 0 { //用户不存在
-		c.AbortWithStatus(612)
+		c.AbortWithStatus(models.StatusUserNameNotExist)
 		return
 	}
 	if !check_passwd(user.Passwd, []byte(passwd)) {
-		c.AbortWithStatus(613)
+		c.AbortWithStatus(models.StatusPasswordError)
 		return
 	}
 
@@ -66,7 +66,7 @@ func Login(c *gin.Context, db *gorm.DB) {
 	session.Set("is_login", true)
 	session.Set("level", user.Level)
 	session.Save()
-	c.AbortWithStatus(611)
+	c.AbortWithStatus(models.StatusLoginOK)
 }
 
 func Register(c *gin.Context, db *gorm.DB) {
@@ -83,19 +83,18 @@ func Register(c *gin.Context, db *gorm.DB) {
 	}
 	//上面判断输入是否合法,下面判断用户是否已经存在
 
-	//601:创建成功,602:用户名重复,603:邮箱重复
 	if db.First(&models.User{}, "Name = ?", username).RowsAffected != 0 {
-		c.AbortWithStatus(602)
+		c.AbortWithStatus(models.StatusRepeatUserName)
 		return
 	}
 	if db.First(&models.User{}, "Email = ?", mail).RowsAffected != 0 {
-		c.AbortWithStatus(603)
+		c.AbortWithStatus(models.StatusRepeatEmail)
 		return
 	}
 
 	user := models.User{Name: username, Passwd: encrypt_passwd([]byte(passwd)), Email: mail}
 	db.Create(&user)
-	c.AbortWithStatus(601)
+	c.AbortWithStatus(models.StatusUserCreatedOK)
 }
 
 func encrypt_passwd(passwd []byte) []byte { //加密密码,带盐

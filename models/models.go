@@ -4,6 +4,16 @@ import (
 	"gorm.io/gorm"
 )
 
+const (
+StatusUserCreatedOK		int = 601
+StatusRepeatUserName	int = 602
+StatusRepeatEmail		int = 603
+StatusLoginOK			int = 611
+StatusUserNameNotExist	int = 612
+StatusPasswordError		int = 613
+StatusAlreadyLogin		int = 614
+)
+
 type User struct {
 	gorm.Model        //用模型本身的id
 	Name       string `gorm:"unique"`
