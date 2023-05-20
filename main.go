@@ -2,7 +2,6 @@ package main
 
 import (
 	"cute_site/models"
-	
 
 	"net/http"
 
@@ -51,16 +50,23 @@ func main() {
 func get_self_user_status(c *gin.Context) {
 
 	session := sessions.Default(c)
-	userid := 0 //userid为零表示错误
+	var userid uint
+	var mail string
+	var user models.User
+
+	userid = 0 //userid为零表示错误
 	if session.Get("is_login") == true {
-		userid = session.Get("userid").(int)
-		// } else {
-		// 	c.AbortWithStatus(http.StatusUnauthorized) //返回401
-		// 	return
+		userid = session.Get("userid").(uint)
+		db.First(&user, userid)
+		mail = user.Email
+	} else {
+		c.AbortWithStatus(http.StatusUnauthorized) //返回401
+		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"userid": userid,
+		"mail":   mail,
 	})
 }
 
@@ -74,30 +80,36 @@ func coffee(c *gin.Context) { //没有人能拒绝愚人节彩蛋
 	} else {
 		c.String(http.StatusForbidden, "我拒绝泡咖啡,因为我是服务器")
 	}
-
 }
 
 //下面的都是post
 
 func login(c *gin.Context) {
+	session := sessions.Default(c)
+	if session.Get("is_login") == true {
+		c.AbortWithStatus(610)
+		return
+	}
 	username, passwd := c.PostForm("username"), c.PostForm("passwd") //传入的用户名也有可能是邮箱
 	if username == "" || passwd == "" {
 		c.AbortWithStatus(http.StatusBadRequest) //400
 		return
 	}
 	var user models.User
-	if db.First(&user, "Name = ?", username).RowsAffected == 0{	//用户不存在
-		if db.First(&user, "Email = ?", username).RowsAffected == 0 {
-			c.AbortWithStatus(612)
-			return
-		}
+	if db.First(&user, "Name = ? OR Email = ?", username, username).RowsAffected == 0 { //用户不存在
+
+		c.AbortWithStatus(612)
+		return
+
 	}
-	if check_passwd(user.Passwd, []byte(passwd)){
-		c.AbortWithStatus(611)
-	}else{
+	if !check_passwd(user.Passwd, []byte(passwd)) {
 		c.AbortWithStatus(613)
+		return
 	}
-	
+	session.Set("userid", user.ID)
+	session.Set("is_login", true)
+	session.Save()
+	c.AbortWithStatus(611)
 }
 
 func register(c *gin.Context) {
@@ -142,20 +154,20 @@ func encrypt_passwd(passwd []byte) []byte { //加密密码,带盐
 
 func check_passwd(passwd []byte, passwd2 []byte) bool {
 	//获取盐
-	salt := passwd[64:]		
-	passwd = passwd[:64]	
+	salt := passwd[64:]
+	passwd = passwd[:64]
 
 	passwd2_sha := sha512.Sum512(passwd2)
 	saltpasswd2 := append(passwd2_sha[:], salt...)
 	safe_passwd := sha512.Sum512(saltpasswd2)
-	
+
 	ret := true
-	for i, v := range passwd{
-		if v != safe_passwd[i]{
+	for i, v := range passwd {
+		if v != safe_passwd[i] {
 			ret = false
 			//不要break防止时间攻击
 		}
-		
+
 	}
 	return ret
 }
