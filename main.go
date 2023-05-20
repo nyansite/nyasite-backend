@@ -15,7 +15,6 @@ import (
 	"crypto/sha512"
 	"regexp"
 	"time"
-	// "fmt"
 )
 
 var db *gorm.DB
@@ -50,16 +49,23 @@ func main() {
 func get_self_user_status(c *gin.Context) {
 
 	session := sessions.Default(c)
-	userid := 0 //userid为零表示错误
+	var userid uint
+	var mail string
+	var user models.User
+
+	userid = 0 //userid为零表示错误
 	if session.Get("is_login") == true {
-		userid = session.Get("userid").(int)
-		// } else {
-		// 	c.AbortWithStatus(http.StatusUnauthorized) //返回401
-		// 	return
+		userid = session.Get("userid").(uint)
+		db.First(&user, userid)
+		mail = user.Email
+	} else {
+		c.AbortWithStatus(http.StatusUnauthorized) //返回401
+		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"userid": userid,
+		"mail":   mail,
 	})
 }
 
@@ -73,18 +79,23 @@ func coffee(c *gin.Context) { //没有人能拒绝愚人节彩蛋
 	} else {
 		c.String(http.StatusForbidden, "我拒绝泡咖啡,因为我是服务器")
 	}
-
 }
 
 //下面的都是post
 
 func login(c *gin.Context) {
+	session := sessions.Default(c)
+	if session.Get("is_login") == true {
+		c.AbortWithStatus(610)
+		return
+	}
 	username, passwd := c.PostForm("username"), c.PostForm("passwd") //传入的用户名也有可能是邮箱
 	if username == "" || passwd == "" {
 		c.AbortWithStatus(http.StatusBadRequest) //400
 		return
 	}
 	var user models.User
+<<<<<<< HEAD
 	if db.First(&user, "Name = ?", username).RowsAffected == 0 { //用户不存在
 		if db.First(&user, "Email = ?", username).RowsAffected == 0 {
 			c.AbortWithStatus(612)
@@ -94,9 +105,26 @@ func login(c *gin.Context) {
 	if tosha512string(passwd) == user.Passwd {
 		c.AbortWithStatus(611)
 	} else {
-		c.AbortWithStatus(613)
-	}
+=======
+	if db.First(&user, "Name = ? OR Email = ?", username, username).RowsAffected == 0 { //用户不存在
 
+		c.AbortWithStatus(612)
+		return
+
+	}
+	if !check_passwd(user.Passwd, []byte(passwd)) {
+>>>>>>> 62a611f3e339f9eaa4348d75ffb908849a327d84
+		c.AbortWithStatus(613)
+		return
+	}
+<<<<<<< HEAD
+
+=======
+	session.Set("userid", user.ID)
+	session.Set("is_login", true)
+	session.Save()
+	c.AbortWithStatus(611)
+>>>>>>> 62a611f3e339f9eaa4348d75ffb908849a327d84
 }
 
 func register(c *gin.Context) {
@@ -128,25 +156,36 @@ func register(c *gin.Context) {
 	c.AbortWithStatus(601)
 }
 
+//上面的都是post
+
 func encrypt_passwd(passwd []byte) []byte { //加密密码,带盐
 	salte, _ := rand.Prime(rand.Reader, 64) //普普通通的64位盐,8字节
 	salt := salte.Bytes()
 
 	passwd_sha := sha512.Sum512(passwd)          //密码的sha
 	saltpasswd := append(passwd_sha[:], salt...) //加盐
-	safe_passwd := sha512.Sum512(saltpasswd)     //这一步才算加密
+	safe_passwd := sha512.Sum512_256(saltpasswd) //这一步才算加密,512/256指生成512之后截断成256,安全性一样
 
 	return append(safe_passwd[:], salt...) //保存盐
 }
 
 func check_passwd(passwd []byte, passwd2 []byte) bool {
 	//获取盐
+<<<<<<< HEAD
 	salt := passwd[64:]
 	passwd = passwd[:64]
 
 	passwd2_sha := sha512.Sum512(passwd2)
 	saltpasswd2 := append(passwd2_sha[:], salt...)
 	safe_passwd := sha512.Sum512(saltpasswd2)
+=======
+	salt := passwd[32:]
+	passwd = passwd[:32]
+
+	passwd2_sha := sha512.Sum512(passwd2)
+	saltpasswd2 := append(passwd2_sha[:], salt...)
+	safe_passwd := sha512.Sum512_256(saltpasswd2)
+>>>>>>> 62a611f3e339f9eaa4348d75ffb908849a327d84
 
 	ret := true
 	for i, v := range passwd {
@@ -154,7 +193,10 @@ func check_passwd(passwd []byte, passwd2 []byte) bool {
 			ret = false
 			//不要break防止时间攻击
 		}
+<<<<<<< HEAD
 
+=======
+>>>>>>> 62a611f3e339f9eaa4348d75ffb908849a327d84
 	}
 	return ret
 }
