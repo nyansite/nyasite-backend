@@ -2,6 +2,7 @@ package main
 
 import (
 	"cute_site/models"
+	
 
 	"net/http"
 
@@ -123,13 +124,13 @@ func register(c *gin.Context) {
 		return
 	}
 
-	user := models.User{Name: username, Passwd: encrypt_passwd([]byte(username)), Email: mail}
+	user := models.User{Name: username, Passwd: encrypt_passwd([]byte(passwd)), Email: mail}
 	db.Create(&user)
 	c.AbortWithStatus(601)
 }
 
 func encrypt_passwd(passwd []byte) []byte { //加密密码,带盐
-	salte, _ := rand.Prime(rand.Reader, 64) //普普通通的64位盐
+	salte, _ := rand.Prime(rand.Reader, 64) //普普通通的64位盐,8字节
 	salt := salte.Bytes()
 
 	passwd_sha := sha512.Sum512(passwd)          //密码的sha
@@ -141,16 +142,16 @@ func encrypt_passwd(passwd []byte) []byte { //加密密码,带盐
 
 func check_passwd(passwd []byte, passwd2 []byte) bool {
 	//获取盐
-	salt := passwd[64:]
-	passwd = passwd[:64]
+	salt := passwd[64:]		
+	passwd = passwd[:64]	
 
 	passwd2_sha := sha512.Sum512(passwd2)
 	saltpasswd2 := append(passwd2_sha[:], salt...)
 	safe_passwd := sha512.Sum512(saltpasswd2)
-
+	
 	ret := true
-	for i, _ := range safe_passwd{
-		if passwd[i] != safe_passwd[i]{
+	for i, v := range passwd{
+		if v != safe_passwd[i]{
 			ret = false
 			//不要break防止时间攻击
 		}
