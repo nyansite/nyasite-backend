@@ -2,7 +2,7 @@ package main
 
 import (
 	"cute_site/models"
-	"fmt"
+
 
 	"net/http"
 
@@ -14,7 +14,6 @@ import (
 
 	"crypto/rand"
 	"crypto/sha512"
-	"encoding/json"
 	_ "encoding/json"
 	_ "fmt"
 	"regexp"
