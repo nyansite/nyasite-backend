@@ -123,46 +123,38 @@ func register(c *gin.Context) {
 		return
 	}
 
-	user := models.User{Name: username, Passwd: tosha512string(passwd), Email: mail}
+	user := models.User{Name: username, Passwd: encrypt_passwd([]byte(passwd)), Email: mail}
 	db.Create(&user)
 	c.AbortWithStatus(601)
 }
 
-func tosha512string(in string) string {
-	h := sha512.New()
-	h.Write([]byte(in))
-	s := h.Sum(nil)
-	out := hex.EncodeToString(s)
-	return string(out)
+func encrypt_passwd(passwd []byte) []byte { //加密密码,带盐
+	salte, _ := rand.Prime(rand.Reader, 64) //普普通通的64位盐,8字节
+	salt := salte.Bytes()
+
+	passwd_sha := sha512.Sum512(passwd)          //密码的sha
+	saltpasswd := append(passwd_sha[:], salt...) //加盐
+	safe_passwd := sha512.Sum512(saltpasswd)     //这一步才算加密
+
+	return append(safe_passwd[:], salt...) //保存盐
 }
 
-//func encrypt_passwd(passwd []byte) []byte { //加密密码,带盐
-//	salte, _ := rand.Prime(rand.Reader, 64) //普普通通的64位盐
-//	salt := salte.Bytes()
+func check_passwd(passwd []byte, passwd2 []byte) bool {
+	//获取盐
+	salt := passwd[64:]
+	passwd = passwd[:64]
 
-//	passwd_sha := sha512.Sum512(passwd)          //密码的sha
-//	saltpasswd := append(passwd_sha[:], salt...) //加盐
-//	safe_passwd := sha512.Sum512(saltpasswd)     //这一步才算加密
-//
-//	return append(safe_passwd[:], salt...) //保存盐
-//}
+	passwd2_sha := sha512.Sum512(passwd2)
+	saltpasswd2 := append(passwd2_sha[:], salt...)
+	safe_passwd := sha512.Sum512(saltpasswd2)
 
-//func check_passwd(passwd []byte, passwd2 []byte) bool {
-//	//获取盐
-//	salt := passwd[64:]
-//	passwd = passwd[:64]
-//
-//	passwd2_sha := sha512.Sum512(passwd2)
-//	saltpasswd2 := append(passwd2_sha[:], salt...)
-//	safe_passwd := sha512.Sum512(saltpasswd2)
-//
-//	ret := true
-//	for i, _ := range safe_passwd{
-//		if passwd[i] != safe_passwd[i]{
-//			ret = false
-//			//不要break防止时间攻击
-//		}
+	ret := true
+	for i, v := range passwd {
+		if v != safe_passwd[i] {
+			ret = false
+			//不要break防止时间攻击
+		}
 
-//	}
-//	return ret
-//}
+	}
+	return ret
+}
