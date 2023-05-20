@@ -2,6 +2,7 @@ package main
 
 import (
 	"cute_site/models"
+	"fmt"
 
 	"net/http"
 
@@ -13,6 +14,9 @@ import (
 
 	"crypto/rand"
 	"crypto/sha512"
+	"encoding/json"
+	_ "encoding/json"
+	_ "fmt"
 	"regexp"
 	"time"
 )
@@ -31,8 +35,9 @@ func main() {
 	if dberr != nil {
 		panic("我数据库呢???我那么大一个数据库呢???还我数据库!!!")
 	}
-	db.AutoMigrate(&models.User{}) //实际上的作用是创建表
-
+	
+	db.AutoMigrate(&models.User{}, &models.Video{}, &models.Comment{}) //实际上的作用是创建表
+	
 	group := r.Group("/api")
 	{
 		group.GET("/user_status", get_self_user_status)
@@ -42,7 +47,6 @@ func main() {
 		group.POST("/register", register)
 		group.POST("/login", login)
 	}
-
 	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }
 

@@ -30,7 +30,7 @@ type Video struct {
 	CoverLink   string		//封面也用磁力链接
 	Title       string
 	Profile  	string		//芝士简介
-	Comment		[]Comment	//评论	
+	Comment		[]Comment	`gorm:"ForeignKey:Vid"`	//评论	
 	// Views         	uint	//这是什么
 }
 
@@ -56,9 +56,19 @@ type Video struct {
 // 一个mainpost下面挂着unitpost
 
 
-type Comment struct {
+type Comment struct {//不知道为什么基于gorm.Model会出问题
 	gorm.Model
-	Text	string
-	Type 	uint8	//0为字符串,1为markdown
-	Author  uint
+	Vid			uint	`gorm:"index"`	//所属的视频/帖子的id
+	Cid			uint	`gorm:"index"`	//楼中楼上一层的ID,不是楼中楼应该为0
+	Text		string
+	/*
+	文本类型
+	0:	字符串
+	1:	markdown
+	2:	bbcode
+	3:	reStructuredText
+	*/
+	Type 		uint8	
+	Author  	uint
+	Comment		[]Comment	`gorm:"ForeignKey:Cid"`
 }
