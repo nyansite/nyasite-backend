@@ -50,9 +50,9 @@ func main() {
 	group = r.Group("/uapi")		//不安全的api,能够操作数据库的所有数据
 	group.Use(cors.New(config))
 	{
-		
+
 	}
-	r.Run() // 8080
+	r.Run("8000") // 8000
 
 }
 
