@@ -33,6 +33,16 @@ func CreatNewPost(db *gorm.DB, c *gin.Context) { //发帖
 	SendMain(db, c, mainpost_p, user_p, content)
 }
 
+func Send(db *gorm.DB, c *gin.Context) { //跟帖
+	data, _ := c.GetRawData()
+	var body map[string]string
+	_ = json.Unmarshal(data, &body)
+	mainPost_p := body["mainpost_id"]
+	user_p := body["user_id"]
+	content := body["content"]
+	SendMain(db, c, mainPost_p, user_p, content)
+}
+
 func SendMain(db *gorm.DB, c *gin.Context, mainPost_p string, user_p string, content string) { //无论是发新帖还是根贴都要用到这个函数
 	var lastPost models.UnitPost
 	var user models.User
