@@ -7,30 +7,41 @@ import (
 type User struct {
 	gorm.Model        //用模型本身的id
 	Name       string `gorm:"unique"`
-	Passwd     string //TODO 记得加盐
+	Passwd     []byte //TODO 记得加盐
 	Email      string `gorm:"unique"`
+	Level      uint   //4位权限4位等级,所以满级15
 }
 
-//视频部分
-
-type VideoRequireReview struct {
+// 这个要重构,先摸了
+type VideoPreviewRequire struct {
 	gorm.Model
-	CoverFile    string `json:"cover`
-	VideoFile    string `json:"videofile"`
-	UpId_p       string `json:"up_p"`
-	Title        string `json:"title"`
-	Pass         uint   `json:"pass"`
-	Introduction string `json:"introduction"`
+	CoverFile    string
+	VideoFile    string
+	Title        string
+	Pass         uint
+	Introduction string
 }
 
 type Video struct {
 	gorm.Model
-	VideoIpfsSite string `json:"VideoIpfsSite"`
-	CoverFile     string `json:"coverfile"`
-	UpId_p        string `json:"up_p"`
-	Title         string `json:"title"`
-	Introduction  string `json:"introduction"`
-	Views         uint   `json:"views"`
+	VideoLink string
+	CoverLink string //封面也用磁力链接
+	Title     string
+	Profile   string    //芝士简介
+	Comment   []Comment `gorm:"ForeignKey:Vid"` //评论
+	Tag       []Tag     `gorm:"ForeignKey:Tid"`
+	// Views         	uint	//这是什么
+}
+
+type Tag struct {
+	ID  uint `gorm:"primarykey"`
+	Vid uint `gorm:"index"` //对应的视频的id
+	Tid uint `gorm:"index"` //避免tag文本被多次存储
+}
+
+type TagText struct { //tag的文本,其他地方有一个切片存储
+	gorm.Model
+	Text string `gorm:"unique"`
 }
 
 //论坛部分
@@ -42,6 +53,7 @@ type MainPost struct {
 	Views       uint   `json:"views"`
 	Video_p     string `json:"video_p"` //如果帖子是视频的评论区存储视频id，如果不是存储"independent"
 	ContentShow string `json:"contentshow"`
+	Likes       uint   `json:"likes"`
 }
 
 type UnitPost struct {
@@ -49,7 +61,6 @@ type UnitPost struct {
 	MainPost_p string `json:"mainpost_p"`
 	Content    string `json:"content"` //以md形式储存
 	User_p     string `json:"user_p"`
-	Level      uint   `json:"level"` //楼层
 }
 
 // 一个mainpost下面挂着unitpost
