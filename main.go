@@ -35,8 +35,8 @@ func main() {
 
 	group := r.Group("/api")
 	{
-		group.GET("/user_status", GetSelfUserStatus)
-		group.GET("/user_status/:id", GetUserStatus)
+		group.GET("/user_status", GetSelfUserData)
+		group.GET("/user_status/:id", GetUserData)
 		group.GET("/coffee", coffee)
 
 		group.POST("/register", Register)

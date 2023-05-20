@@ -1,7 +1,6 @@
 package main
 
 import (
-
 	"net/http"
 
 	"github.com/gin-contrib/sessions"
@@ -12,9 +11,10 @@ import (
 	_ "encoding/json"
 	_ "fmt"
 	"regexp"
+	"strconv"
 )
 
-func GetSelfUserStatus(c *gin.Context) {
+func GetSelfUserData(c *gin.Context) {
 
 	session := sessions.Default(c)
 	var user User
@@ -35,8 +35,19 @@ func GetSelfUserStatus(c *gin.Context) {
 	}
 }
 
-func GetUserStatus(c *gin.Context) {
-	// TODO 根据id获取
+func GetUserData(c *gin.Context) {
+	id := c.Param("id")
+	nid, err := strconv.Atoi(id)
+	if err != nil {
+		c.AbortWithStatus(http.StatusUnauthorized) //返回401
+		return
+	}
+	var user User
+	db.First(&user, nid)
+	c.JSON(http.StatusOK, gin.H{
+		"name":  user.Name,
+		"level": user.Level,
+	})
 }
 
 func Login(c *gin.Context) {
