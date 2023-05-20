@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"github.com/gin-contrib/cors"
 
 	_ "encoding/json"
 	_ "fmt"
@@ -45,7 +46,12 @@ func main() {
 		group.POST("/login", Login)
 		group.POST("/new_tag", NewTag)
 	}
-
+	config := cors.DefaultConfig()	//这个是不允许远程的
+	group = r.Group("/uapi")		//不安全的api,能够操作数据库的所有数据
+	group.Use(cors.New(config))
+	{
+		
+	}
 	r.Run() // 8080
 
 }
