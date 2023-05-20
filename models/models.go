@@ -9,7 +9,7 @@ type User struct {
 	Name	string `gorm:"unique"`
 	Passwd	[]byte //TODO 记得加盐
 	Email	string `gorm:"unique"`
-	level	uint	//4位权限4位等级,所以满级15
+	Level	uint	//4位权限4位等级,所以满级15
 }
 
 //视频部分

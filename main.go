@@ -49,24 +49,24 @@ func main() {
 func get_self_user_status(c *gin.Context) {
 
 	session := sessions.Default(c)
-	var userid uint
-	var mail string
 	var user models.User
 
-	userid = 0 //userid为零表示错误
 	if session.Get("is_login") == true {
-		userid = session.Get("userid").(uint)
+		userid := session.Get("userid")
+		level := session.Get("level")
 		db.First(&user, userid)
-		mail = user.Email
+		mail := user.Email
+		c.JSON(http.StatusOK, gin.H{
+			"userid": userid,
+			"mail":   mail,
+			"level": level,
+		})
 	} else {
 		c.AbortWithStatus(http.StatusUnauthorized) //返回401
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"userid": userid,
-		"mail":   mail,
-	})
+	
 }
 
 func get_user_status(c *gin.Context) {
@@ -96,10 +96,8 @@ func login(c *gin.Context) {
 	}
 	var user models.User
 	if db.First(&user, "Name = ? OR Email = ?", username, username).RowsAffected == 0 { //用户不存在
-
 		c.AbortWithStatus(612)
 		return
-
 	}
 	if !check_passwd(user.Passwd, []byte(passwd)) {
 		c.AbortWithStatus(613)
@@ -108,6 +106,7 @@ func login(c *gin.Context) {
 
 	session.Set("userid", user.ID)
 	session.Set("is_login", true)
+	session.Set("level", user.Level)
 	session.Save()
 	c.AbortWithStatus(611)
 }
