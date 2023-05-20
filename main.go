@@ -15,7 +15,6 @@ import (
 	"crypto/sha512"
 	"regexp"
 	"time"
-	// "fmt"
 )
 
 var db *gorm.DB
@@ -141,25 +140,27 @@ func register(c *gin.Context) {
 	c.AbortWithStatus(601)
 }
 
+//上面的都是post
+
 func encrypt_passwd(passwd []byte) []byte { //加密密码,带盐
 	salte, _ := rand.Prime(rand.Reader, 64) //普普通通的64位盐,8字节
 	salt := salte.Bytes()
 
 	passwd_sha := sha512.Sum512(passwd)          //密码的sha
 	saltpasswd := append(passwd_sha[:], salt...) //加盐
-	safe_passwd := sha512.Sum512(saltpasswd)     //这一步才算加密
+	safe_passwd := sha512.Sum512_256(saltpasswd) //这一步才算加密,512/256指生成512之后截断成256,安全性一样
 
 	return append(safe_passwd[:], salt...) //保存盐
 }
 
 func check_passwd(passwd []byte, passwd2 []byte) bool {
 	//获取盐
-	salt := passwd[64:]
-	passwd = passwd[:64]
+	salt := passwd[32:]
+	passwd = passwd[:32]
 
 	passwd2_sha := sha512.Sum512(passwd2)
 	saltpasswd2 := append(passwd2_sha[:], salt...)
-	safe_passwd := sha512.Sum512(saltpasswd2)
+	safe_passwd := sha512.Sum512_256(saltpasswd2)
 
 	ret := true
 	for i, v := range passwd {
@@ -167,7 +168,6 @@ func check_passwd(passwd []byte, passwd2 []byte) bool {
 			ret = false
 			//不要break防止时间攻击
 		}
-
 	}
 	return ret
 }
