@@ -35,8 +35,8 @@ func main() {
 		panic("我数据库呢???我那么大一个数据库呢???还我数据库!!!")
 	}
 	
-	db.AutoMigrate(&models.User{}, &models.Video{}, &models.Comment{}) //实际上的作用是创建表
-	
+	db.AutoMigrate(&models.User{}, &models.Video{}, &models.Comment{}, &models.Tag{}) //实际上的作用是创建表
+	tags := []models.TagText{}
 	group := r.Group("/api")
 	{
 		group.GET("/user_status", get_self_user_status)
@@ -46,7 +46,8 @@ func main() {
 		group.POST("/register", register)
 		group.POST("/login", login)
 	}
-	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+	// r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+	
 }
 
 func get_self_user_status(c *gin.Context) {
