@@ -4,7 +4,8 @@ import (
 	"net/http"
 
 	"github.com/gin-contrib/sessions"
-	"github.com/gin-contrib/sessions/memstore"
+	// "github.com/gin-contrib/sessions/memstore"
+	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -19,7 +20,8 @@ var tags []TagText
 
 func main() {
 	r := gin.Default()
-	store := memstore.NewStore([]byte("just_secret"))
+	// store := memstore.NewStore([]byte("just_secret"))
+	store := cookie.NewStore([]byte("just_secret")) //不安全但是方便测试,正式版换成上面的
 	store.Options(sessions.Options{Secure: true, HttpOnly: true})
 	r.Use(sessions.Sessions("session_id", store))
 	// TODO csrf防护,需要前端支持

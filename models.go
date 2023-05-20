@@ -56,27 +56,18 @@ type TagText struct { //tag的文本,其他地方有一个切片存储
 
 //论坛部分
 
-type MainPost struct {
+type MainForum struct {
 	gorm.Model
-	Title       string `json:"title"`
-	User_p      string `json:"user_p"` //发起人
-	Views       uint   `json:"views"`
-	Likes       uint   `json:"likes"`
-	Video_p     string `json:"video_p"` //如果帖子是视频的评论区存储视频id，如果不是存储"independent"
-	ContentShow string `json:"contentshow"`
+	Title       string
+	Author      uint			`gorm:"index"`//发起人
+	Views       uint			//阅读量
+	Unit		[]UnitForum		`gorm:"ForeignKey:Tid"`
 }
 
-type UnitPost struct {
+//两个表避免很多麻烦
+type UnitForum struct {
 	gorm.Model
-	MainPost_p string
-	Content    string	//以md形式储存
-	User_p     string
-}
-
-// 一个mainpost下面挂着unitpost
-type Comment struct {
-	gorm.Model
-	Vid  uint `gorm:"index"` //所属的视频的id,帖子先摸了
+	Tid  uint `gorm:"index"` //所属的帖子的id
 	Cid  uint `gorm:"index"` //楼中楼上一层的ID,不是楼中楼应该为0
 	Text string
 	/*
@@ -90,3 +81,22 @@ type Comment struct {
 	Author  uint
 	Comment []Comment `gorm:"ForeignKey:Cid"`
 }
+
+// 一个mainpost下面挂着unitpost
+type Comment struct {
+	gorm.Model
+	Vid  uint `gorm:"index"` //所属的视频的id
+	Cid  uint `gorm:"index"` //楼中楼上一层的ID,不是楼中楼应该为0
+	Text string
+	/*
+		文本类型
+		0:	字符串
+		1:	markdown
+		2:	bbcode
+		3:	reStructuredText
+	*/
+	Type    uint8
+	Author  uint
+	Comment []Comment `gorm:"ForeignKey:Cid"`
+}
+
