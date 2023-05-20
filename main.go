@@ -85,18 +85,18 @@ func login(c *gin.Context) {
 		return
 	}
 	var user models.User
-	if db.First(&user, "Name = ?", username).RowsAffected == 0{	//用户不存在
+	if db.First(&user, "Name = ?", username).RowsAffected == 0 { //用户不存在
 		if db.First(&user, "Email = ?", username).RowsAffected == 0 {
 			c.AbortWithStatus(612)
 			return
 		}
 	}
-	if check_passwd(user.Passwd, []byte(passwd)){
+	if tosha512string(passwd) == user.Passwd {
 		c.AbortWithStatus(611)
-	}else{
+	} else {
 		c.AbortWithStatus(613)
 	}
-	
+
 }
 
 func register(c *gin.Context) {
@@ -123,38 +123,46 @@ func register(c *gin.Context) {
 		return
 	}
 
-	user := models.User{Name: username, Passwd: encrypt_passwd([]byte(username)), Email: mail}
+	user := models.User{Name: username, Passwd: tosha512string(passwd), Email: mail}
 	db.Create(&user)
 	c.AbortWithStatus(601)
 }
 
-func encrypt_passwd(passwd []byte) []byte { //加密密码,带盐
-	salte, _ := rand.Prime(rand.Reader, 64) //普普通通的64位盐
-	salt := salte.Bytes()
-
-	passwd_sha := sha512.Sum512(passwd)          //密码的sha
-	saltpasswd := append(passwd_sha[:], salt...) //加盐
-	safe_passwd := sha512.Sum512(saltpasswd)     //这一步才算加密
-
-	return append(safe_passwd[:], salt...) //保存盐
+func tosha512string(in string) string {
+	h := sha512.New()
+	h.Write([]byte(in))
+	s := h.Sum(nil)
+	out := hex.EncodeToString(s)
+	return string(out)
 }
 
-func check_passwd(passwd []byte, passwd2 []byte) bool {
-	//获取盐
-	salt := passwd[64:]
-	passwd = passwd[:64]
+//func encrypt_passwd(passwd []byte) []byte { //加密密码,带盐
+//	salte, _ := rand.Prime(rand.Reader, 64) //普普通通的64位盐
+//	salt := salte.Bytes()
 
-	passwd2_sha := sha512.Sum512(passwd2)
-	saltpasswd2 := append(passwd2_sha[:], salt...)
-	safe_passwd := sha512.Sum512(saltpasswd2)
+//	passwd_sha := sha512.Sum512(passwd)          //密码的sha
+//	saltpasswd := append(passwd_sha[:], salt...) //加盐
+//	safe_passwd := sha512.Sum512(saltpasswd)     //这一步才算加密
+//
+//	return append(safe_passwd[:], salt...) //保存盐
+//}
 
-	ret := true
-	for i, _ := range safe_passwd{
-		if passwd[i] != safe_passwd[i]{
-			ret = false
-			//不要break防止时间攻击
-		}
-		
-	}
-	return ret
-}
+//func check_passwd(passwd []byte, passwd2 []byte) bool {
+//	//获取盐
+//	salt := passwd[64:]
+//	passwd = passwd[:64]
+//
+//	passwd2_sha := sha512.Sum512(passwd2)
+//	saltpasswd2 := append(passwd2_sha[:], salt...)
+//	safe_passwd := sha512.Sum512(saltpasswd2)
+//
+//	ret := true
+//	for i, _ := range safe_passwd{
+//		if passwd[i] != safe_passwd[i]{
+//			ret = false
+//			//不要break防止时间攻击
+//		}
+
+//	}
+//	return ret
+//}
