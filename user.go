@@ -2,14 +2,11 @@ package main
 
 import (
 	"net/http"
-
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 
 	"crypto/rand"
 	"crypto/sha512"
-	_ "encoding/json"
-	_ "fmt"
 	"regexp"
 	"strconv"
 )
@@ -19,27 +16,26 @@ func GetSelfUserData(c *gin.Context) {
 	session := sessions.Default(c)
 	var user User
 
-	if session.Get("is_login") == true {
-		userid := session.Get("userid")
-		level := session.Get("level")
-		db.First(&user, userid)
-		mail := user.Email
-		c.JSON(http.StatusOK, gin.H{
-			"userid": userid,
-			"mail":   mail,
-			"level":  level,
-		})
-	} else {
+	if session.Get("is_login") != true {
 		c.AbortWithStatus(http.StatusUnauthorized) //返回401
 		return
 	}
+	userid := session.Get("userid")
+	level := session.Get("level")
+	db.First(&user, userid)
+	mail := user.Email
+	c.JSON(http.StatusOK, gin.H{
+		"userid": userid,
+		"mail":   mail,
+		"level":  level,
+	})
 }
 
 func GetUserData(c *gin.Context) {
 	id := c.Param("id")
 	nid, err := strconv.Atoi(id)
 	if err != nil {
-		c.AbortWithStatus(http.StatusUnauthorized) //返回401
+		c.AbortWithStatus(http.StatusBadRequest) //返回400
 		return
 	}
 	var user User
@@ -75,7 +71,7 @@ func Login(c *gin.Context) {
 	session.Set("is_login", true)
 	session.Set("level", user.Level)
 	session.Save()
-	c.AbortWithStatus(StatusLoginOK)
+	c.AbortWithStatus(http.StatusOK)
 }
 
 func Register(c *gin.Context) {
@@ -103,7 +99,7 @@ func Register(c *gin.Context) {
 
 	user := User{Name: username, Passwd: encrypt_passwd([]byte(passwd)), Email: mail}
 	db.Create(&user)
-	c.AbortWithStatus(StatusUserCreatedOK)
+	c.AbortWithStatus(http.StatusOK)
 }
 
 func encrypt_passwd(passwd []byte) []byte { //加密密码,带盐

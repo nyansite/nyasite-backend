@@ -5,13 +5,12 @@ import (
 )
 
 const (
-StatusUserCreatedOK		int = 601
-StatusRepeatUserName	int = 602
-StatusRepeatEmail		int = 603
-StatusLoginOK			int = 611
-StatusUserNameNotExist	int = 612
-StatusPasswordError		int = 613
-StatusAlreadyLogin		int = 614
+StatusRepeatUserName	int = 601
+StatusRepeatEmail		int = 602
+StatusUserNameNotExist	int = 611
+StatusPasswordError		int = 612
+StatusAlreadyLogin		int = 613
+StatusRepeatTag			int = 621
 )
 
 type User struct {
@@ -50,8 +49,8 @@ type Tag struct {
 }
 
 type TagText struct { //tag的文本,其他地方有一个切片存储
-	gorm.Model
-	Text string `gorm:"unique"`
+	ID  	uint 	`gorm:"primarykey"`
+	Text 	string 	`gorm:"unique"`
 }
 
 //论坛部分

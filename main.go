@@ -21,7 +21,7 @@ var tags []TagText
 func main() {
 	r := gin.Default()
 	// store := memstore.NewStore([]byte("just_secret"))
-	store := cookie.NewStore([]byte("just_secret")) //不安全但是方便测试,正式版换成上面的
+	store := cookie.NewStore([]byte("just_secret")) //不安全但是方便测试,记得清cookie
 	store.Options(sessions.Options{Secure: true, HttpOnly: true})
 	r.Use(sessions.Sessions("session_id", store))
 	// TODO csrf防护,需要前端支持
@@ -33,7 +33,7 @@ func main() {
 		panic("我数据库呢???我那么大一个数据库呢???还我数据库!!!")
 	}
 
-	db.AutoMigrate(&User{}, &Video{}, &Comment{}, &Tag{}) //实际上的作用是创建表
+	db.AutoMigrate(&User{}, &Video{}, &Comment{}, &Tag{}, &TagText{}) //实际上的作用是创建表
 
 	group := r.Group("/api")
 	{
@@ -43,7 +43,7 @@ func main() {
 
 		group.POST("/register", Register)
 		group.POST("/login", Login)
-
+		group.POST("/new_tag", NewTag)
 	}
 
 	r.Run() // 8080
