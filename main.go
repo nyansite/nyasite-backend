@@ -95,17 +95,6 @@ func login(c *gin.Context) {
 		return
 	}
 	var user models.User
-<<<<<<< HEAD
-	if db.First(&user, "Name = ?", username).RowsAffected == 0 { //用户不存在
-		if db.First(&user, "Email = ?", username).RowsAffected == 0 {
-			c.AbortWithStatus(612)
-			return
-		}
-	}
-	if tosha512string(passwd) == user.Passwd {
-		c.AbortWithStatus(611)
-	} else {
-=======
 	if db.First(&user, "Name = ? OR Email = ?", username, username).RowsAffected == 0 { //用户不存在
 
 		c.AbortWithStatus(612)
@@ -113,18 +102,14 @@ func login(c *gin.Context) {
 
 	}
 	if !check_passwd(user.Passwd, []byte(passwd)) {
->>>>>>> 62a611f3e339f9eaa4348d75ffb908849a327d84
 		c.AbortWithStatus(613)
 		return
 	}
-<<<<<<< HEAD
 
-=======
 	session.Set("userid", user.ID)
 	session.Set("is_login", true)
 	session.Save()
 	c.AbortWithStatus(611)
->>>>>>> 62a611f3e339f9eaa4348d75ffb908849a327d84
 }
 
 func register(c *gin.Context) {
@@ -171,21 +156,12 @@ func encrypt_passwd(passwd []byte) []byte { //加密密码,带盐
 
 func check_passwd(passwd []byte, passwd2 []byte) bool {
 	//获取盐
-<<<<<<< HEAD
-	salt := passwd[64:]
-	passwd = passwd[:64]
-
-	passwd2_sha := sha512.Sum512(passwd2)
-	saltpasswd2 := append(passwd2_sha[:], salt...)
-	safe_passwd := sha512.Sum512(saltpasswd2)
-=======
 	salt := passwd[32:]
 	passwd = passwd[:32]
 
 	passwd2_sha := sha512.Sum512(passwd2)
 	saltpasswd2 := append(passwd2_sha[:], salt...)
 	safe_passwd := sha512.Sum512_256(saltpasswd2)
->>>>>>> 62a611f3e339f9eaa4348d75ffb908849a327d84
 
 	ret := true
 	for i, v := range passwd {
@@ -193,10 +169,6 @@ func check_passwd(passwd []byte, passwd2 []byte) bool {
 			ret = false
 			//不要break防止时间攻击
 		}
-<<<<<<< HEAD
-
-=======
->>>>>>> 62a611f3e339f9eaa4348d75ffb908849a327d84
 	}
 	return ret
 }
