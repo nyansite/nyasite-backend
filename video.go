@@ -1,8 +1,9 @@
 package main
 
 import (
-	_ "fmt"
+	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
@@ -27,4 +28,43 @@ func NewTag(c *gin.Context) {
 	}
 	db.Create(&TagText{Text: tagname})
 	c.AbortWithStatus(http.StatusOK)
+}
+
+func VideoComment(c *gin.Context)  {
+	sid := c.Param("id")
+	spg := c.Param("pg")
+	id, err := strconv.Atoi(sid)
+	if err != nil {
+		c.AbortWithStatus(http.StatusBadRequest) //返回400
+		return
+	}
+	pg, err := strconv.Atoi(spg)
+	if err != nil {
+		c.AbortWithStatus(http.StatusBadRequest) //返回400
+		return
+	}
+	var video Video
+	db.Preload("CommentPage", "Count = ?", pg).Preload("Cid = 0 OR (Count < 3)").First(&video, id)
+	fmt.Println(&video)
+}
+
+func AddComment(c *gin.Context)  {
+	
+}
+//先摸了
+func WAddComment(str string, vid uint, cid uint)  {//测试用
+	var video Video
+	db.Preload("Comment").First(&video, vid)
+	
+	var com []Comment
+	db.Preload("Comment").Find(&com, "Pid = ?", len(video.Comment))
+	var pg CommentPage
+	if len(com) > 16{
+		video.Comment = append(video.Comment, pg)
+	}else{
+		pg = video.Comment[len(video.Comment)-1]
+	}
+	if cid == 0{
+		pg.Comment = append(pg.Comment, Comment{Text: str})
+	}
 }
