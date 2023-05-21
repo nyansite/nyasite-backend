@@ -30,7 +30,7 @@ func NewTag(c *gin.Context) {
 	c.AbortWithStatus(http.StatusOK)
 }
 
-func VideoComment(c *gin.Context)  {
+func VideoComment(c *gin.Context) {
 	sid := c.Param("id")
 	spg := c.Param("pg")
 	id, err := strconv.Atoi(sid)
@@ -48,23 +48,27 @@ func VideoComment(c *gin.Context)  {
 	fmt.Println(&video)
 }
 
-func AddComment(c *gin.Context)  {
-	
+func AddComment(c *gin.Context) {
+
 }
-//先摸了
-func WAddComment(str string, vid uint, cid uint)  {//测试用
+
+// TODO 先摸了
+func WAddComment(str string, vid uint, cid uint) { //测试用
 	var video Video
-	db.Preload("Comment").First(&video, vid)
+	db.Preload("CommentP").First(&video, vid)
 	
+	fmt.Println(video.CommentP[len(video.CommentP)-1].ID)
 	var com []Comment
-	db.Preload("Comment").Find(&com, "Pid = ?", len(video.Comment))
-	var pg CommentPage
-	if len(com) > 16{
-		video.Comment = append(video.Comment, pg)
-	}else{
-		pg = video.Comment[len(video.Comment)-1]
+	db.Find(&com, "Pid = ?", video.CommentP[len(video.CommentP)-1].ID)
+
+	if len(com) >= 16 {
+		video.CommentP = append(video.CommentP, CommentPage{Vid: video.ID})
+		
 	}
-	if cid == 0{
+	pg := video.CommentP[len(video.CommentP)-1]
+
+	if cid == 0 {
 		pg.Comment = append(pg.Comment, Comment{Text: str})
+		db.Save(&pg)
 	}
 }
