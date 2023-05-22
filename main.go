@@ -70,6 +70,9 @@ func main() {
 		group.GET("/login", func(ctx *gin.Context) {
 			ctx.HTML(http.StatusOK, "login.html", gin.H{})
 		})
+		group.GET("/register", func(ctx *gin.Context) {
+			ctx.HTML(http.StatusOK, "register.html", gin.H{})
+		})
 	}
 
 	r.Run(":8000") // 8000
