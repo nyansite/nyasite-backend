@@ -12,7 +12,7 @@ import (
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 
-	// "github.com/gin-contrib/cors"
+
 
 	_ "encoding/json"
 	_ "fmt"
@@ -59,12 +59,12 @@ func main() {
 	{
 
 	}
-	// r.Run("0.0.0.0:8000") // 8000
+	r.Run("0.0.0.0:8000") // 8000
 	// db.Create(&Video{CommentP: []CommentPage{{Comment: []Comment{{Text: "ww"}}}}})
-	var i uint64
-	for i = 0; i < 10; i++ {
-		WAddComment("只因", 1, 0)
-	}
+	// var i uint64
+	// for i = 0; i < 10; i++ {
+	// 	WAddComment("只因", 1, 0)
+	// }
 }
 
 func coffee(c *gin.Context) { //没有人能拒绝愚人节彩蛋

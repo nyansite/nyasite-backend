@@ -57,7 +57,7 @@ func WAddComment(str string, vid uint, cid uint) { //测试用
 	var video Video
 	db.Preload("CommentP").First(&video, vid)
 	
-	fmt.Println(video.CommentP[len(video.CommentP)-1].ID)
+	// fmt.Println(video.CommentP[len(video.CommentP)-1].ID)
 	var com []Comment
 	db.Find(&com, "Pid = ?", video.CommentP[len(video.CommentP)-1].ID)
 
