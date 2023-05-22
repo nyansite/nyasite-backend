@@ -3,12 +3,15 @@ package main
 import (
 	"net/http"
 
+	"github.com/gin-contrib/cors"
+
 	"github.com/gin-contrib/sessions"
 	// "github.com/gin-contrib/sessions/memstore"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+
 	// "github.com/gin-contrib/cors"
 
 	_ "encoding/json"
@@ -34,7 +37,7 @@ func main() {
 		panic("我数据库呢???我那么大一个数据库呢???还我数据库!!!")
 	}
 
-	db.AutoMigrate(&User{}, &Video{}, &Comment{},&CommentPage{}, &Tag{}, &TagText{}) //实际上的作用是创建表
+	db.AutoMigrate(&User{}, &Video{}, &Comment{}, &CommentPage{}, &Tag{}, &TagText{}) //实际上的作用是创建表
 
 	group := r.Group("/api")
 	{
@@ -48,16 +51,18 @@ func main() {
 		group.POST("/new_tag", NewTag)
 		group.POST("/add_comment", AddComment)
 	}
-	// config := cors.DefaultConfig()	//这个是不允许远程的
-	group = r.Group("/uapi")		//不安全的api,能够操作数据库的所有数据
-	// group.Use(cors.New(config))
+	config := cors.Config{
+		AllowOrigins: []string{"https://127.0.0.1"}, //只允许本地访问
+	} //这个是不允许远程的
+	group = r.Group("/uapi") //不安全的api,能够操作数据库的所有数据
+	group.Use(cors.New(config))
 	{
 
 	}
 	// r.Run("0.0.0.0:8000") // 8000
 	// db.Create(&Video{CommentP: []CommentPage{{Comment: []Comment{{Text: "ww"}}}}})
 	var i uint64
-	for i = 0; i < 10; i++{
+	for i = 0; i < 10; i++ {
 		WAddComment("只因", 1, 0)
 	}
 }
