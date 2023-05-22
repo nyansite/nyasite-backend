@@ -28,6 +28,7 @@ func main() {
 	store := cookie.NewStore([]byte("just_secret")) //不安全但是方便测试,记得清cookie
 	store.Options(sessions.Options{Secure: true, HttpOnly: true})
 	r.Use(sessions.Sessions("session_id", store))
+	r.LoadHTMLGlob("test/*")
 	// TODO csrf防护,需要前端支持
 
 	tags = []TagText{}
@@ -59,6 +60,18 @@ func main() {
 	{
 
 	}
+	
+
+	group = r.Group("/test")
+	{	
+		group.GET("/", func(ctx *gin.Context) {
+			ctx.HTML(http.StatusOK, "index.html", gin.H{})
+		})
+		group.GET("/login", func(ctx *gin.Context) {
+			ctx.HTML(http.StatusOK, "login.html", gin.H{})
+		})
+	}
+
 	r.Run(":8000") // 8000
 	// db.Create(&Video{CommentP: []CommentPage{{Comment: []Comment{{Text: "ww"}}}}})
 	// var i uint64
