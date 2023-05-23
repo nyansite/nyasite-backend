@@ -12,8 +12,6 @@ import (
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 
-
-
 	_ "encoding/json"
 	_ "fmt"
 	"time"
@@ -53,17 +51,16 @@ func main() {
 		group.POST("/add_comment", AddComment)
 	}
 	config := cors.Config{
-		AllowOrigins: []string{"http://127.0.0.1"}, //只允许本地访问
+		AllowOrigins: []string{"https://127.0.0.1"}, //只允许本地访问
 	} //这个是不允许远程的
 	group = r.Group("/uapi") //不安全的api,能够操作数据库的所有数据
 	group.Use(cors.New(config))
 	{
 
 	}
-	
 
 	group = r.Group("/test")
-	{	
+	{
 		group.GET("/", func(ctx *gin.Context) {
 			ctx.HTML(http.StatusOK, "index.html", gin.H{})
 		})
