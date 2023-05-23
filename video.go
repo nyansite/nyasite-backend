@@ -34,11 +34,13 @@ func VideoComment(c *gin.Context) {
 	sid := c.Param("id")
 	spg := c.Param("pg")
 	id, err := strconv.Atoi(sid)
+	id = uint(id)
 	if err != nil {
 		c.AbortWithStatus(http.StatusBadRequest) //返回400
 		return
 	}
 	pg, err := strconv.Atoi(spg)
+	pg = uint(pg)
 	if err != nil {
 		c.AbortWithStatus(http.StatusBadRequest) //返回400
 		return
@@ -56,19 +58,19 @@ func AddComment(c *gin.Context) {
 func WAddComment(str string, vid uint, cid uint) { //测试用
 	var video Video
 	db.Preload("CommentP").First(&video, vid)
-	
+
 	// fmt.Println(video.CommentP[len(video.CommentP)-1].ID)
-	var com []Comment
+	var com []VideoComment
 	db.Find(&com, "Pid = ?", video.CommentP[len(video.CommentP)-1].ID)
 
 	if len(com) >= 16 {
-		video.CommentP = append(video.CommentP, CommentPage{Vid: video.ID})
-		
+		video.CommentP = append(video.CommentP, VideoCommentPage{Vid: video.ID})
+
 	}
 	pg := video.CommentP[len(video.CommentP)-1]
 
 	if cid == 0 {
-		pg.Comment = append(pg.Comment, Comment{Text: str})
+		pg.Comment = append(pg.Comment, VideoComment{Text: str})
 		db.Save(&pg)
 	}
 }

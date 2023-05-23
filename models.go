@@ -39,7 +39,7 @@ type Video struct {
 	CoverLink string //封面也用磁力链接
 	Title     string
 	Profile   string        //芝士简介
-	CommentP  []CommentPage `gorm:"ForeignKey:Vid"` //评论
+	CommentP  []VideoCommentPage `gorm:"ForeignKey:Vid"` //评论
 	Tag       []Tag         `gorm:"ForeignKey:Tid"`
 	Views     uint          //这是播放量
 }
@@ -55,21 +55,75 @@ type TagText struct { //tag的文本,其他地方有一个切片存储
 	Text string `gorm:"unique"`
 }
 
-// //论坛部分
 
-// type MainForum struct {
-// 	gorm.Model
-// 	Title       string
-// 	Author      uint			`gorm:"index"`//发起人
-// 	Views       uint			//阅读量
-// 	Unit		[]UnitForum		`gorm:"ForeignKey:Tid"`
-// }
+
+type VideoCommentPage struct { //一页16个
+	ID uint `gorm:"primarykey"`
+	// Count   uint      //页数
+	Comment []VideoComment `gorm:"ForeignKey:Pid"`
+	Vid     uint      `gorm:"index"` //所属的视频/论坛的id
+}
+type VideoComment struct {
+	ID        uint `gorm:"primarykey"`
+	CreatedAt time.Time
+	// Count		uint								//楼层
+	Pid  uint `gorm:"index:VideoComment"` //所属页面的id,楼中楼为0(大概)
+	Cid  uint `gorm:"index:VideoComment"` //楼中楼上一层的ID,不是楼中楼应该为0
+	Text string
+	/*
+		文本类型
+		0:	字符串
+		1:	markdown
+		2:	bbcode
+		3:	reStructuredText
+	*/
+	Type    uint8
+	Author  uint
+	Comment []VideoComment `gorm:"ForeignKey:Cid"`
+}
+
+// //论坛部分
+type MainForum struct {
+ 	gorm.Model
+	ID 			uint 			`gorm:"primarykey"`
+ 	Title       string
+ 	Author      uint			`gorm:"index"`//发起人
+ 	Views       uint			//阅读量
+ 	UnitP		[]UtilForumPage	`gorm:"ForeignKey:Tid"`
+}
+
+type UtilForumPage struct { //一页16个
+	ID uint `gorm:"primarykey"`
+	// Count   uint      //页数
+	UtilForum UtilForum[] `gorm:"ForeignKey:Pid"`
+	Tid     uint      `gorm:"index"` //所属的论坛的id
+}
+
+type UtilForum struct {
+	ID        uint `gorm:"primarykey"`
+	CreatedAt time.Time
+	// Count		uint								//楼层
+	Pid  uint `gorm:"index:UtilForum"` //所属页面的id,楼中楼为0(大概)
+	Cid  uint `gorm:"index:UtilForum"` //楼中楼上一层的ID,不是楼中楼应该为0
+	Text string
+	/*
+		文本类型
+		0:	字符串
+		1:	markdown
+		2:	bbcode
+		3:	reStructuredText
+	*/
+	Type    uint8
+	Author  uint
+	UtilForum []UtilForum `gorm:"ForeignKey:Cid"`
+	Comment []Comment	`gorm:"ForeignKey:Uvid"`
+}
 
 type CommentPage struct { //一页16个
 	ID uint `gorm:"primarykey"`
 	// Count   uint      //页数
 	Comment []Comment `gorm:"ForeignKey:Pid"`
-	Vid     uint      `gorm:"index"` //所属的视频的id
+	Vid     uint      `gorm:"index"` //所属的视频/论坛的id
 }
 type Comment struct {
 	ID        uint `gorm:"primarykey"`
