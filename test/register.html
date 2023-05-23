@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+
+<head>
+
+</head>
+
+<body>
+    <form id="formElem">
+        <label for="username">用户名</label>
+        <input type="text" name="username" id="username" required>
+
+        <label for="email">邮箱</label>
+        <input type="email" name="email" id="email" required>
+
+        <label for="passwd">密码</label>
+        <input type="password" id="passwd" name="passwd" minlength="4" required>
+
+        <input type="submit" value="登录">
+
+    </form>
+    <p><span></span></p>
+    <script>
+        formElem.onsubmit = async (e) => {
+            e.preventDefault();
+
+            let response = await fetch('http://127.0.0.1:8000/api/register', {
+                method: 'POST',
+                body: new FormData(formElem)
+            });
+            // let result = await response.json();
+            switch (response.status) {
+                case 200:
+                    alert("200注册成功")
+                    break;
+                case 611:
+                    alert("601用户名重复")
+                    break
+                case 612:
+                    alert("602邮箱重复")
+                    break
+            }
+        }
+    </script>
+</body>

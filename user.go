@@ -59,7 +59,7 @@ func Login(c *gin.Context) {
 	}
 	var user User
 	if db.First(&user, "Name = ? OR Email = ?", username, username).RowsAffected == 0 { //用户不存在
-		c.AbortWithStatus(StatusUserNameNotExist)
+		c.Status(StatusUserNameNotExist)
 		return
 	}
 	if !check_passwd(user.Passwd, []byte(passwd)) {

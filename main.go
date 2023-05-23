@@ -28,6 +28,7 @@ func main() {
 	store := cookie.NewStore([]byte("just_secret")) //不安全但是方便测试,记得清cookie
 	store.Options(sessions.Options{Secure: true, HttpOnly: true})
 	r.Use(sessions.Sessions("session_id", store))
+	r.LoadHTMLGlob("test/*")
 	// TODO csrf防护,需要前端支持
 
 	tags = []TagText{}
@@ -52,14 +53,29 @@ func main() {
 		group.POST("/add_comment", AddComment)
 	}
 	config := cors.Config{
-		AllowOrigins: []string{"https://127.0.0.1"}, //只允许本地访问
+		AllowOrigins: []string{"http://127.0.0.1"}, //只允许本地访问
 	} //这个是不允许远程的
 	group = r.Group("/uapi") //不安全的api,能够操作数据库的所有数据
 	group.Use(cors.New(config))
 	{
 
 	}
-	r.Run("0.0.0.0:8000") // 8000
+	
+
+	group = r.Group("/test")
+	{	
+		group.GET("/", func(ctx *gin.Context) {
+			ctx.HTML(http.StatusOK, "index.html", gin.H{})
+		})
+		group.GET("/login", func(ctx *gin.Context) {
+			ctx.HTML(http.StatusOK, "login.html", gin.H{})
+		})
+		group.GET("/register", func(ctx *gin.Context) {
+			ctx.HTML(http.StatusOK, "register.html", gin.H{})
+		})
+	}
+
+	r.Run(":8000") // 8000
 	// db.Create(&Video{CommentP: []CommentPage{{Comment: []Comment{{Text: "ww"}}}}})
 	// var i uint64
 	// for i = 0; i < 10; i++ {
