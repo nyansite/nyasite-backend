@@ -42,7 +42,7 @@ func main() {
 	{
 		group.GET("/user_status", GetSelfUserData)
 		group.GET("/user_status/:id", GetUserData)
-		group.GET("/video_comment/:id/:pg", GetSelfUserData)
+		group.GET("/video_comment/:id/:pg", GetVideoComment)
 		group.GET("/coffee", coffee)
 
 		group.POST("/register", Register)

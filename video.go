@@ -30,17 +30,17 @@ func NewTag(c *gin.Context) {
 	c.AbortWithStatus(http.StatusOK)
 }
 
-func VideoComment(c *gin.Context) {
-	sid := c.Param("id")
+func GetVideoComment(c *gin.Context) {
+	strid := c.Param("id")
 	spg := c.Param("pg")
-	id, err := strconv.Atoi(sid)
-	id = uint(id)
+	sid, err := strconv.Atoi(strid)
+	id := uint(sid)
 	if err != nil {
 		c.AbortWithStatus(http.StatusBadRequest) //返回400
 		return
 	}
 	pg, err := strconv.Atoi(spg)
-	pg = uint(pg)
+	// pg = uint(pg)
 	if err != nil {
 		c.AbortWithStatus(http.StatusBadRequest) //返回400
 		return

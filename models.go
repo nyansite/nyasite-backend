@@ -66,9 +66,9 @@ type VideoCommentPage struct { //一页16个
 type VideoComment struct {
 	ID        uint `gorm:"primarykey"`
 	CreatedAt time.Time
-	// Count		uint								//楼层
+	// Count		uint								//楼层 //没必要存起来
 	Pid  uint `gorm:"index:VideoComment"` //所属页面的id,楼中楼为0(大概)
-	Cid  uint `gorm:"index:VideoComment"` //楼中楼上一层的ID,不是楼中楼应该为0
+	// Cid  uint `gorm:"index:VideoComment"` //楼中楼上一层的ID,不是楼中楼应该为0
 	Text string
 	/*
 		文本类型
@@ -93,10 +93,10 @@ type MainForum struct {
 }
 
 type UtilForumPage struct { //一页16个
-	ID uint `gorm:"primarykey"`
+	ID uint 	`gorm:"primarykey"`
 	// Count   uint      //页数
-	UtilForum UtilForum[] `gorm:"ForeignKey:Pid"`
-	Tid     uint      `gorm:"index"` //所属的论坛的id
+	UtilForum 	[]UtilForum `gorm:"ForeignKey:Pid"`
+	Tid     	uint      `gorm:"index"` //所属的论坛的id
 }
 
 type UtilForum struct {
