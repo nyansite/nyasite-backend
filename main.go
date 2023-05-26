@@ -12,6 +12,8 @@ import (
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 
+	_ "cute_site/MiddleWare"
+	middleware "cute_site/MiddleWare"
 	_ "encoding/json"
 	_ "fmt"
 	"time"
@@ -26,6 +28,7 @@ func main() {
 	store := cookie.NewStore([]byte("just_secret")) //不安全但是方便测试,记得清cookie
 	store.Options(sessions.Options{Secure: true, HttpOnly: true})
 	r.Use(sessions.Sessions("session_id", store))
+	r.Use(middleware.Br())
 	r.LoadHTMLGlob("test/*")
 	// TODO csrf防护,需要前端支持
 
@@ -70,6 +73,7 @@ func main() {
 		group.GET("/register", func(ctx *gin.Context) {
 			ctx.HTML(http.StatusOK, "register.html", gin.H{})
 		})
+		group.Static("img", "./img")
 	}
 
 	r.Run(":8000") // 8000
