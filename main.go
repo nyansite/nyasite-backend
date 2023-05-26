@@ -12,8 +12,6 @@ import (
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 
-	_ "cute_site/MiddleWare"
-	middleware "cute_site/MiddleWare"
 	_ "encoding/json"
 	_ "fmt"
 	"time"
@@ -28,7 +26,6 @@ func main() {
 	store := cookie.NewStore([]byte("just_secret")) //不安全但是方便测试,记得清cookie
 	store.Options(sessions.Options{Secure: true, HttpOnly: true})
 	r.Use(sessions.Sessions("session_id", store))
-	r.Use(middleware.Br())
 	r.LoadHTMLGlob("test/*")
 	// TODO csrf防护,需要前端支持
 
@@ -52,6 +49,7 @@ func main() {
 		group.POST("/login", Login)
 		group.POST("/new_tag", NewTag)
 		group.POST("/add_comment", AddComment)
+		group.POST("/add_file", AddFile)
 	}
 	config := cors.Config{
 		AllowOrigins: []string{"https://127.0.0.1"}, //只允许本地访问
@@ -90,8 +88,4 @@ func coffee(c *gin.Context) { //没有人能拒绝愚人节彩蛋
 	} else {
 		c.String(http.StatusForbidden, "我拒绝泡咖啡,因为我是服务器")
 	}
-}
-
-func getfile(c *gin.Context)  {
-	// TODO
 }
