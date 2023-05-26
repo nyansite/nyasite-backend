@@ -91,3 +91,7 @@ func coffee(c *gin.Context) { //没有人能拒绝愚人节彩蛋
 		c.String(http.StatusForbidden, "我拒绝泡咖啡,因为我是服务器")
 	}
 }
+
+func getfile(c *gin.Context)  {
+	// TODO
+}

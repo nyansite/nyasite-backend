@@ -1,4 +1,5 @@
 //修改自 github.com/anargu/gin-brotli (MIT)
+//并不需要压缩,数据库存储已压缩文件
 package middleware
 
 import (
@@ -60,11 +61,6 @@ func shouldCompress(req *http.Request) bool {
 
 func Br() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		if !strings.Contains(ctx.Request.Header.Get("Accept-Encoding"), "br") || strings.Contains(ctx.Request.Header.Get("Content-Type"), "text/event-stream"){
-			ctx.String(http.StatusUpgradeRequired, "请使用支持brotli的浏览器(2016年之后)")
-			ctx.Abort()
-			return
-		}
 		if !shouldCompress(ctx.Request){
 			ctx.String(http.StatusUpgradeRequired, "请使用支持brotli的浏览器(2016年之后)")
 			ctx.Abort()
