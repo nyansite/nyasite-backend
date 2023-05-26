@@ -2,6 +2,7 @@ package main
 
 import (
 	"time"
+
 	"gorm.io/gorm"
 )
 
@@ -82,10 +83,10 @@ type VideoCommentSubPage struct { //,楼中楼也要分页,一页12个
 	Comment []VideoCommentReply `gorm:"ForeignKey:SPid"`
 	Cid     uint                `gorm:"index"` //所属的评论id
 }
-type VideoCommentReply struct {	//楼中楼的回复.......
+type VideoCommentReply struct { //楼中楼的回复.......
 	ID        uint `gorm:"primarykey"`
 	CreatedAt time.Time
-	SPid       uint `gorm:"index"` //所属页面的id,指向VideoCommentSubPage,
+	SPid      uint `gorm:"index"` //所属页面的id,指向VideoCommentSubPage,
 	Text      string
 	/*
 		文本类型
@@ -130,10 +131,9 @@ type UtilForum struct {
 		2:	bbcode
 		3:	reStructuredText
 	*/
-	Type      uint8
-	Author    uint
-	UtilForum []UtilForum `gorm:"ForeignKey:Cid"`
-	Comment   []Comment   `gorm:"ForeignKey:Uvid"`
+	Type    uint8
+	Author  uint
+	Comment []Comment `gorm:"ForeignKey:Pid"`
 }
 
 type CommentPage struct { //一页16个
