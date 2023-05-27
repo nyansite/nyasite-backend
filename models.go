@@ -26,11 +26,12 @@ type User struct {
 // 这个要重构,先摸了
 type VideoPreviewRequire struct {
 	gorm.Model
-	CoverFile    string
-	VideoFile    string
-	Title        string
-	Pass         uint
-	Introduction string
+	CoverFile string
+	VideoFile string
+	Title     string
+	Up        uint
+	Pass      uint
+	Profile   string
 }
 
 type Video struct {

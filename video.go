@@ -55,7 +55,7 @@ func AddComment(c *gin.Context) {
 }
 
 // TODO 先摸了
-func WAddComment(str string, vid uint, cid uint) { //测试用
+func DBaddComment(str string, vid uint, cid uint) { 
 	var video Video
 	db.Preload("CommentP").First(&video, vid)
 
@@ -73,4 +73,43 @@ func WAddComment(str string, vid uint, cid uint) { //测试用
 		pg.Comment = append(pg.Comment, VideoComment{Text: str})
 		db.Save(&pg)
 	}
+}
+
+func uploadVideo(c *gin.Context){
+	//获取标题和简介
+	upid := c.PostForm("upid")
+	title := c.PostForm("title")
+	profile := c.PostForm("profile")
+	fmt.Println(up_p)
+	//新建一个待检视频的记录
+	
+	videoUpload := VideoPreviewRequire{Title:title,Profile:profile,Up:upid,Pass:0})
+	db.Create(&videoUpload)
+	file, err := c.FormFile("file")
+	//将上传路径定义为/media/vntc/+待检视频的id
+	id := fmt.Sprintf("%d", videoUpload.ID)
+	dst := "./media/vntc/" + id + "/" + file.Filename
+	videoUpload.VideoFile = dst
+	//一个规范的纠错部分
+	if err != nil {
+		c.String(http.StatusBadRequest, "get form err: %s", err.Error())
+		return
+	}
+	if err := c.SaveUploadedFile(file, dst); err != nil {
+		c.String(http.StatusBadRequest, "upload file err: %s", err.Error())
+		return
+	}
+	cover, err := c.FormFile("cover")
+	dst = "./media/vntc/" + id + "/" + cover.Filename
+	videoUpload.CoverFile = dst
+	if err != nil {
+		c.String(http.StatusBadRequest, "get form err: %s", err.Error())
+		return
+	}
+	if err := c.SaveUploadedFile(cover, dst); err != nil {
+		c.String(http.StatusBadRequest, "upload file err: %s", err.Error())
+		return
+	}
+	db.Save(&videoUpload)
+	return
 }
