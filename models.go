@@ -133,7 +133,7 @@ type UtilForum struct {
 	*/
 	Type     uint8
 	Author   uint
-	CommentP []CommentP `gorm:"ForeignKey:Pid"`
+	CommentP []CommentPage `gorm:"ForeignKey:Pid"`
 }
 
 type CommentPage struct { //一页16个

@@ -1,8 +1,8 @@
 package main
 
 import (
-	"gorm.io/driver/sqlite"
-	"gorm.io/gorm"
+	// "gorm.io/driver/sqlite"
+	// "gorm.io/gorm"
 )
 
 func addMainForum(text string, title string, author uint) {
@@ -19,7 +19,7 @@ func addUtilForum(text string, mid uint, cid uint, author uint) {
 	db.Find(&com, "Pid = ?", mainForum.UnitP[len(mainForum.UnitP)-1].ID)
 
 	if len(com) >= 16 {
-		mainForum.UnitP = append(mainForum.UnitP, UtilForumPage{Pid: mainForum.ID})
+		mainForum.UnitP = append(mainForum.UnitP, UtilForumPage{Tid: mainForum.ID})
 
 	}
 	pg := mainForum.UnitP[len(mainForum.UnitP)-1]
@@ -37,11 +37,11 @@ func addComment(str string, uid uint, cid uint, author uint) { //测试用
 	db.Find(&com, "Pid = ?", utilForum.CommentP[len(utilForum.CommentP)-1].ID)
 
 	if len(com) >= 16 {
-		utilForum.CommentP = append(utilForum.CommentP, CommentPage{uid: utilForum.ID})
+		utilForum.CommentP = append(utilForum.CommentP, CommentPage{Uid: utilForum.ID})
 
 	}
 	pg := utilForum.CommentP[len(utilForum.CommentP)-1]
 
-	pg.Comment = append(pg.Comment, Comment{Text: str, Cid: cid, Author: author, Pid: mid})
+	// pg.Comment = append(pg.Comment, Comment{Text: str, Cid: cid, Author: author, Pid: mid})
 	db.Save(&pg)
 }
