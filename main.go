@@ -49,6 +49,7 @@ func main() {
 		group.POST("/login", Login)
 		group.POST("/new_tag", NewTag)
 		group.POST("/add_comment", AddComment)
+		
 	}
 	config := cors.Config{
 		AllowOrigins: []string{"https://127.0.0.1"}, //只允许本地访问
@@ -69,6 +70,11 @@ func main() {
 		})
 		group.GET("/register", func(ctx *gin.Context) {
 			ctx.HTML(http.StatusOK, "register.html", gin.H{})
+		})
+		group.GET("get_file", GetFile)
+		group.POST("/add_file", func(ctx *gin.Context) {
+			head, _ := ctx.FormFile("file")
+			AddFile(head)
 		})
 		group.Static("img", "./img")
 	}
