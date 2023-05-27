@@ -55,7 +55,7 @@ func AddComment(c *gin.Context) {
 }
 
 // TODO 先摸了
-func DBaddComment(str string, vid uint, cid uint) {
+func DaddComment(str string, vid uint, cid uint) {
 	var video Video
 	db.Preload("CommentP").First(&video, vid)
 
@@ -75,15 +75,21 @@ func DBaddComment(str string, vid uint, cid uint) {
 	}
 }
 
+//先摸了
 func uploadVideo(c *gin.Context) {
 	//获取标题和简介
 	upid := c.PostForm("upid")
 	title := c.PostForm("title")
 	profile := c.PostForm("profile")
-	fmt.Println(up_p)
+	fmt.Println(upid)
+	nid, err := strconv.Atoi(upid)
+	if err != nil {
+		c.AbortWithStatus(http.StatusBadRequest) //返回400
+		return
+	}
 	//新建一个待检视频的记录
 
-	videoUpload := VideoPreviewRequire{Title: title, Profile: profile, Up: upid, Pass: 0}
+	videoUpload := VideoPreviewRequire{Title: title, Profile: profile, Up: uint(nid), Pass: 0}
 	db.Create(&videoUpload)
 	file, err := c.FormFile("file")
 	//将上传路径定义为/media/vntc/+待检视频的id
