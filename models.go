@@ -131,16 +131,16 @@ type UtilForum struct {
 		2:	bbcode
 		3:	reStructuredText
 	*/
-	Type    uint8
-	Author  uint
-	Comment []Comment `gorm:"ForeignKey:Pid"`
+	Type     uint8
+	Author   uint
+	CommentP []CommentP `gorm:"ForeignKey:Pid"`
 }
 
 type CommentPage struct { //一页16个
 	ID uint `gorm:"primarykey"`
 	// Count   uint      //页数
 	Comment []Comment `gorm:"ForeignKey:Pid"`
-	Vid     uint      `gorm:"index"` //所属的视频/论坛的id
+	Uid     uint      `gorm:"index"` //所属的视频/论坛的id
 }
 type Comment struct {
 	ID        uint `gorm:"primarykey"`
