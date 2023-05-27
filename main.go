@@ -49,7 +49,6 @@ func main() {
 		group.POST("/login", Login)
 		group.POST("/new_tag", NewTag)
 		group.POST("/add_comment", AddComment)
-		group.POST("/add_file", AddFile)
 	}
 	config := cors.Config{
 		AllowOrigins: []string{"https://127.0.0.1"}, //只允许本地访问
