@@ -1,12 +1,10 @@
 package main
 
 import (
-	// "fmt"
+	"fmt"
 	"net/http"
-	"io"
 	"github.com/gin-gonic/gin"
-	"bytes"
-	// "github.com/ipfs/boxo/files"
+	shell "github.com/ipfs/go-ipfs-api"
 )
 
 // 从ipfs获取文件
@@ -25,8 +23,8 @@ func AddFile(c *gin.Context) {
 		c.AbortWithStatus(http.StatusBadRequest) //400
 		return
 	}
-	buf := bytes.NewBuffer(nil)
-	io.Copy(buf, f)
 
-	// files.NewBytesFile(buf.Bytes())
+	sh := shell.NewLocalShell()	//需要挂着ipfs daemon
+	sh.Add(f)
+	fmt.Println()
 }
