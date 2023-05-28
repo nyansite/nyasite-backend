@@ -17,12 +17,13 @@ import (
 )
 
 // 从ipfs获取文件,测试用
+//只有用AddFile上传的文件才能用,因为存储的是压缩数据
 func GetFile(ctx *gin.Context) {
-	ctx.Header("Content-Encoding", "br")
-	ctx.Header("Vary", "Accept-Encoding")
+	ctx.Header("Content-Encoding", "br")	//声明压缩格式,否则会被当作二进制文件下载
+	ctx.Header("Vary", "Accept-Encoding")	//客户端使用缓存
 
 	head := ctx.Query("file")
-	if head == ""{
+	if head == "" {
 		ctx.AbortWithStatus(http.StatusBadRequest) //400
 		return
 	}
@@ -30,10 +31,19 @@ func GetFile(ctx *gin.Context) {
 	if sh == nil {
 		return
 	}
-	brfr, _:= sh.Cat(head)
-	cl := brotli.NewReader(brfr)
-	buf, _ := io.ReadAll(cl)
-	fmt.Println(string(buf))
+	sh.SetTimeout(300000000)	//为啥单位是纳秒???
+	brfr, err := sh.Cat(head)
+	if brfr == nil {
+		fmt.Println(err)
+		ctx.AbortWithStatus(http.StatusNotFound) //404
+		return
+	}
+	// cl := brotli.NewReader(brfr)
+	// buf, _ := io.ReadAll(cl)
+	buf2, _ := io.ReadAll(brfr)
+	
+	// ctx.String(http.StatusOK, string(buf))
+	ctx.Data(http.StatusOK, "text/plain", buf2)
 }
 
 func AddFile(wf *multipart.FileHeader) string {
