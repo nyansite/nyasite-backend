@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"mime/multipart"
 	"net/http"
 	"strconv"
 
@@ -75,43 +76,45 @@ func DaddComment(str string, vid uint, cid uint) {
 	}
 }
 
-//先摸了
+// 先摸了
 func uploadVideo(c *gin.Context) {
 	//获取标题和简介
 	upid := c.PostForm("upid")
 	title := c.PostForm("title")
 	profile := c.PostForm("profile")
 	fmt.Println(upid)
-	nid, err := strconv.Atoi(upid)
+	file, err := c.FormFile("file")
+
 	if err != nil {
-		c.AbortWithStatus(http.StatusBadRequest) //返回400
+		c.String(http.StatusBadRequest, "get form err: %s", err.Error())
 		return
 	}
-	//新建一个待检视频的记录
+	cover, err := c.FormFile("cover")
+	if err != nil {
+		c.String(http.StatusBadRequest, "get form err: %s", err.Error())
+		return
+	}
+	DuploadVideo(upid, title, profile, file, cover, c)
+	return
+}
 
+func DuploadVideo(upid string, title string, profile string,
+	file *multipart.FileHeader, cover *multipart.FileHeader, c *gin.Context) {
+
+	nid, _ := strconv.Atoi(upid)
 	videoUpload := VideoPreviewRequire{Title: title, Profile: profile, Up: uint(nid), Pass: 0}
 	db.Create(&videoUpload)
-	file, err := c.FormFile("file")
 	//将上传路径定义为/media/vntc/+待检视频的id
 	id := fmt.Sprintf("%d", videoUpload.ID)
 	dst := "./media/vntc/" + id + "/" + file.Filename
 	videoUpload.VideoFile = dst
 	//一个规范的纠错部分
-	if err != nil {
-		c.String(http.StatusBadRequest, "get form err: %s", err.Error())
-		return
-	}
 	if err := c.SaveUploadedFile(file, dst); err != nil {
 		c.String(http.StatusBadRequest, "upload file err: %s", err.Error())
 		return
 	}
-	cover, err := c.FormFile("cover")
 	dst = "./media/vntc/" + id + "/" + cover.Filename
 	videoUpload.CoverFile = dst
-	if err != nil {
-		c.String(http.StatusBadRequest, "get form err: %s", err.Error())
-		return
-	}
 	if err := c.SaveUploadedFile(cover, dst); err != nil {
 		c.String(http.StatusBadRequest, "upload file err: %s", err.Error())
 		return
