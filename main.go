@@ -71,11 +71,11 @@ func main() {
 		group.GET("/register", func(ctx *gin.Context) {
 			ctx.HTML(http.StatusOK, "register.html", gin.H{})
 		})
-		group.GET("get_file", GetFile)
-		group.POST("/add_file", func(ctx *gin.Context) {
-			head, _ := ctx.FormFile("file")
-			AddFile(head)
+		group.GET("/add_file", func(ctx *gin.Context) {
+			ctx.HTML(http.StatusOK, "addfile.html", gin.H{})
 		})
+		group.GET("get_file", GetFile)
+		group.POST("/api/add_file", AddFile)
 		group.Static("img", "./img")
 	}
 
