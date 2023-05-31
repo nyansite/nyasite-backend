@@ -6,15 +6,23 @@ import (
 	"io"
 	"net/http"
 
-	// "io"
-	// "net/http"
-
 	"github.com/andybalholm/brotli"
 	// "github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	shell "github.com/ipfs/go-ipfs-api"
 )
-
+// TODO ipfs files
+//从ipfs中查看文件列表/文件名
+func BrowseFiles(ctx *gin.Context)  {
+	sh := shell.NewLocalShell() //需要挂着ipfs daemon
+	if sh == nil {
+		ctx.AbortWithStatus(http.StatusInternalServerError) //500
+		return
+	}
+	sh.SetTimeout(1145140000) //为啥单位是纳秒???
+	// sh.FilesWrite()
+	
+}
 // 从ipfs获取文件,测试用
 // 只有用AddFile上传的文件才能用,因为存储的是压缩数据
 func GetFile(ctx *gin.Context) {
@@ -31,7 +39,7 @@ func GetFile(ctx *gin.Context) {
 		ctx.AbortWithStatus(http.StatusInternalServerError) //500
 		return
 	}
-	sh.SetTimeout(300000000) //为啥单位是纳秒???
+	sh.SetTimeout(1145140000) //为啥单位是纳秒???
 	brfr, err := sh.Cat(head)
 	if brfr == nil {
 		fmt.Println(err)
