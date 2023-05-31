@@ -2,7 +2,7 @@ package main
 
 import (
 	"bytes"
-	// "context"
+	"context"
 	"fmt"
 	"github.com/andybalholm/brotli"
 	"io"
@@ -11,7 +11,13 @@ import (
 	"github.com/gin-gonic/gin"
 	shell "github.com/ipfs/go-ipfs-api"
 	// "gorm.io/gorm"
+	"errors"
 	"strconv"
+)
+
+var (
+	NotFound     = errors.New("梦里啥都有,这里什么都没有")
+	NoIpfsDaemon = errors.New("ipfs daemon被你吃了?")
 )
 
 func BrowseVideo(ctx *gin.Context) {
@@ -40,12 +46,8 @@ func BrowseVideo(ctx *gin.Context) {
 
 	// }
 	ctx.HTML(http.StatusOK, "browsevideo.html", gin.H{
-		"list" : videos,
+		"list": videos,
 	})
-}
-
-func GetvidoeCover(ctx *gin.Context) {
-
 }
 
 // TODO
@@ -74,36 +76,46 @@ func GetvidoeCover(ctx *gin.Context) {
 
 // 从ipfs获取文件,测试用
 // 只有用AddFile上传的文件才能用,因为存储的是压缩数据
-func GetFile(ctx *gin.Context) {
-	ctx.Header("Content-Encoding", "br")  //声明压缩格式,否则会被当作二进制文件下载
-	ctx.Header("Vary", "Accept-Encoding") //客户端使用缓存
-
-	head := ctx.Query("file")
-	if head == "" {
-		ctx.AbortWithStatus(http.StatusBadRequest) //400
-		return
-	}
+func GetFile(path string) ([]byte, error) {
 	sh := shell.NewLocalShell() //需要挂着ipfs daemon
 	if sh == nil {
-		ctx.AbortWithStatus(http.StatusInternalServerError) //500
-		return
+		return nil, NoIpfsDaemon
 	}
 	sh.SetTimeout(1145140000) //为啥单位是纳秒???
-	brfr, err := sh.Cat(head)
+	brfr, _ := sh.Cat(path)
 	if brfr == nil {
-		fmt.Println(err)
-		ctx.AbortWithStatus(http.StatusNotFound) //404
-		return
+
+		return nil, NotFound
 	}
 	// cl := brotli.NewReader(brfr)
 	// buf, _ := io.ReadAll(cl)
 	buf2, _ := io.ReadAll(brfr)
 
 	// ctx.String(http.StatusOK, string(buf))
-	ctx.Data(http.StatusOK, "text/plain", buf2)
+	return buf2, nil
+
 }
 
-func AddFile(c *gin.Context) {
+func AddFile(r io.Reader, path string) error {
+	buf := bytes.Buffer{} //输出的缓冲区
+	buf2 := bytes.Buffer{}
+	buf2.ReadFrom(r)
+
+	cl := brotli.NewWriter(&buf)
+	cl.Write(buf2.Bytes())
+	cl.Close()
+
+	sh := shell.NewLocalShell() //需要挂着ipfs daemon
+	if sh == nil {
+		return NoIpfsDaemon
+	}
+
+	ctx := context.Background()
+	err := sh.FilesWrite(ctx, path, &buf)
+	return err	//正常情况下应该是nil(大概)
+}
+
+func AddFileT(c *gin.Context) {
 	//TODO 权限
 	//先注释掉因为要测试
 	// session := sessions.Default(c)

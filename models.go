@@ -26,12 +26,12 @@ type User struct {
 type Video struct {
 	gorm.Model
 	// VideoLink string 	//ipfs files 有文件名,可以指向uid,所以不需要这个了
-	// CoverLink string
-	Title    string
-	Profile  string             //芝士简介
-	CommentP []VideoCommentPage `gorm:"ForeignKey:Vid"` //评论
-	Tag      []Tag              `gorm:"ForeignKey:Tid"`
-	Views    uint               //这是播放量
+	// ImgLink string
+	Title       string
+	Description string             //芝士简介
+	CommentP    []VideoCommentPage `gorm:"ForeignKey:Vid"` //评论
+	Tag         []Tag              `gorm:"ForeignKey:Tid"`
+	Views       uint               //这是播放量
 }
 
 type Tag struct {

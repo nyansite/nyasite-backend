@@ -42,13 +42,14 @@ func main() {
 		group.GET("/user_status", GetSelfUserData)
 		group.GET("/user_status/:id", GetUserData)
 		group.GET("/video_comment/:id/:pg", GetVideoComment)
+		group.GET("/video_img/:id", GetVideoImg)
 		group.GET("/coffee", coffee)
 
 		group.POST("/register", Register)
 		group.POST("/login", Login)
 		group.POST("/new_tag", NewTag)
 		group.POST("/add_comment", AddComment)
-		
+		group.POST("/upload_video", UploadVideo)
 	}
 	config := cors.Config{
 		AllowOrigins: []string{"https://127.0.0.1"}, //只允许本地访问
@@ -73,9 +74,9 @@ func main() {
 		group.GET("/add_file", func(ctx *gin.Context) {
 			ctx.HTML(http.StatusOK, "addfile.html", gin.H{})
 		})
-		group.GET("/get_file", GetFile)
+		// group.GET("/get_file", GetFile)
 		group.GET("/browse_video/:vid", BrowseVideo)
-		group.POST("/api/add_file", AddFile)
+		group.POST("/api/add_file", AddFileT)
 		group.Static("img", "./img")
 	}
 

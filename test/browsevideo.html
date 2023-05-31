@@ -1,16 +1,26 @@
 <!DOCTYPE html>
+
 <body>
     <div id="main"></div>
 </body>
 <script>
     var mp = document.getElementById("main");
-    {{.list}}.forEach((v, i) => {
+    { {.list } }.forEach((v, i) => {
         var div = document.createElement("div");
         div.setAttribute("id", i);
         div.innerText = v.Title;
+        var vdiv = document.createElement("div");
+        vdiv.innerHTML = v.ID
         mp.appendChild(div);
     });
-        
-    
-    
+
+
+    async function getvideocover(e) {
+        e.preventDefault();
+
+        let response = await fetch('http://127.0.0.1:8000/test/api/add_file', {
+            method: 'GET',
+            body: new FormData(formElem)
+        });
+    }
 </script>
