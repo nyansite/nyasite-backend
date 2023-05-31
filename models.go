@@ -23,26 +23,15 @@ type User struct {
 	Level      uint   //4位权限4位等级,所以满级15
 }
 
-// 这个要重构,先摸了
-type VideoPreviewRequire struct {
-	gorm.Model
-	CoverFile string
-	VideoFile string
-	Title     string
-	Up        uint
-	Pass      uint
-	Profile   string
-}
-
 type Video struct {
 	gorm.Model
-	VideoLink string
-	CoverLink string //封面也用磁力链接
-	Title     string
-	Profile   string             //芝士简介
-	CommentP  []VideoCommentPage `gorm:"ForeignKey:Vid"` //评论
-	Tag       []Tag              `gorm:"ForeignKey:Tid"`
-	Views     uint               //这是播放量
+	// VideoLink string 	//ipfs files 有文件名,可以指向uid,所以不需要这个了
+	// CoverLink string
+	Title    string
+	Profile  string             //芝士简介
+	CommentP []VideoCommentPage `gorm:"ForeignKey:Vid"` //评论
+	Tag      []Tag              `gorm:"ForeignKey:Tid"`
+	Views    uint               //这是播放量
 }
 
 type Tag struct {
@@ -158,4 +147,15 @@ type Comment struct {
 	*/
 	Type   uint8
 	Author uint
+}
+
+// 这个要重构,先摸了
+type VideoPreviewRequire struct {
+	gorm.Model
+	CoverFile string
+	VideoFile string
+	Title     string
+	Up        uint
+	Pass      uint
+	Profile   string
 }

@@ -45,5 +45,14 @@
 |---|---|
 |0|什么都不能干的未答题用户
 |1|答完题的用户
-|10-14|用户中的管理员|
+|10-14|普通管理员|
 |15|超级管理员\开发者|
+
+## ipfs files(目录)
+
+|路径|作用|备注
+|---|---|---|
+|/img|图片|{%videoid}.webp, webp+brotli|
+|/video|视频|{%videoid}.m3u8, av1+brotli|
+|/temporary|临时文件|
+|/temporary/video/{%date}/{%uuid}|未审核的视频|

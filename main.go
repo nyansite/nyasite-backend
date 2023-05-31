@@ -35,7 +35,6 @@ func main() {
 	if dberr != nil {
 		panic("我数据库呢???我那么大一个数据库呢???还我数据库!!!")
 	}
-
 	db.AutoMigrate(&User{}, &Video{}, &VideoCommentPage{}, &VideoComment{},&VideoCommentSubPage{},&VideoCommentReply{}, &Tag{}, &TagText{}) //实际上的作用是创建表
 
 	group := r.Group("/api")
@@ -74,7 +73,8 @@ func main() {
 		group.GET("/add_file", func(ctx *gin.Context) {
 			ctx.HTML(http.StatusOK, "addfile.html", gin.H{})
 		})
-		group.GET("get_file", GetFile)
+		group.GET("/get_file", GetFile)
+		group.GET("/browse_file", BrowseFiles)
 		group.POST("/api/add_file", AddFile)
 		group.Static("img", "./img")
 	}

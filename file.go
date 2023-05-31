@@ -2,27 +2,40 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"fmt"
+	"github.com/andybalholm/brotli"
 	"io"
 	"net/http"
-
-	"github.com/andybalholm/brotli"
 	// "github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	shell "github.com/ipfs/go-ipfs-api"
 )
-// TODO ipfs files
-//从ipfs中查看文件列表/文件名
-func BrowseFiles(ctx *gin.Context)  {
+
+// TODO 
+// 从ipfs中查看文件列表/文件名
+func BrowseFiles(ctx *gin.Context) {
 	sh := shell.NewLocalShell() //需要挂着ipfs daemon
 	if sh == nil {
 		ctx.AbortWithStatus(http.StatusInternalServerError) //500
 		return
 	}
 	sh.SetTimeout(1145140000) //为啥单位是纳秒???
-	// sh.FilesWrite()
-	
+
+	ctx2 := context.Background() //直接传给ipfs daemon,密码之类的,(很没用
+	// sh.FilesMkdir(ctx2, "/img")		//防小天才
+
+	fls, err := sh.FilesLs(ctx2, "")
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusInternalServerError) //500
+		fmt.Println(err)
+		return
+	}
+	for _, v := range fls{
+		_ = v
+	}
 }
+
 // 从ipfs获取文件,测试用
 // 只有用AddFile上传的文件才能用,因为存储的是压缩数据
 func GetFile(ctx *gin.Context) {
@@ -85,6 +98,7 @@ func AddFile(c *gin.Context) {
 		c.AbortWithStatus(http.StatusInternalServerError) //500
 		return
 	}
+
 	path, _ := sh.Add(&buf)
 	fmt.Println(path)
 	c.String(http.StatusOK, path)
