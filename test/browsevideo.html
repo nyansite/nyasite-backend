@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<body>
+    <div id="main"></div>
+</body>
+<script>
+    var mp = document.getElementById("main");
+    {{.list}}.forEach((v, i) => {
+        var div = document.createElement("div");
+        div.setAttribute("id", i);
+        div.innerText = v.Title;
+        mp.appendChild(div);
+    });
+        
+    
+    
+</script>

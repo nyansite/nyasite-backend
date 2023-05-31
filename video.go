@@ -98,6 +98,12 @@ func uploadVideo(c *gin.Context) {
 	return
 }
 
+
+
+
+
+
+
 func DuploadVideo(upid string, title string, profile string,
 	file *multipart.FileHeader, cover *multipart.FileHeader, c *gin.Context) {
 

@@ -2,7 +2,7 @@ package main
 
 import (
 	"bytes"
-	"context"
+	// "context"
 	"fmt"
 	"github.com/andybalholm/brotli"
 	"io"
@@ -10,31 +10,67 @@ import (
 	// "github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	shell "github.com/ipfs/go-ipfs-api"
+	// "gorm.io/gorm"
+	"strconv"
 )
 
-// TODO 
-// 从ipfs中查看文件列表/文件名
-func BrowseFiles(ctx *gin.Context) {
-	sh := shell.NewLocalShell() //需要挂着ipfs daemon
-	if sh == nil {
-		ctx.AbortWithStatus(http.StatusInternalServerError) //500
+func BrowseVideo(ctx *gin.Context) {
+
+	vid := ctx.Param("vid")
+	if vid == "" {
+		ctx.Redirect(http.StatusTemporaryRedirect, "/1")
 		return
 	}
-	sh.SetTimeout(1145140000) //为啥单位是纳秒???
 
-	ctx2 := context.Background() //直接传给ipfs daemon,密码之类的,(很没用
-	// sh.FilesMkdir(ctx2, "/img")		//防小天才
-
-	fls, err := sh.FilesLs(ctx2, "")
+	id, err := strconv.Atoi(vid)
 	if err != nil {
-		ctx.AbortWithStatus(http.StatusInternalServerError) //500
-		fmt.Println(err)
+		ctx.AbortWithStatus(http.StatusBadRequest) //400
 		return
 	}
-	for _, v := range fls{
-		_ = v
+	if id < 1 {
+		ctx.String(http.StatusBadRequest, "你搁这翻空气呢?")
+		return
 	}
+	var videos []Video
+	var count int64 //总数,Count比rowsaffected更快(懒得用变量缓存了
+	id -= 1
+	db.Model(&Video{}).Count(&count)
+	db.Limit(20).Offset(id * 20).Find(&videos)
+	// for i, v:= range videos{
+
+	// }
+	ctx.HTML(http.StatusOK, "browsevideo.html", gin.H{
+		"list" : videos,
+	})
 }
+
+func GetvidoeCover(ctx *gin.Context) {
+
+}
+
+// TODO
+// 从ipfs中查看文件列表/文件名
+// func BrowseFiles(ctx *gin.Context) {
+// 	sh := shell.NewLocalShell() //需要挂着ipfs daemon
+// 	if sh == nil {
+// 		ctx.AbortWithStatus(http.StatusInternalServerError) //500
+// 		return
+// 	}
+// 	sh.SetTimeout(1145140000) //为啥单位是纳秒???
+
+// 	ctx2 := context.Background() //直接传给ipfs daemon,密码之类的,(很没用
+// 	// sh.FilesMkdir(ctx2, "/img")		//防小天才
+
+// 	fls, err := sh.FilesLs(ctx2, "")
+// 	if err != nil {
+// 		ctx.AbortWithStatus(http.StatusInternalServerError) //500
+// 		fmt.Println(err)
+// 		return
+// 	}
+// 	for _, v := range fls{
+// 		_ = v
+// 	}
+// }
 
 // 从ipfs获取文件,测试用
 // 只有用AddFile上传的文件才能用,因为存储的是压缩数据

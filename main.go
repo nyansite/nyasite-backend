@@ -74,7 +74,7 @@ func main() {
 			ctx.HTML(http.StatusOK, "addfile.html", gin.H{})
 		})
 		group.GET("/get_file", GetFile)
-		group.GET("/browse_file", BrowseFiles)
+		group.GET("/browse_video/:vid", BrowseVideo)
 		group.POST("/api/add_file", AddFile)
 		group.Static("img", "./img")
 	}
