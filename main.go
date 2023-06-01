@@ -35,7 +35,7 @@ func main() {
 	if dberr != nil {
 		panic("我数据库呢???我那么大一个数据库呢???还我数据库!!!")
 	}
-	db.AutoMigrate(&User{}, &Video{}, &VideoCommentPage{}, &VideoComment{},&VideoCommentSubPage{},&VideoCommentReply{}, &Tag{}, &TagText{}) //实际上的作用是创建表
+	db.AutoMigrate(&User{}, &Video{}, &VideoComment{}, &Tag{}, &TagText{}) //实际上的作用是创建表
 
 	group := r.Group("/api")
 	{
