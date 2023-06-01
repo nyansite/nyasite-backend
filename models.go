@@ -23,7 +23,7 @@ type User struct {
 	Level      uint   //4位权限4位等级,所以满级15
 }
 
-type Video struct {
+type Video struct { //获取视频和获取评论分开
 	gorm.Model
 	// VideoLink string 	//ipfs files 有文件名,可以指向uid,所以不需要这个了
 	// ImgLink string
@@ -31,6 +31,7 @@ type Video struct {
 	Description string         //芝士简介
 	CommentP    []VideoComment `gorm:"ForeignKey:Vid"` //评论
 	Tag         []uint         `gorm:"index"`          //tag的id
+	likes       uint           //芝士点赞数量
 	Views       uint           //这是播放量
 }
 
@@ -53,6 +54,7 @@ type VideoComment struct {
 	*/
 	Type    uint8
 	Author  uint
+	likes   uint                //芝士点赞数量
 	Comment []VideoCommentReply `gorm:"ForeignKey:Cid"`
 }
 type VideoCommentReply struct { //楼中楼的回复.......
@@ -68,8 +70,10 @@ type VideoCommentReply struct { //楼中楼的回复.......
 	*/
 	Type    uint8
 	Author  uint
+	likes   uint           //芝士点赞数量
 	Comment []VideoComment `gorm:"ForeignKey:Cid"`
 }
+
 // 论坛部分
 // 不需要楼中楼,直接引用
 type MainForum struct {

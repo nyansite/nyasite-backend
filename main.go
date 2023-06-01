@@ -46,7 +46,7 @@ func main() {
 
 		group.POST("/register", Register)
 		group.POST("/login", Login)
-		// group.POST("/new_tag", NewTag)
+		group.POST("/new_tag", NewTag)
 		group.POST("/add_comment", AddComment)
 		group.POST("/upload_video", UploadVideo)
 	}

@@ -31,23 +31,23 @@ func NewTag(c *gin.Context) {
 }
 
 func GetVideoComment(c *gin.Context) {
-	strid := c.Param("id")
+	strid := c.Param("id")	
 	spg := c.Param("pg")
 	sid, err := strconv.Atoi(strid)
-	id := uint(sid)
+	id := uint(sid)//视频id
 	if err != nil {
 		c.AbortWithStatus(http.StatusBadRequest) //返回400
 		return
 	}
 	pg, err := strconv.Atoi(spg)
-	// pg = uint(pg)
 	if err != nil {
 		c.AbortWithStatus(http.StatusBadRequest) //返回400
 		return
 	}
-	var video Video
-	db.Preload("CommentPage", "Count = ?", pg).Preload("Cid = 0 OR (Count < 3)").First(&video, id)
-	fmt.Println(&video)
+	var comments []VideoComment
+	// db.Preload("CommentPage", "Count = ?", pg).Preload("Cid = 0 OR (Count < 3)").First(&video, id)
+	db.Limit(3).Order("likes").Preload("VideoCommentReply").Limit(20).Offset(pg-1).Where("Vid = ?", id).Find(&comments)
+	fmt.Println(&comments)
 }
 
 func GetVideoImg(c *gin.Context) {
