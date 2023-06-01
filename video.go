@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
-	ffmpeg "github.com/u2takey/ffmpeg-go"
+	
 )
 
 func NewTag(c *gin.Context) {
@@ -99,23 +99,3 @@ func AddComment(c *gin.Context) {
 	// }
 }
 
-// 不审核直接上传,测试接口
-func UploadVideo(c *gin.Context) {
-	title := c.PostForm("Title")
-	description := c.PostForm("Description") //简介
-	f, err := c.FormFile("file")
-	if err != nil {
-		c.AbortWithStatus(http.StatusBadRequest) //400
-		return
-	}
-	ff, _ := f.Open()
-	defer ff.Close()
-	// c.SaveUploadedFile(f, )
-	var video Video
-	video.Title = title
-	video.Description = description
-	video.Views = 0
-	db.Create(&video)
-	err = ffmpeg.Input("").Run()
-	AddFile(ff, "/video/"+strconv.Itoa(int(video.ID))+".m3u8")
-}

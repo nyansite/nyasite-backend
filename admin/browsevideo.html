@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+
+<body>
+    <a href="/admin/upload_video">上传视频</a>
+    <hr>
+    <div id="main"></div>
+</body>
+<script>
+    // var mp = document.getElementById("main");
+    // { {.list } }.forEach((v, i) => {
+    //     var div = document.createElement("div");
+    //     div.setAttribute("id", i);
+    //     div.innerText = v.Title;
+    //     var vdiv = document.createElement("div");
+    //     vdiv.innerHTML = v.ID
+    //     mp.appendChild(div);
+    // });
+
+
+    window.onload = async (e) => {
+        e.preventDefault();
+
+        let response = await fetch('', {
+            method: 'POST',
+        });
+        switch (response.status) {
+            case 200:
+                setdata(await response.json())
+                break;
+            case 500:
+                alert("500服务器错误,也许是没开ipfs deamon?");
+                break;
+        }
+
+    }
+    function setdata(data) {
+        console.log(data)
+    }
+</script>

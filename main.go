@@ -26,9 +26,9 @@ func main() {
 	store.Options(sessions.Options{Secure: true, HttpOnly: true})
 	r.Use(sessions.Sessions("session_id", store))
 	r.LoadHTMLGlob("test/*")
+	r.LoadHTMLGlob("admin/*")
 	// TODO csrf防护,需要前端支持
 
-	
 	dbl, dberr := gorm.Open(sqlite.Open("test.db"), &gorm.Config{})
 	db = dbl
 	if dberr != nil {
@@ -74,9 +74,19 @@ func main() {
 			ctx.HTML(http.StatusOK, "addfile.html", gin.H{})
 		})
 		// group.GET("/get_file", GetFile)
-		group.GET("/browse_video/:vid", BrowseVideo)
-		group.POST("/api/add_file", AddFileT)
 		group.Static("img", "./img")
+	}
+	//管理员页面
+	group = r.Group("/admin")
+	{
+		group.GET("/browse_video/", AdminVideo)
+		group.GET("/browse_video/:page", AdminVideo)
+		group.GET("/upload_video", func(ctx *gin.Context) {
+			ctx.HTML(http.StatusOK, "uploadvideo.html", gin.H{})
+		})
+
+		group.POST("/browse_video/:page", AdminVideoPost)
+		group.POST("/upload_video", UploadVideo)
 	}
 
 	r.Run(":8000") // 8000

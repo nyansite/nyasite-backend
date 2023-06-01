@@ -30,7 +30,7 @@ type Video struct { //获取视频和获取评论分开
 	Title       string
 	Description string         //芝士简介
 	CommentP    []VideoComment `gorm:"ForeignKey:Vid"` //评论
-	Tag         []uint         `gorm:"index"`          //tag的id
+	Tag         []uint         `gorm:"index;type:bytes"`//tag的id
 	likes       uint           //芝士点赞数量
 	Views       uint           //这是播放量
 }
@@ -71,7 +71,7 @@ type VideoCommentReply struct { //楼中楼的回复.......
 	Type    uint8
 	Author  uint
 	likes   uint           //芝士点赞数量
-	Comment []VideoComment `gorm:"ForeignKey:Cid"`
+	Comment []VideoCommentReply `gorm:"ForeignKey:Cid"`
 }
 
 // 论坛部分
