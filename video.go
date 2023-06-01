@@ -2,33 +2,33 @@ package main
 
 import (
 	"fmt"
-	"github.com/gin-contrib/sessions"
+	// "github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
 	ffmpeg "github.com/u2takey/ffmpeg-go"
 )
 
-func NewTag(c *gin.Context) {
-	session := sessions.Default(c)
-	if session.Get("is_login") != true {
-		c.AbortWithStatus(http.StatusUnauthorized) //返回401
-		return
-	}
-	level := session.Get("level").(uint)
-	privilege_level := level >> 4
-	if privilege_level <= 10 { //10以上权限能新建tag
-		c.AbortWithStatus(http.StatusForbidden) //403
-		return
-	}
-	tagname := c.PostForm("tagname")
-	if db.Take(&TagText{}, "Text = ?", tagname).RowsAffected != 0 {
-		c.AbortWithStatus(StatusRepeatTag)
-		return
-	}
-	db.Create(&TagText{Text: tagname})
-	c.AbortWithStatus(http.StatusOK)
-}
+// func NewTag(c *gin.Context) {
+// 	session := sessions.Default(c)
+// 	if session.Get("is_login") != true {
+// 		c.AbortWithStatus(http.StatusUnauthorized) //返回401
+// 		return
+// 	}
+// 	level := session.Get("level").(uint)
+// 	privilege_level := level >> 4
+// 	if privilege_level <= 10 { //10以上权限能新建tag
+// 		c.AbortWithStatus(http.StatusForbidden) //403
+// 		return
+// 	}
+// 	tagname := c.PostForm("tagname")
+// 	if db.Take(&TagText{}, "Text = ?", tagname).RowsAffected != 0 {
+// 		c.AbortWithStatus(StatusRepeatTag)
+// 		return
+// 	}
+// 	db.Create(&TagText{Text: tagname})
+// 	c.AbortWithStatus(http.StatusOK)
+// }
 
 func GetVideoComment(c *gin.Context) {
 	strid := c.Param("id")

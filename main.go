@@ -18,7 +18,6 @@ import (
 )
 
 var db *gorm.DB
-var tags []TagText
 
 func main() {
 	r := gin.Default()
@@ -29,13 +28,13 @@ func main() {
 	r.LoadHTMLGlob("test/*")
 	// TODO csrf防护,需要前端支持
 
-	tags = []TagText{}
+	
 	dbl, dberr := gorm.Open(sqlite.Open("test.db"), &gorm.Config{})
 	db = dbl
 	if dberr != nil {
 		panic("我数据库呢???我那么大一个数据库呢???还我数据库!!!")
 	}
-	db.AutoMigrate(&User{}, &Video{}, &VideoComment{}, &Tag{}, &TagText{}) //实际上的作用是创建表
+	db.AutoMigrate(&User{}, &Video{}, &VideoComment{}, &Tag{}) //实际上的作用是创建表
 
 	group := r.Group("/api")
 	{
@@ -47,7 +46,7 @@ func main() {
 
 		group.POST("/register", Register)
 		group.POST("/login", Login)
-		group.POST("/new_tag", NewTag)
+		// group.POST("/new_tag", NewTag)
 		group.POST("/add_comment", AddComment)
 		group.POST("/upload_video", UploadVideo)
 	}
