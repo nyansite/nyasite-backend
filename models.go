@@ -29,8 +29,8 @@ type Video struct { //获取视频和获取评论分开
 	// ImgLink string
 	Title       string
 	Description string         //芝士简介
-	CommentP    []VideoComment `gorm:"ForeignKey:Vid"` //评论
-	Tag         []uint         `gorm:"index;type:bytes"`//tag的id
+	CommentP    []VideoComment `gorm:"ForeignKey:Vid"`   //评论
+	Tag         []uint         `gorm:"index;type:bytes"` //tag的id
 	likes       uint           //芝士点赞数量
 	Views       uint           //这是播放量
 }
@@ -70,27 +70,24 @@ type VideoCommentReply struct { //楼中楼的回复.......
 	*/
 	Type    uint8
 	Author  uint
-	likes   uint           //芝士点赞数量
+	likes   uint                //芝士点赞数量
 	Comment []VideoCommentReply `gorm:"ForeignKey:Cid"`
 }
 
 // 论坛部分
 // 不需要楼中楼,直接引用
-type MainForum struct {
+type MainForum struct { //获取视频和获取评论分开
 	gorm.Model
-	ID     uint `gorm:"primarykey"`
 	Title  string
-	Author uint        `gorm:"index"` //发起人
-	Views  uint        //阅读量
-	UnitP  []UtilForum `gorm:"ForeignKey:Pid"`
+	UnitP  []UnitForum `gorm:"ForeignKey:Mid"` //评论
+	Views  uint        //这是播放量
+	Author uint
 }
 
-type UtilForum struct {
-	ID        uint `gorm:"primarykey"`
-	CreatedAt time.Time
-	// Count		uint				//楼层
-	Pid  uint `gorm:"index:UtilForum"` //所属论坛的id,楼中楼为0(大概)
-	Cid  uint `gorm:"index:UtilForum"` //楼中楼上一层的ID,不是楼中楼应该为0
+type UnitForum struct {
+	gorm.Model
+	Mid  uint `gorm:"index"` //所属页面的id
+	Cid  uint
 	Text string
 	/*
 		文本类型
@@ -101,21 +98,13 @@ type UtilForum struct {
 	*/
 	Type     uint8
 	Author   uint
-	CommentP []CommentPage `gorm:"ForeignKey:Pid"`
+	likes    uint      //芝士点赞数量
+	CommentP []Comment `gorm:"ForeignKey:Cid"`
 }
-
-type CommentPage struct { //一页16个
-	ID uint `gorm:"primarykey"`
-	// Count   uint      //页数
-	Comment []Comment `gorm:"ForeignKey:Pid"`
-	Uid     uint      `gorm:"index"` //所属的视频/论坛的id
-}
-type Comment struct {
-	ID        uint `gorm:"primarykey"`
-	CreatedAt time.Time
-	Pid       uint `gorm:"index:Comment"` //所属页面的id
-	Cid       uint `gorm:"index:Comment"` //楼中楼上一层的ID
-	Text      string
+type Comment struct { //楼中楼的回复.......
+	gorm.Model
+	Cid  uint `gorm:"index"` //楼中楼上一层的id
+	Text string
 	/*
 		文本类型
 		0:	字符串
@@ -125,6 +114,7 @@ type Comment struct {
 	*/
 	Type   uint8
 	Author uint
+	likes  uint //芝士点赞数量
 }
 
 // 这个要重构,先摸了

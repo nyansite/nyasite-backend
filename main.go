@@ -29,13 +29,13 @@ func main() {
 	r.LoadHTMLGlob("admin/*")
 	// TODO csrf防护,需要前端支持
 
-	dbl, dberr := gorm.Open(sqlite.Open("test.db"), &gorm.Config{})
-	db = dbl
+	db, dberr := gorm.Open(sqlite.Open("test.sqlite3"), &gorm.Config{}) //方便直接用系统编辑器打开
 	if dberr != nil {
 		panic("我数据库呢???我那么大一个数据库呢???还我数据库!!!")
 	}
-	db.AutoMigrate(&User{}, &Video{}, &VideoComment{}, &Tag{}) //实际上的作用是创建表
-
+	db.AutoMigrate(&User{}, &Video{}, &VideoComment{}, &Tag{},
+		&MainForum{}, &UnitForum{}, &Comment{}) //实际上的作用是创建表
+	DBaddMainForum("114514", "1919810", 1, 0, db)
 	group := r.Group("/api")
 	{
 		group.GET("/user_status", GetSelfUserData)
