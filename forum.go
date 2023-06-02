@@ -1,10 +1,10 @@
 package main
 
-import (
-	"gorm.io/gorm"
-)
+// import (
+// 	"gorm.io/gorm"
+// )
 
-func DBaddMainForum(text string, title string, author uint, kind uint8, db *gorm.DB) {
+func DBaddMainForum(text string, title string, author uint, kind uint8,) {
 	var mainForum MainForum
 	mainForum.Title = title
 	mainForum.Author = author

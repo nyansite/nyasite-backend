@@ -38,7 +38,6 @@ func main() {
 	}
 	db.AutoMigrate(&User{}, &Video{}, &VideoComment{}, &Tag{},
 		&MainForum{}, &UnitForum{}, &Comment{}) //实际上的作用是创建表
-	DBaddMainForum("114514", "1919810", 1, 0, db)
 	group := r.Group("/api")
 	{
 		group.GET("/user_status", GetSelfUserData)
@@ -92,7 +91,7 @@ func main() {
 		group.POST("/browse_video/:page", AdminVideoPost)
 		group.POST("/upload_video", UploadVideo)
 	}
-
+	DBaddMainForum("114514", "1919810", 1, 0)
 	r.Run(":8000") // 8000
 	// db.Create(&Video{})
 	// var i uint64
