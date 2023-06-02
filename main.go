@@ -30,8 +30,7 @@ func main() {
 	// TODO csrf防护,需要前端支持
 
 	dbl, dberr := gorm.Open(sqlite.Open("test.db"), &gorm.Config{
-		SkipDefaultTransaction: true,
-		PrepareStmt: true,
+		PrepareStmt: true,//执行任何 SQL 时都创建并缓存预编译语句，可以提高后续的调用速度
 	})
 	db = dbl
 	if dberr != nil {
@@ -96,7 +95,7 @@ func main() {
 	r.Run(":8000") // 8000
 	// db.Create(&Video{})
 	// var i uint64
-	// for i = 0; i < 114514; i++ {
+	// for i = 0; i < 114; i++ {
 	// 	db.Create(&Video{})
 	// }
 }
