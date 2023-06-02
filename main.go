@@ -29,7 +29,10 @@ func main() {
 	r.LoadHTMLGlob("admin/*")
 	// TODO csrf防护,需要前端支持
 
-	db, dberr := gorm.Open(sqlite.Open("test.sqlite3"), &gorm.Config{}) //方便直接用系统编辑器打开
+	dbl, dberr := gorm.Open(sqlite.Open("test.db"), &gorm.Config{
+		PrepareStmt: true, //执行任何 SQL 时都创建并缓存预编译语句，可以提高后续的调用速度
+	})
+	db = dbl
 	if dberr != nil {
 		panic("我数据库呢???我那么大一个数据库呢???还我数据库!!!")
 	}
@@ -79,8 +82,9 @@ func main() {
 	//管理员页面
 	group = r.Group("/admin")
 	{
-		group.GET("/browse_video/", AdminVideo)
-		group.GET("/browse_video/:page", AdminVideo)
+		group.GET("/browse_video/", func(ctx *gin.Context) {
+			ctx.HTML(http.StatusOK, "browsevideo.html", gin.H{})
+		})
 		group.GET("/upload_video", func(ctx *gin.Context) {
 			ctx.HTML(http.StatusOK, "uploadvideo.html", gin.H{})
 		})
@@ -90,10 +94,10 @@ func main() {
 	}
 
 	r.Run(":8000") // 8000
-	// db.Create(&Video{CommentP: []CommentPage{{Comment: []Comment{{Text: "ww"}}}}})
+	// db.Create(&Video{})
 	// var i uint64
-	// for i = 0; i < 10; i++ {
-	// 	WAddComment("只因", 1, 0)
+	// for i = 0; i < 114; i++ {
+	// 	db.Create(&Video{})
 	// }
 }
 

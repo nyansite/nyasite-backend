@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- TODO 改异步 -->
 
 <body>
 
@@ -41,32 +42,20 @@
 
     }
 
-    /* #foot a{
-        width: 70px;
-    } */
     #next {
-        text-align: right;
+        text-align: center;
         /* 靠右 */
         grid-column: -2 / -1;
     }
 </style>
 <script>
     var mp = document.getElementById("foot");
-    page = window.location.href.substring(window.location.href.lastIndexOf("/") + 1, window.location.href.length)
+    page = 1
 
-    if (page > 1) {
-        var a = document.createElement("a");
-        a.href = Number(page) - 1;
-        a.innerText = "上一页";
-        mp.appendChild(a);
-    }
-
-
-
-    window.onload = async (e) => {
+    async function getdata(e) {
         e.preventDefault();
 
-        let response = await fetch('', {
+        let response = await fetch(page, {
             method: 'POST',
         });
         switch (response.status) {
@@ -78,9 +67,12 @@
                 break;
         }
     }
+
+    window.onload = getdata;
     function setdata(data) {
-        console.log(data.Body)
         var mpe = document.getElementById("main");
+        mpe.innerHTML = "";
+        mp.innerHTML = "";
         data.Body.forEach((v, i) => {
             var div = document.createElement("div");
             div.id = "C" + i
@@ -91,9 +83,25 @@
             div.appendChild(vdiv);
             mpe.appendChild(div);
         });
+        if (page > 1) {
+            var a = document.createElement("button");
+            // a.href = Number(page) - 1;
+            pg = page - 1;
+            a.onclick = function (e){
+                page -=1;
+                getdata(e);
+            };
+            a.innerText = "上一页";
+            mp.appendChild(a);
+        }
         if (data.PageCount > page) {
-            var b = document.createElement("a");
-            b.href = Number(page) + 1;
+            var b = document.createElement("button");
+            // b.href = Number(page) + 1;
+            pg = page + 1;
+            b.onclick = function (e){
+                page +=1;
+                getdata(e);
+            };
             b.innerText = "下一页"
             b.id = "next"
             mp.appendChild(b);
