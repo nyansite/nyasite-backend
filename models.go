@@ -32,21 +32,12 @@ type Video struct { //获取视频和获取评论分开
 	Model
 	// VideoLink string 	//ipfs files 有文件名,可以指向uid,所以不需要这个了
 	// ImgLink string
-<<<<<<< HEAD
-	Title       string
-	Description string         //芝士简介
-	CommentP    []VideoComment `gorm:"ForeignKey:Vid"`   //评论
-	Tag         []uint         `gorm:"index;type:bytes"` //tag的id
-	likes       uint           //芝士点赞数量
-	Views       uint           //这是播放量
-=======
 	Title       string         `gorm:"default:芝士标题"`
 	Description string         `gorm:"default:简介不见惹"`    //芝士简介
 	CommentP    []VideoComment `gorm:"ForeignKey:Vid"`   //评论
 	Tag         []uint         `gorm:"index;type:bytes"` //tag的id
 	likes       uint           `gorm:"default:0"`        //芝士点赞数量
 	Views       uint           `gorm:"default:0"`        //这是播放量
->>>>>>> 444f192fa174f36748017865f151a32d0df075d5
 }
 
 type Tag struct {
@@ -90,9 +81,9 @@ type VideoCommentReply struct { //楼中楼的回复.......
 
 // 论坛部分
 // 不需要楼中楼,直接引用
-<<<<<<< HEAD
+
 type MainForum struct { //获取视频和获取评论分开
-	gorm.Model
+	Model
 	Title  string
 	UnitP  []UnitForum `gorm:"ForeignKey:Mid"` //评论
 	Views  uint        //这是播放量
@@ -100,7 +91,7 @@ type MainForum struct { //获取视频和获取评论分开
 }
 
 type UnitForum struct {
-	gorm.Model
+	Model
 	Mid  uint `gorm:"index"` //所属页面的id
 	Cid  uint
 	Text string
@@ -117,7 +108,7 @@ type UnitForum struct {
 	CommentP []Comment `gorm:"ForeignKey:Cid"`
 }
 type Comment struct { //楼中楼的回复.......
-	gorm.Model
+	Model
 	Cid  uint `gorm:"index"` //楼中楼上一层的id
 	Text string
 	/*
