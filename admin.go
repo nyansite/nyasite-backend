@@ -12,27 +12,6 @@ import (
 	"strconv"
 )
 
-func AdminVideo(ctx *gin.Context) {
-
-	vpg := ctx.Param("page")
-	if vpg == "" {
-		ctx.Redirect(http.StatusTemporaryRedirect, "1")
-		return
-	}
-
-	pg, err := strconv.Atoi(vpg)
-	if err != nil {
-		ctx.AbortWithStatus(http.StatusBadRequest) //400
-		return
-	}
-	if pg < 1 {
-		ctx.String(http.StatusBadRequest, "你搁这翻空气呢?")
-		return
-	}
-
-	ctx.HTML(http.StatusOK, "browsevideo.html", gin.H{})
-}
-
 func AdminVideoPost(ctx *gin.Context) {
 	vpg := ctx.Param("page")
 	pg, err := strconv.Atoi(vpg)
