@@ -104,12 +104,12 @@ type UnitForum struct {
 	*/
 	Type     uint8
 	Author   uint
-	likes    uint      //芝士点赞数量
-	CommentP []Comment `gorm:"ForeignKey:Cid"`
+	Likes    uint      //芝士点赞数量
+	CommentP []Comment `gorm:"ForeignKey:Uid"`
 }
 type Comment struct { //楼中楼的回复.......
 	Model
-	Cid  uint `gorm:"index"` //楼中楼上一层的id
+	Uid  uint `gorm:"index"` //楼中楼上一层的id
 	Text string
 	/*
 		文本类型
@@ -120,7 +120,7 @@ type Comment struct { //楼中楼的回复.......
 	*/
 	Type   uint8
 	Author uint
-	likes  uint //芝士点赞数量
+	Likes  uint //芝士点赞数量
 }
 
 // 这个要重构,先摸了
