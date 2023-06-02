@@ -1,21 +1,67 @@
 <!DOCTYPE html>
 
 <body>
+
     <a href="/admin/upload_video">上传视频</a>
     <hr>
     <div id="main"></div>
+    <div id="foot"></div>
 </body>
-<script>
-    // var mp = document.getElementById("main");
-    // { {.list } }.forEach((v, i) => {
-    //     var div = document.createElement("div");
-    //     div.setAttribute("id", i);
-    //     div.innerText = v.Title;
-    //     var vdiv = document.createElement("div");
-    //     vdiv.innerHTML = v.ID
-    //     mp.appendChild(div);
-    // });
+<style>
+    #main {
+        width: 75%;
+        /* 内边距 */
+        padding: 0.5%;
+        /* 居中 */
+        margin: 0 auto;
+        display: grid;
+        grid-auto-rows: minmax(30px, auto);
+        /* 间隔 */
+        grid-gap: 5px;
 
+        border: 2px solid;
+        border-radius: 5px;
+    }
+
+    .card {
+        border: 2px solid;
+        border-radius: 5px;
+    }
+
+    #foot {
+        /* 75+0.5x2 */
+        width: 75%;
+        padding-left: 0.5%;
+        padding-right: 0.5%;
+        border: 2px solid;
+        border-radius: 5px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 70px auto 70px;
+        
+    }
+    /* #foot a{
+        width: 70px;
+    } */
+    #next {
+        text-align: right;
+        /* 靠右 */
+        grid-column: -2 / -1;
+    }
+</style>
+<script>
+    var mp = document.getElementById("foot");
+    var a = document.createElement("a");
+    page = window.location.href.substring(window.location.href.lastIndexOf("/") + 1, window.location.href.length)
+    a.href = Number(page - 1);
+    a.innerText = "上一页";
+    mp.appendChild(a);
+
+    var b = document.createElement("a");
+    b.href = Number(page + 1)
+    b.innerText = "下一页"
+    b.id = "next"
+    mp.appendChild(b);
 
     window.onload = async (e) => {
         e.preventDefault();
@@ -34,6 +80,17 @@
 
     }
     function setdata(data) {
-        console.log(data)
+        console.log(data.Body)
+        var mp = document.getElementById("main");
+        data.Body.forEach((v, i) => {
+            var div = document.createElement("div");
+            div.id = "C" + i
+            div.className = "card"
+            div.innerText = v.Title;
+            var vdiv = document.createElement("div");
+            vdiv.innerHTML = v.ID;
+            div.appendChild(vdiv);
+            mp.appendChild(div);
+        });
     }
 </script>

@@ -16,7 +16,7 @@ func AdminVideo(ctx *gin.Context) {
 
 	vpg := ctx.Param("page")
 	if vpg == "" {
-		ctx.Redirect(http.StatusTemporaryRedirect, "/1")
+		ctx.Redirect(http.StatusTemporaryRedirect, "1")
 		return
 	}
 

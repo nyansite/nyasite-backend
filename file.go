@@ -97,7 +97,7 @@ func Addpath(src string, dst string) error {
 	if err != nil {
 		return err
 	}
-	// err = sh.FilesMkdir(ctx, dst)
+	sh.FilesMkdir(ctx, "/video")	//没啥用,但是防小天才
 	err = sh.FilesCp(ctx, "/ipfs/"+path, dst)
 	if err != nil {
 		return err
