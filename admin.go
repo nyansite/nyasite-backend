@@ -2,14 +2,14 @@ package main
 
 import (
 	"fmt"
+	"github.com/gin-gonic/gin"
+	UUID "github.com/google/uuid"
+	ffmpeg "github.com/u2takey/ffmpeg-go"
+	"math"
 	"net/http"
 	"os"
 	"path"
 	"strconv"
-
-	"github.com/gin-gonic/gin"
-	UUID "github.com/google/uuid"
-	ffmpeg "github.com/u2takey/ffmpeg-go"
 )
 
 func AdminVideo(ctx *gin.Context) {
@@ -47,7 +47,7 @@ func AdminVideoPost(ctx *gin.Context) {
 	db.Limit(20).Offset(pg * 20).Find(&videos)
 	ctx.JSON(http.StatusOK, gin.H{
 		"Body":      videos,
-		"PageCount": count,
+		"PageCount": math.Ceil(float64(count) / 20), //总页数
 	})
 }
 

@@ -38,8 +38,9 @@
         margin: 0 auto;
         display: grid;
         grid-template-columns: 70px auto 70px;
-        
+
     }
+
     /* #foot a{
         width: 70px;
     } */
@@ -51,17 +52,16 @@
 </style>
 <script>
     var mp = document.getElementById("foot");
-    var a = document.createElement("a");
     page = window.location.href.substring(window.location.href.lastIndexOf("/") + 1, window.location.href.length)
-    a.href = Number(page - 1);
-    a.innerText = "上一页";
-    mp.appendChild(a);
 
-    var b = document.createElement("a");
-    b.href = Number(page + 1)
-    b.innerText = "下一页"
-    b.id = "next"
-    mp.appendChild(b);
+    if (page > 1) {
+        var a = document.createElement("a");
+        a.href = Number(page) - 1;
+        a.innerText = "上一页";
+        mp.appendChild(a);
+    }
+
+
 
     window.onload = async (e) => {
         e.preventDefault();
@@ -77,11 +77,10 @@
                 alert("500服务器错误,也许是没开ipfs deamon?");
                 break;
         }
-
     }
     function setdata(data) {
         console.log(data.Body)
-        var mp = document.getElementById("main");
+        var mpe = document.getElementById("main");
         data.Body.forEach((v, i) => {
             var div = document.createElement("div");
             div.id = "C" + i
@@ -90,7 +89,14 @@
             var vdiv = document.createElement("div");
             vdiv.innerHTML = v.ID;
             div.appendChild(vdiv);
-            mp.appendChild(div);
+            mpe.appendChild(div);
         });
+        if (data.PageCount > page) {
+            var b = document.createElement("a");
+            b.href = Number(page) + 1;
+            b.innerText = "下一页"
+            b.id = "next"
+            mp.appendChild(b);
+        }
     }
 </script>
