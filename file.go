@@ -4,10 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"fmt"
-
 	"io"
-
 	"github.com/andybalholm/brotli"
 	shell "github.com/ipfs/go-ipfs-api"
 )
@@ -85,8 +82,6 @@ func AddFile(r io.Reader, path string) error {
 }
 
 func Addpath(src string, dst string) error {
-	fmt.Println(src)
-	fmt.Println(dst)
 	sh := shell.NewLocalShell() //需要挂着ipfs daemon
 	if sh == nil {
 		return NoIpfsDaemon

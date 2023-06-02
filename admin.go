@@ -81,10 +81,12 @@ func SaveVideo(src string, title string, description string, uuid string) {
 	}
 	os.Mkdir("./temporary/"+uuid, os.ModePerm)
 	err = ffmpeg.Input(src+".mp4").Output("./temporary/"+uuid+"/w.m3u8", ffmpeg.KwArgs{
-		"g":                "60",
-		"hls_time":         "2",
-		"hls_list_size":    "0",
-		"hls_segment_size": "500000"}).Run() //cpu软解
+		// "codec":         "copy",		//只有音频,原因未知
+		"start_number":  0,
+		"hls_list_size": 0,
+		"hls_time":      5,
+		"f":             "hls",
+	}).Run() //cpu软解
 	err = Addpath("./temporary/"+uuid, "/video/"+strconv.Itoa(int(video.ID)))
 	if err != nil {
 		fmt.Println(err)
