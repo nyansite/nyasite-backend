@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-contrib/cors"
 
@@ -11,9 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
-
-	_ "encoding/json"
-	_ "fmt"
 	"time"
 )
 
@@ -37,10 +35,8 @@ func main() {
 		panic("我数据库呢???我那么大一个数据库呢???还我数据库!!!")
 	}
 	db.AutoMigrate(&User{}, &Video{}, &VideoComment{}, &Tag{},
-		&MainForum{}, &UnitForum{}, &Comment{}) //实际上的作用是创建表
-	DBaddMainForum("114", "514", 1, 0)
-	DBaddUtilForum("114", 1, 0, 0, 1)
-	DBaddComment("114", 1, 1)
+		&Forum{}, &ForumComment{}) //实际上的作用是创建表
+
 	group := r.Group("/api")
 	{
 		group.GET("/user_status", GetSelfUserData)
@@ -78,7 +74,6 @@ func main() {
 		group.GET("/add_file", func(ctx *gin.Context) {
 			ctx.HTML(http.StatusOK, "addfile.html", gin.H{})
 		})
-		// group.GET("/get_file", GetFile)
 		group.Static("img", "./img")
 	}
 	//管理员页面
@@ -94,13 +89,20 @@ func main() {
 		group.POST("/browse_video/:page", AdminVideoPost)
 		group.POST("/upload_video", UploadVideo)
 	}
-	DBaddMainForum("114514", "1919810", 1, 0)
-	r.Run(":8000") // 8000
+
+	id := DBaddMainForum("说明文本", false, "标题", 1)
+	for i := 0; i < 114; i++ {
+		DBaddComment(strconv.Itoa(i), false, id, 1)
+	}
+
+	
 	// db.Create(&Video{})
 	// var i uint64
 	// for i = 0; i < 114; i++ {
 	// 	db.Create(&Video{})
 	// }
+
+	r.Run(":8000") // 8000
 }
 
 func coffee(c *gin.Context) { //没有人能拒绝愚人节彩蛋
