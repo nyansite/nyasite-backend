@@ -21,10 +21,9 @@ func main() {
 	r := gin.Default()
 	// store := memstore.NewStore([]byte("just_secret"))
 	store := cookie.NewStore([]byte("just_secret")) //不安全但是方便测试,记得清cookie
-	store.Options(sessions.Options{Secure: true, HttpOnly: true})
+	store.Options(sessions.Options{Secure: true, HttpOnly: true, Path: "/"})
 	r.Use(sessions.Sessions("session_id", store))
-	r.LoadHTMLGlob("test/*")
-	r.LoadHTMLGlob("admin/*")
+	r.LoadHTMLGlob("templates/**/*")
 	// TODO csrf防护,需要前端支持
 
 	dbl, dberr := gorm.Open(sqlite.Open("test.db"), &gorm.Config{

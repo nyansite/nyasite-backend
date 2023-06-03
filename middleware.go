@@ -1,9 +1,10 @@
 package main
 
-import(
-	"github.com/gin-gonic/gin"
-	"github.com/gin-contrib/sessions"
+import (
 	"net/http"
+
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-gonic/gin"
 )
 
 func AdminCheck() gin.HandlerFunc {
@@ -15,8 +16,9 @@ func AdminCheck() gin.HandlerFunc {
 		}
 		level := session.Get("level").(uint8)
 		privilege_level := level >> 4
-		if privilege_level <= 15 { //15满级权限才能进入
-			c.AbortWithStatus(http.StatusForbidden) //403
+		if privilege_level < 15 { //15满级权限才能进入
+			c.String(http.StatusForbidden, "梦里啥都有")	//403
+			c.Abort()
 			return
 		}
 	}

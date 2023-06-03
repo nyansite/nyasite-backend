@@ -17,7 +17,7 @@ func NewTag(c *gin.Context) {
 	}
 	level := session.Get("level").(uint)
 	privilege_level := level >> 4
-	if privilege_level <= 10 { //10以上权限能新建tag
+	if privilege_level < 10 { //10以上权限能新建tag
 		c.AbortWithStatus(http.StatusForbidden) //403
 		return
 	}
