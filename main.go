@@ -2,7 +2,7 @@ package main
 
 import (
 	"net/http"
-	"strconv"
+	// "strconv"
 
 	"github.com/gin-contrib/cors"
 
@@ -27,7 +27,7 @@ func main() {
 	r.LoadHTMLGlob("admin/*")
 	// TODO csrf防护,需要前端支持
 
-	dbl, dberr := gorm.Open(sqlite.Open("test.sqlite3"), &gorm.Config{ //方便调试
+	dbl, dberr := gorm.Open(sqlite.Open("test.db"), &gorm.Config{
 		PrepareStmt: true, //执行任何 SQL 时都创建并缓存预编译语句，可以提高后续的调用速度
 	})
 	db = dbl
@@ -78,6 +78,7 @@ func main() {
 	}
 	//管理员页面
 	group = r.Group("/admin")
+	group.Use(AdminCheck())
 	{
 		group.GET("/browse_video/", func(ctx *gin.Context) {
 			ctx.HTML(http.StatusOK, "browsevideo.html", gin.H{})
@@ -90,10 +91,10 @@ func main() {
 		group.POST("/upload_video", UploadVideo)
 	}
 
-	id := DBaddMainForum("说明文本", false, "标题", 1)
-	for i := 0; i < 114; i++ {
-		DBaddComment(strconv.Itoa(i), false, id, 1)
-	}
+	// id := DBaddMainForum("说明文本", false, "标题", 1)
+	// for i := 0; i < 114; i++ {
+	// 	DBaddComment(strconv.Itoa(i), false, id, 1)
+	// }
 
 	
 	// db.Create(&Video{})

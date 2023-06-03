@@ -25,15 +25,13 @@ type User struct {
 	Name   string `gorm:"unique"`
 	Passwd []byte
 	Email  string `gorm:"unique"`
-	Level  uint   //4位权限4位等级,所以满级15
+	Level  uint8   `gorm:"default:0"` //4位权限4位等级,所以满级15(要不了这么多)
 }
 
 type Video struct { //获取视频和获取评论分开
 	Model
-	// VideoLink string 	//ipfs files 有文件名,可以指向uid,所以不需要这个了
-	// ImgLink string
 	Title       string         `gorm:"default:芝士标题"`
-	Description string         `gorm:"default:简介不见惹"`    //芝士简介
+	Description string         `gorm:"default:简介不见惹"`
 	CommentP    []VideoComment `gorm:"ForeignKey:Vid"`   //评论
 	Tag         []uint         `gorm:"index;type:bytes"` //tag的id
 	likes       uint           `gorm:"default:0"`        //芝士点赞数量
@@ -82,16 +80,4 @@ type ForumComment struct {
 	Text   string
 	IsMD   bool `gorm:"default:false"` //t:markdown,f:str
 	Author uint
-	// Likes  uint `gorm:"default:0"` //芝士点赞数量		//论坛要个锤子点赞
-}
-
-// 这个要重构,先摸了
-type VideoPreviewRequire struct {
-	Model
-	CoverFile string
-	VideoFile string
-	Title     string
-	Up        uint
-	Pass      uint
-	Profile   string
 }
