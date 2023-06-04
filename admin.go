@@ -1,13 +1,11 @@
 package main
 
 import (
-	"fmt"
+	
 	"github.com/gin-gonic/gin"
 	UUID "github.com/google/uuid"
-	ffmpeg "github.com/u2takey/ffmpeg-go"
 	"math"
 	"net/http"
-	"os"
 	"path"
 	"strconv"
 )
@@ -44,30 +42,4 @@ func UploadVideo(c *gin.Context) {
 	fpath := "./temporary/" + uuid.String() + path.Ext(f.Filename)
 	c.SaveUploadedFile(f, fpath)
 	go SaveVideo(fpath, title, description, uuid.String())
-
-}
-
-func SaveVideo(src string, title string, description string, uuid string) {
-	var video Video
-	video.Title = title
-	video.Description = description
-	video.Views = 0
-	db.Create(&video)
-	err := ffmpeg.Input(src).Output(src+".mp4", ffmpeg.KwArgs{"c:v": "libsvtav1"}).Run() //cpu软解
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	os.Mkdir("./temporary/"+uuid, os.ModePerm)
-	err = ffmpeg.Input(src+".mp4").Output("./temporary/"+uuid+"/w.m3u8", ffmpeg.KwArgs{
-		// "codec":         "copy",		//只有音频,原因未知
-		"start_number":  0,
-		"hls_list_size": 0,
-		"hls_time":      5,
-		"f":             "hls",
-	}).Run() //cpu软解
-	err = Addpath("./temporary/"+uuid, "/video/"+strconv.Itoa(int(video.ID)))
-	if err != nil {
-		fmt.Println(err)
-	}
 }

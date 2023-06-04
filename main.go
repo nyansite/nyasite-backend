@@ -1,12 +1,16 @@
 package main
 
 import (
-	"net/http"
-	// "strconv"
+	"context"
+	"fmt"
 
 	"github.com/gin-contrib/cors"
 
+	"net/http"
+
 	"github.com/gin-contrib/sessions"
+	"github.com/redis/go-redis/v9"
+
 	// "github.com/gin-contrib/sessions/memstore"
 	"time"
 
@@ -16,8 +20,12 @@ import (
 	"gorm.io/gorm"
 )
 
-var db *gorm.DB
-var Tags []string
+var(
+	db *gorm.DB
+	Tags []string
+	rdb *redis.Client
+)
+
 
 func main() {
 	r := gin.Default()
@@ -35,8 +43,19 @@ func main() {
 	if dberr != nil {
 		panic("我数据库呢???我那么大一个数据库呢???还我数据库!!!")
 	}
-	db.AutoMigrate(&User{}, &Video{}, &VideoComment{}, &Tag{},
-		&Forum{}, &ForumComment{}) //实际上的作用是创建表
+	db.AutoMigrate(&User{}, &Video{}, &VideoComment{}, &Tag{}, &Forum{}, &ForumComment{}) //实际上的作用是创建表
+
+	rdb = redis.NewClient(&redis.Options{
+		Addr:	  "localhost:6379",
+		Password: "", // no password set
+		DB:		  0,  // use default DB
+	})
+	_, err := rdb.Ping(context.Background()).Result()
+	if err != nil {
+		fmt.Println("redis坏掉了😵")
+		panic(err)
+	}
+
 	group := r.Group("/api")
 	{
 		group.GET("/user_status", GetSelfUserData)
@@ -91,17 +110,17 @@ func main() {
 		group.POST("/upload_video", UploadVideo)
 	}
 
-	// id := DBaddMainForum("说明文本", false, "标题", 1)
-	// for i := 0; i < 114; i++ {
-	// 	DBaddComment(strconv.Itoa(i), false, id, 1)
-	// }
-
 	// db.Create(&Video{})
 	// var i uint64
 	// for i = 0; i < 114; i++ {
 	// 	db.Create(&Video{})
 	// }
-
+	rdb.Set(context.Background(), "1", 100, 0)
+	val, err := rdb.Get(context.Background(), "1").Result()
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("返回", val)
 	r.Run(":8000") // 8000
 }
 

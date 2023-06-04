@@ -6,7 +6,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
-	
+
+	ffmpeg "github.com/u2takey/ffmpeg-go"
+	"os"
 )
 
 func NewTag(c *gin.Context) {
@@ -31,10 +33,10 @@ func NewTag(c *gin.Context) {
 }
 
 func GetVideoComment(c *gin.Context) {
-	strid := c.Param("id")	
+	strid := c.Param("id")
 	spg := c.Param("pg")
 	sid, err := strconv.Atoi(strid)
-	id := uint(sid)//视频id
+	id := uint(sid) //视频id
 	if err != nil {
 		c.AbortWithStatus(http.StatusBadRequest) //返回400
 		return
@@ -99,3 +101,30 @@ func AddComment(c *gin.Context) {
 	// }
 }
 
+func SaveVideo(src string, title string, description string, uuid string) {
+	var video Video
+	video.Title = title
+	video.Description = description
+	video.Views = 0
+	db.Create(&video)
+	err := ffmpeg.Input(src).Output(src+".mp4", ffmpeg.KwArgs{
+		// "c:v": "libsvtav1",
+	}).Run()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	os.Mkdir("./temporary/"+uuid, os.ModePerm)
+	err = ffmpeg.Input(src+".mp4").Output("./temporary/"+uuid+"/w.m3u8", ffmpeg.KwArgs{
+		// "codec":         "copy",		//只有音频,原因未知
+		"start_number":  0,
+		"hls_list_size": 0,
+		"hls_time":      5,
+		"f":             "hls",
+	}).Run()
+	err = Addpath("./temporary/"+uuid, "/video/"+strconv.Itoa(int(video.ID)))
+	if err != nil {
+		fmt.Println(err)
+	}
+
+}
