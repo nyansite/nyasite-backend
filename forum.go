@@ -1,16 +1,16 @@
 package main
 
 func DBaddMainForum(text string, title string, author uint, ismd bool) {
-	mainForum := Forum{Title: title, Author: author}
-	mainForum.Comment = append(mainForum.Comment, ForumComment{Text: text, Author: author, IsMD: ismd})
-	db.Create(&mainForum)
+	forum := Forum{Title: title, Author: author}
+	forum.Comment = append(forum.Comment, ForumComment{Text: text, Author: author, IsMD: ismd})
+	db.Insert(&forum)
 	return
 }
 
 func DBaddUtilForum(text string, fid uint, author uint, ismd bool) {
-	var mainForum Forum
-	db.Take(&mainForum, fid)
-	mainForum.Comment = append(mainForum.Comment, ForumComment{Text: text, IsMD: ismd, Author: author})
-	db.Save(&mainForum)
+	var forum Forum
+	db.ID(fid).Get(&forum)
+	forum.Comment = append(forum.Comment, ForumComment{Text: text, IsMD: ismd, Author: author})
+	db.Update(&forum)
 	return
 }

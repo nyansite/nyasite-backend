@@ -1,7 +1,6 @@
 package main
 
 import (
-	
 	"github.com/gin-gonic/gin"
 	UUID "github.com/google/uuid"
 	"math"
@@ -20,8 +19,12 @@ func AdminVideoPost(ctx *gin.Context) {
 	var videos []Video
 	var count int64 //总数,Count比rowsaffected更快(懒得用变量缓存了
 	pg -= 1
-	db.Model(&Video{}).Count(&count)
-	db.Limit(20).Offset(pg * 20).Find(&videos)
+	count, err = db.Count(&videos)
+	if err != nil{
+		ctx.AbortWithStatus(http.StatusInternalServerError) //500,正常情况下不会出现
+		return
+	}
+	db.Limit(20, pg*20).Find(&videos)
 	ctx.JSON(http.StatusOK, gin.H{
 		"Body":      videos,
 		"PageCount": math.Ceil(float64(count) / 20), //总页数

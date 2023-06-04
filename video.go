@@ -24,11 +24,11 @@ func NewTag(c *gin.Context) {
 		return
 	}
 	tagname := c.PostForm("tagname")
-	if db.Take(&Tag{}, "Text = ?", tagname).RowsAffected != 0 {
+	if has, _ :=db.Exist(&Tag{Text: tagname}); has == true {
 		c.AbortWithStatus(StatusRepeatTag)
 		return
 	}
-	db.Create(&Tag{Text: tagname})
+	db.Insert(&Tag{Text: tagname})
 	c.AbortWithStatus(http.StatusOK)
 }
 
@@ -48,7 +48,8 @@ func GetVideoComment(c *gin.Context) {
 	}
 	var comments []VideoComment
 	// db.Preload("CommentPage", "Count = ?", pg).Preload("Cid = 0 OR (Count < 3)").First(&video, id)
-	db.Limit(3).Order("likes").Preload("VideoCommentReply").Limit(20).Offset(pg-1).Where("Vid = ?", id).Find(&comments)
+	// db.Limit(3).Order("likes").Preload("VideoCommentReply").Limit(20).Offset(pg-1).Where("Vid = ?", id).Find(&comments)
+	db.Desc("Likes").Limit(20, (pg-1)*20).Where("Vid = ?", id).Find(&comments)
 	fmt.Println(&comments)
 }
 
@@ -106,7 +107,7 @@ func SaveVideo(src string, title string, description string, uuid string) {
 	video.Title = title
 	video.Description = description
 	video.Views = 0
-	db.Create(&video)
+	db.Insert(&video)
 	err := ffmpeg.Input(src).Output(src+".mp4", ffmpeg.KwArgs{
 		// "c:v": "libsvtav1",
 	}).Run()

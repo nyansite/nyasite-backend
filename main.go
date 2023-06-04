@@ -15,12 +15,12 @@ import (
 
 	sred "github.com/gin-contrib/sessions/redis"
 	"github.com/gin-gonic/gin"
-	"gorm.io/driver/sqlite"
-	"gorm.io/gorm"
+	_ "github.com/mattn/go-sqlite3"
+	"xorm.io/xorm"
 )
 
 var(
-	db *gorm.DB
+	db *xorm.Engine
 	Tags []string
 	rdb *redis.Client
 )
@@ -34,18 +34,20 @@ func main() {
 		fmt.Println("redis坏掉了😵")
 		panic(err)
 	}
-	store.Options(sessions.Options{Secure: true, HttpOnly: true, Path: "/", MaxAge: 3000000})
+	store.Options(sessions.Options{
+		Secure: true, 		//跟下面那条基本上可以防住csrf了,但是还是稳一点好
+		HttpOnly: true, 
+		Path: "/", 
+		MaxAge: 3000000})	//大概一个月多一点
 	r.Use(sessions.Sessions("session_id", store))
 	r.LoadHTMLGlob("templates/**/*")
 	// TODO csrf防护,需要前端支持
 
-	db, err = gorm.Open(sqlite.Open("test.sqlite3"), &gorm.Config{
-		PrepareStmt: true, //执行任何 SQL 时都创建并缓存预编译语句，可以提高后续的调用速度
-	})
+	db, err = xorm.NewEngine("sqlite3", "./test.db")
 	if err != nil {
 		panic("我数据库呢???我那么大一个数据库呢???还我数据库!!!")
 	}
-	db.AutoMigrate(&User{}, &Video{}, &VideoComment{}, &Tag{}, &Forum{}, &ForumComment{}) //实际上的作用是创建表
+	db.Sync(&User{}, &Video{}, &VideoComment{}, &Tag{}, &Forum{}, &ForumComment{})
 
 	rdb = redis.NewClient(&redis.Options{
 		Addr:	  "localhost:6379",
@@ -107,11 +109,7 @@ func main() {
 		group.POST("/upload_video", UploadVideo)
 	}
 
-	// db.Create(&Video{})
-	// var i uint64
-	// for i = 0; i < 114; i++ {
-	// 	db.Create(&Video{})
-	// }
+
 	// rdb.Set(context.Background(), "1", 100, 0)
 	// val, err := rdb.Get(context.Background(), "1").Result()
 	// if err != nil {

@@ -1,9 +1,9 @@
 package main
 
 import (
-	"net/http"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"net/http"
 
 	"crypto/rand"
 	"crypto/sha512"
@@ -22,7 +22,7 @@ func GetSelfUserData(c *gin.Context) {
 	}
 	userid := session.Get("userid")
 	level := session.Get("level")
-	db.First(&user, userid)
+	db.ID(userid).Get(&user)
 	mail := user.Email
 	c.JSON(http.StatusOK, gin.H{
 		"userid": userid,
@@ -39,7 +39,7 @@ func GetUserData(c *gin.Context) {
 		return
 	}
 	var user User
-	db.First(&user, nid)
+	db.ID(nid).Get(&user)
 	c.JSON(http.StatusOK, gin.H{
 		"name":  user.Name,
 		"level": user.Level,
@@ -58,7 +58,7 @@ func Login(c *gin.Context) {
 		return
 	}
 	var user User
-	if db.First(&user, "Name = ? OR Email = ?", username, username).RowsAffected == 0 { //用户不存在
+	if has, _ := db.Where("Name = ? OR Email = ?", username, username).Get(&user); has == false { //用户不存在
 		c.Status(StatusUserNameNotExist)
 		return
 	}
@@ -88,17 +88,17 @@ func Register(c *gin.Context) {
 	}
 	//上面判断输入是否合法,下面判断用户是否已经存在
 
-	if db.First(&User{}, "Name = ?", username).RowsAffected != 0 {
+	if has, _ := db.Exist(&User{Name: username}); has == false {
 		c.AbortWithStatus(StatusRepeatUserName)
 		return
 	}
-	if db.First(&User{}, "Email = ?", mail).RowsAffected != 0 {
+	if has, _ := db.Exist(&User{Email: mail}); has == false {
 		c.AbortWithStatus(StatusRepeatEmail)
 		return
 	}
 
 	user := User{Name: username, Passwd: encrypt_passwd([]byte(passwd)), Email: mail}
-	db.Create(&user)
+	db.Insert(&user)
 	c.AbortWithStatus(http.StatusOK)
 }
 
