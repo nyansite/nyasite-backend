@@ -17,6 +17,7 @@ import (
 )
 
 var db *gorm.DB
+var Tags []string
 
 func main() {
 	r := gin.Default()

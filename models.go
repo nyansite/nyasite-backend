@@ -36,8 +36,10 @@ type Video struct { //获取视频和获取评论分开
 	Tag         []uint         `gorm:"index;type:bytes"` //tag的id
 	likes       uint           `gorm:"default:0"`        //芝士点赞数量
 	Views       uint           `gorm:"default:0"`        //这是播放量
+	Author      uint           `gorm:"index"`            //作者/上传者
 }
 
+//Tags切片存一样的数据
 type Tag struct {
 	ID        uint `gorm:"primarykey"`
 	CreatedAt int
@@ -49,18 +51,19 @@ type VideoComment struct {
 	Vid     uint `gorm:"index"` //所属页面的id
 	Text    string
 	IsMD    bool                `gorm:"default:false"` //t:markdown,f:str
-	Author  uint                //发表评论的用户
-	likes   uint                `gorm:"default:0"` //芝士点赞数量
+	Author  uint                `gorm:"index"`         //发表评论的用户
+	likes   uint                `gorm:"default:0"`     //芝士点赞数量
 	Comment []VideoCommentReply `gorm:"ForeignKey:Cid"`
 }
+
 type VideoCommentReply struct { //楼中楼的回复.......
 	Model
-	Cid     uint `gorm:"index"` //楼中楼上一层的id
+	Cid     uint `gorm:"index"` //楼中楼上一层的id,自动生成
 	Text    string
-	IsMD    bool `gorm:"default:false"` //t:markdown,f:str
-	Author  uint
+	IsMD    bool                `gorm:"default:false"` //t:markdown,f:str
+	Author  uint                `gorm:"index"`
 	likes   uint                `gorm:"default:0"` //芝士点赞数量
-	Comment []VideoCommentReply `gorm:"ForeignKey:Cid"`
+	Comment []VideoCommentReply `gorm:"ForeignKey:Cid"`//楼中楼中楼...
 }
 
 // 论坛部分
@@ -68,10 +71,10 @@ type VideoCommentReply struct { //楼中楼的回复.......
 
 type Forum struct { //获取视频和获取评论分开
 	Model
-	Title   string
+	Title   string         
 	Comment []ForumComment `gorm:"ForeignKey:Mid"` //评论
 	Views   uint           `gorm:"default:0"`      //这是播放量
-	Author  uint
+	Author  uint           `gorm:"index"`
 }
 
 type ForumComment struct {
@@ -79,5 +82,6 @@ type ForumComment struct {
 	Mid    uint `gorm:"index"` //所属页面的id
 	Text   string
 	IsMD   bool `gorm:"default:false"` //t:markdown,f:str
-	Author uint
+	Author uint `gorm:"index"`
+	// Emoji  []uint `gorm:"type:bytes"`	//先摸了
 }
