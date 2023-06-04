@@ -50,7 +50,7 @@ type VideoComment struct {
 	Text    string
 	IsMD    bool                `gorm:"default:false"` //t:markdown,f:str
 	Author  uint                //发表评论的用户
-	likes   uint                //芝士点赞数量
+	likes   uint                `gorm:"default:0"` //芝士点赞数量
 	Comment []VideoCommentReply `gorm:"ForeignKey:Cid"`
 }
 type VideoCommentReply struct { //楼中楼的回复.......
@@ -59,35 +59,25 @@ type VideoCommentReply struct { //楼中楼的回复.......
 	Text    string
 	IsMD    bool `gorm:"default:false"` //t:markdown,f:str
 	Author  uint
-	likes   uint                //芝士点赞数量
+	likes   uint                `gorm:"default:0"` //芝士点赞数量
 	Comment []VideoCommentReply `gorm:"ForeignKey:Cid"`
 }
 
 // 论坛部分
 // 不需要楼中楼,直接引用
 
-type MainForum struct { //获取视频和获取评论分开
+type Forum struct { //获取视频和获取评论分开
 	Model
-	Title  string
-	UnitP  []UnitForum `gorm:"ForeignKey:Mid"` //评论
-	Views  uint        //这是播放量
-	Author uint
+	Title   string
+	Comment []ForumComment `gorm:"ForeignKey:Mid"` //评论
+	Views   uint           `gorm:"default:0"`      //这是播放量
+	Author  uint
 }
 
-type UnitForum struct {
+type ForumComment struct {
 	Model
-	Mid      uint `gorm:"index"` //所属页面的id
-	Cid      uint //引用
-	Text     string
-	IsMD     bool `gorm:"default:false"` //t:markdown,f:str
-	Author   uint
-	Likes    uint      //芝士点赞数量
-	Dislikes uint      //这是点踩数量
-	CommentP []Comment `gorm:"ForeignKey:Uid"`
-}
-type Comment struct { //楼中楼的回复.......
-	Model
+	Mid    uint `gorm:"index"` //所属页面的id
 	Text   string
-	Uid    uint `gorm:"index"`
+	IsMD   bool `gorm:"default:false"` //t:markdown,f:str
 	Author uint
 }
