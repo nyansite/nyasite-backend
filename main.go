@@ -115,12 +115,12 @@ func main() {
 	// for i = 0; i < 114; i++ {
 	// 	db.Create(&Video{})
 	// }
-	rdb.Set(context.Background(), "1", 100, 0)
-	val, err := rdb.Get(context.Background(), "1").Result()
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println("返回", val)
+	// rdb.Set(context.Background(), "1", 100, 0)
+	// val, err := rdb.Get(context.Background(), "1").Result()
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// fmt.Println("返回", val)
 	r.Run(":8000") // 8000
 }
 
