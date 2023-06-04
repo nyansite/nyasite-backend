@@ -8,11 +8,12 @@ import (
 
 	"github.com/gin-contrib/sessions"
 	// "github.com/gin-contrib/sessions/memstore"
+	"time"
+
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
-	"time"
 )
 
 var db *gorm.DB
@@ -26,7 +27,7 @@ func main() {
 	r.LoadHTMLGlob("templates/**/*")
 	// TODO csrf防护,需要前端支持
 
-	dbl, dberr := gorm.Open(sqlite.Open("test.db"), &gorm.Config{
+	dbl, dberr := gorm.Open(sqlite.Open("test.sqlite3"), &gorm.Config{
 		PrepareStmt: true, //执行任何 SQL 时都创建并缓存预编译语句，可以提高后续的调用速度
 	})
 	db = dbl
@@ -34,8 +35,7 @@ func main() {
 		panic("我数据库呢???我那么大一个数据库呢???还我数据库!!!")
 	}
 	db.AutoMigrate(&User{}, &Video{}, &VideoComment{}, &Tag{},
-		&Forum{}, &ForumComment{}) //实际上的作用是创建表
-
+		&MainForum{}, &UnitForum{}, &Comment{}) //实际上的作用是创建表
 	group := r.Group("/api")
 	{
 		group.GET("/user_status", GetSelfUserData)
@@ -95,7 +95,6 @@ func main() {
 	// 	DBaddComment(strconv.Itoa(i), false, id, 1)
 	// }
 
-	
 	// db.Create(&Video{})
 	// var i uint64
 	// for i = 0; i < 114; i++ {
