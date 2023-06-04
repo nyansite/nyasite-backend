@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/gin-contrib/cors"
@@ -14,7 +13,7 @@ import (
 	// "github.com/gin-contrib/sessions/memstore"
 	"time"
 
-	"github.com/gin-contrib/sessions/cookie"
+	sred "github.com/gin-contrib/sessions/redis"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -29,18 +28,21 @@ var(
 
 func main() {
 	r := gin.Default()
-	// store := memstore.NewStore([]byte("just_secret"))
-	store := cookie.NewStore([]byte("just_secret")) //不安全但是方便测试,记得清cookie
-	store.Options(sessions.Options{Secure: true, HttpOnly: true, Path: "/"})
+	// store := cookie.NewStore([]byte("just_secret")) //不安全但是方便测试,记得清cookie
+	store, err := sred.NewStore(10, "tcp", "localhost:6379", "", []byte("secret"))
+	if err != nil {
+		fmt.Println("redis坏掉了😵")
+		panic(err)
+	}
+	store.Options(sessions.Options{Secure: true, HttpOnly: true, Path: "/", MaxAge: 3000000})
 	r.Use(sessions.Sessions("session_id", store))
 	r.LoadHTMLGlob("templates/**/*")
 	// TODO csrf防护,需要前端支持
 
-	dbl, dberr := gorm.Open(sqlite.Open("test.sqlite3"), &gorm.Config{
+	db, err = gorm.Open(sqlite.Open("test.sqlite3"), &gorm.Config{
 		PrepareStmt: true, //执行任何 SQL 时都创建并缓存预编译语句，可以提高后续的调用速度
 	})
-	db = dbl
-	if dberr != nil {
+	if err != nil {
 		panic("我数据库呢???我那么大一个数据库呢???还我数据库!!!")
 	}
 	db.AutoMigrate(&User{}, &Video{}, &VideoComment{}, &Tag{}, &Forum{}, &ForumComment{}) //实际上的作用是创建表
@@ -50,11 +52,6 @@ func main() {
 		Password: "", // no password set
 		DB:		  0,  // use default DB
 	})
-	_, err := rdb.Ping(context.Background()).Result()
-	if err != nil {
-		fmt.Println("redis坏掉了😵")
-		panic(err)
-	}
 
 	group := r.Group("/api")
 	{
