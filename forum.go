@@ -21,7 +21,7 @@ func DBaddUtilForum(text string, mid uint, cid uint, author uint, ismd bool) {
 func DBaddComment(text string, uid uint, author uint) {
 	var unitForum UnitForum
 	db.Last(&unitForum, uid)
-	unitForum.CommentP = append(unitForum.CommentP, Comment{Text: text, Uid: uid, Likes: 0})
+	unitForum.CommentP = append(unitForum.CommentP, Comment{Text: text, Uid: uid, Author: author})
 	db.Save(&unitForum)
 	return
 }

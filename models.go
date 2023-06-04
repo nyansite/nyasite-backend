@@ -88,9 +88,6 @@ type UnitForum struct {
 type Comment struct { //楼中楼的回复.......
 	Model
 	Text   string
-	Uid    uint `gorm:"index"`         //楼中楼上一层的id
-	IsMD   bool `gorm:"default:false"` //t:markdown,f:str
-	Type   uint8
+	Uid    uint `gorm:"index"`
 	Author uint
-	Likes  uint //芝士点赞数量
 }
