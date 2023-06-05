@@ -1,9 +1,11 @@
 package main
 
 import (
+	"fmt"
+	"net/http"
+
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
-	"net/http"
 
 	"crypto/rand"
 	"crypto/sha512"
@@ -88,17 +90,20 @@ func Register(c *gin.Context) {
 	}
 	//上面判断输入是否合法,下面判断用户是否已经存在
 
-	if has, _ := db.Exist(&User{Name: username}); has == false {
+	if has, _ := db.Exist(&User{Name: username}); has == true {
 		c.AbortWithStatus(StatusRepeatUserName)
 		return
 	}
-	if has, _ := db.Exist(&User{Email: mail}); has == false {
+	if has, _ := db.Exist(&User{Email: mail}); has == true {
 		c.AbortWithStatus(StatusRepeatEmail)
 		return
 	}
 
 	user := User{Name: username, Passwd: encrypt_passwd([]byte(passwd)), Email: mail}
-	db.Insert(&user)
+	_, err := db.Insert(&user)
+	if err != nil {
+		fmt.Println(err)
+	}
 	c.AbortWithStatus(http.StatusOK)
 }
 

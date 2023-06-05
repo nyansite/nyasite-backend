@@ -17,6 +17,7 @@ import (
 	"github.com/gin-gonic/gin"
 	_ "github.com/mattn/go-sqlite3"
 	"xorm.io/xorm"
+	xcaches"xorm.io/xorm/caches"
 )
 
 var(
@@ -48,7 +49,7 @@ func main() {
 		panic("我数据库呢???我那么大一个数据库呢???还我数据库!!!")
 	}
 	db.Sync(&User{}, &Video{}, &VideoComment{}, &Tag{}, &Forum{}, &ForumComment{})
-
+	db.SetDefaultCacher(xcaches.NewLRUCacher(xcaches.NewMemoryStore(), 1000))
 	rdb = redis.NewClient(&redis.Options{
 		Addr:	  "localhost:6379",
 		Password: "", // no password set
