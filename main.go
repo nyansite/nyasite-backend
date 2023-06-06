@@ -1,40 +1,30 @@
 package main
 
 import (
-	"fmt"
-
-	"github.com/gin-contrib/cors"
-
 	"net/http"
-
-	"github.com/gin-contrib/sessions"
-	"github.com/redis/go-redis/v9"
-
-	// "github.com/gin-contrib/sessions/memstore"
 	"time"
 
-	sred "github.com/gin-contrib/sessions/redis"
+	"github.com/gin-contrib/cors"
+	"github.com/gin-contrib/sessions"
+	// "github.com/gin-contrib/sessions/memstore"
+	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 	_ "github.com/mattn/go-sqlite3"
 	"xorm.io/xorm"
-	xcaches"xorm.io/xorm/caches"
+	xcach "xorm.io/xorm/caches"
+	"xorm.io/xorm/log"
 )
 
 var(
 	db *xorm.Engine
-	Tags []string
-	rdb *redis.Client
 )
 
 
 func main() {
 	r := gin.Default()
-	// store := cookie.NewStore([]byte("just_secret")) //不安全但是方便测试,记得清cookie
-	store, err := sred.NewStore(10, "tcp", "localhost:6379", "", []byte("secret"))
-	if err != nil {
-		fmt.Println("redis坏掉了😵")
-		panic(err)
-	}
+	store := cookie.NewStore([]byte("just_secret")) //不安全但是方便测试,记得清cookie
+	// store := memstore.NewStore([]byte("secret"))
+
 	store.Options(sessions.Options{
 		Secure: true, 		//跟下面那条基本上可以防住csrf了,但是还是稳一点好
 		HttpOnly: true, 
@@ -43,18 +33,14 @@ func main() {
 	r.Use(sessions.Sessions("session_id", store))
 	r.LoadHTMLGlob("templates/**/*")
 	// TODO csrf防护,需要前端支持
-
+	var err error
 	db, err = xorm.NewEngine("sqlite3", "./test.db")
 	if err != nil {
 		panic("我数据库呢???我那么大一个数据库呢???还我数据库!!!")
 	}
+	db.Logger().SetLevel(log.LOG_INFO)
 	db.Sync(&User{}, &Video{}, &VideoComment{}, &Tag{}, &Forum{}, &ForumComment{})
-	db.SetDefaultCacher(xcaches.NewLRUCacher(xcaches.NewMemoryStore(), 1000))
-	rdb = redis.NewClient(&redis.Options{
-		Addr:	  "localhost:6379",
-		Password: "", // no password set
-		DB:		  0,  // use default DB
-	})
+	db.SetDefaultCacher(xcach.NewLRUCacher(xcach.NewMemoryStore(), 1000))
 
 	group := r.Group("/api")
 	{

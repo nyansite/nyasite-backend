@@ -14,7 +14,7 @@ const (
 )
 
 type User struct {
-	ID        uint   //xorm自动主键
+	Id        int64   //xorm自动主键
 	CreatedAt int    `xorm:"created"` //使用时间戳而非time.time(字符串)
 	UpdatedAt int    `xorm:"updated"`
 	DeletedAt int    `xorm:"deleted"` //用模型本身的id
@@ -25,28 +25,28 @@ type User struct {
 }
 
 type Video struct { //获取视频和获取评论分开
-	ID          uint           //xorm自动主键
-	CreatedAt   int            `xorm:"created"` //使用时间戳而非time.time(字符串)
-	UpdatedAt   int            `xorm:"updated"`
-	DeletedAt   int            `xorm:"deleted"`
-	Title       string         `xorm:"default:芝士标题"`
-	Description string         `xorm:"default:简介不见惹"`
-	CommentP    []VideoComment `gorm:"ForeignKey:Vid"` //评论
-	Tag         []uint         `xorm:"index"`          //tag的id
-	likes       uint           `xorm:"default 0"`      //芝士点赞数量
-	Views       uint           `xorm:"default 0"`      //这是播放量
-	Author      uint           `xorm:"index"`          //作者/上传者
+	Id          int64   //xorm自动主键
+	CreatedAt   int    `xorm:"created"` //使用时间戳而非time.time(字符串)
+	UpdatedAt   int    `xorm:"updated"`
+	DeletedAt   int    `xorm:"deleted"`
+	Title       string `xorm:"default '芝士标题'"`
+	Description string `xorm:"default '简介不见惹'"`
+	// CommentP    []VideoComment `gorm:"ForeignKey:Vid"` //评论
+	Tag    []uint `xorm:"index"`     //tag的id
+	likes  uint   `xorm:"default 0"` //芝士点赞数量
+	Views  uint   `xorm:"default 0"` //这是播放量
+	Author uint   `xorm:"index"`     //作者/上传者
 }
 
 // Tags切片存一样的数据
 type Tag struct {
-	ID        uint   //xorm自动主键
+	Id        int64   //xorm自动主键
 	CreatedAt int    `xorm:"created"`
 	Text      string `gorm:"unique"`
 }
 
 type VideoComment struct {
-	ID        uint //xorm自动主键
+	Id        int64 //xorm自动主键
 	CreatedAt int  `xorm:"created"` //使用时间戳而非time.time(字符串)
 	UpdatedAt int  `xorm:"updated"`
 	DeletedAt int  `xorm:"deleted"`
@@ -59,7 +59,7 @@ type VideoComment struct {
 }
 
 type VideoCommentReply struct { //楼中楼的回复.......
-	ID        uint //xorm自动主键
+	Id        int64 //xorm自动主键
 	CreatedAt int  `xorm:"created"` //使用时间戳而非time.time(字符串)
 	UpdatedAt int  `xorm:"updated"`
 	DeletedAt int  `xorm:"deleted"`
@@ -75,7 +75,7 @@ type VideoCommentReply struct { //楼中楼的回复.......
 // 不需要楼中楼,直接引用
 
 type Forum struct { //获取视频和获取评论分开
-	ID        uint //xorm自动主键
+	Id        int64 //xorm自动主键
 	CreatedAt int  `xorm:"created"` //使用时间戳而非time.time(字符串)
 	UpdatedAt int  `xorm:"updated"`
 	DeletedAt int  `xorm:"deleted"`
@@ -86,7 +86,7 @@ type Forum struct { //获取视频和获取评论分开
 }
 
 type ForumComment struct {
-	ID        uint //xorm自动主键
+	Id        int64 //xorm自动主键
 	CreatedAt int  `xorm:"created"` //使用时间戳而非time.time(字符串)
 	UpdatedAt int  `xorm:"updated"`
 	DeletedAt int  `xorm:"deleted"`

@@ -123,7 +123,7 @@ func SaveVideo(src string, title string, description string, uuid string) {
 		"hls_time":      5,
 		"f":             "hls",
 	}).Run()
-	err = Addpath("./temporary/"+uuid, "/video/"+strconv.Itoa(int(video.ID)))
+	err = Addpath("./temporary/"+uuid, "/video/"+strconv.Itoa(int(video.Id)))
 	if err != nil {
 		fmt.Println(err)
 	}

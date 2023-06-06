@@ -41,7 +41,9 @@ func GetUserData(c *gin.Context) {
 		return
 	}
 	var user User
-	db.ID(nid).Get(&user)
+	has, err:=db.ID(nid).Get(&user)
+	fmt.Println(has)
+	fmt.Println(has)
 	c.JSON(http.StatusOK, gin.H{
 		"name":  user.Name,
 		"level": user.Level,
@@ -69,7 +71,7 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	session.Set("userid", user.ID)
+	session.Set("userid", user.Id)
 	session.Set("is_login", true)
 	session.Set("level", user.Level)
 	session.Save()

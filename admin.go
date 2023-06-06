@@ -1,12 +1,14 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
-	UUID "github.com/google/uuid"
+	"fmt"
 	"math"
 	"net/http"
 	"path"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
+	UUID "github.com/google/uuid"
 )
 
 func AdminVideoPost(ctx *gin.Context) {
@@ -19,9 +21,10 @@ func AdminVideoPost(ctx *gin.Context) {
 	var videos []Video
 	var count int64 //总数,Count比rowsaffected更快(懒得用变量缓存了
 	pg -= 1
-	count, err = db.Count(&videos)
+	count, err = db.Count(&Video{})
 	if err != nil{
 		ctx.AbortWithStatus(http.StatusInternalServerError) //500,正常情况下不会出现
+		fmt.Println(err)
 		return
 	}
 	db.Limit(20, pg*20).Find(&videos)
