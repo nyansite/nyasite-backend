@@ -17,7 +17,7 @@ func GetSelfUserData(c *gin.Context) {
 
 	session := sessions.Default(c)
 	var user User
-
+	
 	if session.Get("is_login") != true {
 		c.AbortWithStatus(http.StatusUnauthorized) //返回401
 		return
@@ -26,6 +26,10 @@ func GetSelfUserData(c *gin.Context) {
 	level := session.Get("level")
 	db.ID(userid).Get(&user)
 	mail := user.Email
+
+	session.Flashes()	//重新set cookie,使得cookie生命周期重置,但是值不会重置
+	session.Save()
+
 	c.JSON(http.StatusOK, gin.H{
 		"userid": userid,
 		"mail":   mail,

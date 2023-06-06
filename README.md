@@ -56,3 +56,11 @@
 |/video|视频|{%videoid}.m3u8, av1+brotli|
 <!-- |/temporary|临时文件|
 |/temporary/video/{%date}/{%uuid}|未审核的视频| -->
+
+## session
+
+|键|说明|
+|---|---|
+|is_login|登录为true|
+|userid|
+|level|虽然存储的是字符串但是请当作uint8使用awa 4b权限4b经验|
