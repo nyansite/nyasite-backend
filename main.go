@@ -3,8 +3,6 @@ package main
 import (
 	"net/http"
 	"time"
-
-	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/sessions"
 	// "github.com/gin-contrib/sessions/memstore"
 	"github.com/gin-contrib/sessions/cookie"
@@ -22,6 +20,7 @@ var(
 
 func main() {
 	r := gin.Default()
+
 	store := cookie.NewStore([]byte("just_secret")) //不安全但是方便测试,记得清cookie
 	// store := memstore.NewStore([]byte("secret"))
 
@@ -58,14 +57,6 @@ func main() {
 		group.POST("/add_comment", AddComment)
 		group.POST("/upload_video", UploadVideo)
 	}
-	config := cors.Config{
-		AllowOrigins: []string{"https://127.0.0.1"}, //只允许本地访问
-	} //这个是不允许远程的
-	group = r.Group("/uapi") //不安全的api,能够操作数据库的所有数据
-	group.Use(cors.New(config))
-	{
-
-	}
 
 	group = r.Group("/test")
 	{
@@ -81,7 +72,6 @@ func main() {
 		group.GET("/add_file", func(ctx *gin.Context) {
 			ctx.HTML(http.StatusOK, "addfile.html", gin.H{})
 		})
-		group.Static("img", "./img")
 	}
 	//管理员页面
 	group = r.Group("/admin")
