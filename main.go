@@ -1,9 +1,9 @@
 package main
 
 import (
+	"github.com/gin-contrib/sessions"
 	"net/http"
 	"time"
-	"github.com/gin-contrib/sessions"
 	// "github.com/gin-contrib/sessions/memstore"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
@@ -13,26 +13,29 @@ import (
 	"xorm.io/xorm/log"
 )
 
-var(
+var (
 	db *xorm.Engine
 )
 
-
 func main() {
 	r := gin.Default()
+	
+	// config := cors.DefaultConfig()
+	// config.AllowOrigins = []string{"http://google.com"}	//允许访问信息的第三方,比如说广告供应商
+	// config.AllowCredentials = true	//cookie一并发给跨域请求
+	// r.Use(cors.New(config))
 
 	store := cookie.NewStore([]byte("just_secret")) //不安全但是方便测试,记得清cookie
 	// store := memstore.NewStore([]byte("secret"))
 
 	store.Options(sessions.Options{
-		Secure: true, 		//跟下面那条基本上可以防住csrf了,但是还是稳一点好
-		HttpOnly: true, 
-		Path: "/", 
-		MaxAge: 1000000})	//大概不到12d
+		Secure:   true, //跟下面那条基本上可以防住csrf了,但是还是稳一点好
+		HttpOnly: true,
+		Path:     "/",
+		MaxAge:   1000000}) //大概不到12d
 	r.Use(sessions.Sessions("session_id", store))
 	r.LoadHTMLGlob("templates/**/*")
 	// TODO csrf防护,需要前端支持
-
 
 	var err error
 	db, err = xorm.NewEngine("sqlite3", "./test.db")
@@ -87,7 +90,6 @@ func main() {
 		group.POST("/browse_video/:page", AdminVideoPost)
 		group.POST("/upload_video", UploadVideo)
 	}
-
 
 	r.Run(":8000") // 8000
 }
