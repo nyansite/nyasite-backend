@@ -19,7 +19,7 @@ var (
 
 func main() {
 	r := gin.Default()
-	
+
 	// config := cors.DefaultConfig()
 	// config.AllowOrigins = []string{"http://google.com"}	//允许访问信息的第三方,比如说广告供应商
 	// config.AllowCredentials = true	//cookie一并发给跨域请求
@@ -32,7 +32,7 @@ func main() {
 		Secure:   true, //跟下面那条基本上可以防住csrf了,但是还是稳一点好
 		HttpOnly: true,
 		Path:     "/",
-		MaxAge:   1000000}) //大概不到12d
+		MaxAge:   1200000}) //凑个整,差一点点到2w
 	r.Use(sessions.Sessions("session_id", store))
 	r.LoadHTMLGlob("templates/**/*")
 	// TODO csrf防护,需要前端支持
