@@ -14,7 +14,7 @@ const (
 )
 
 type User struct {
-	Id        int64   //xorm自动主键
+	Id        int64  //xorm自动主键
 	CreatedAt int    `xorm:"created"` //使用时间戳而非time.time(字符串)
 	UpdatedAt int    `xorm:"updated"`
 	DeletedAt int    `xorm:"deleted"` //用模型本身的id
@@ -25,7 +25,7 @@ type User struct {
 }
 
 type Video struct { //获取视频和获取评论分开
-	Id          int64   //xorm自动主键
+	Id          int64  //xorm自动主键
 	CreatedAt   int    `xorm:"created"` //使用时间戳而非time.time(字符串)
 	UpdatedAt   int    `xorm:"updated"`
 	DeletedAt   int    `xorm:"deleted"`
@@ -40,17 +40,17 @@ type Video struct { //获取视频和获取评论分开
 
 // Tags切片存一样的数据
 type Tag struct {
-	Id        int64   //xorm自动主键
+	Id        int64  //xorm自动主键
 	CreatedAt int    `xorm:"created"`
 	Text      string `gorm:"unique"`
 }
 
 type VideoComment struct {
 	Id        int64 //xorm自动主键
-	CreatedAt int  `xorm:"created"` //使用时间戳而非time.time(字符串)
-	UpdatedAt int  `xorm:"updated"`
-	DeletedAt int  `xorm:"deleted"`
-	Vid       uint `xorm:"index"` //所属页面的id
+	CreatedAt int   `xorm:"created"` //使用时间戳而非time.time(字符串)
+	UpdatedAt int   `xorm:"updated"`
+	DeletedAt int   `xorm:"deleted"`
+	Vid       uint  `xorm:"index"` //所属页面的id
 	Text      string
 	IsMD      bool                `xorm:"default false"` //t:markdown,f:str
 	Author    uint                `xorm:"index"`         //发表评论的用户
@@ -60,10 +60,10 @@ type VideoComment struct {
 
 type VideoCommentReply struct { //楼中楼的回复.......
 	Id        int64 //xorm自动主键
-	CreatedAt int  `xorm:"created"` //使用时间戳而非time.time(字符串)
-	UpdatedAt int  `xorm:"updated"`
-	DeletedAt int  `xorm:"deleted"`
-	Cid       uint `xorm:"index"` //楼中楼上一层的id,自动生成
+	CreatedAt int   `xorm:"created"` //使用时间戳而非time.time(字符串)
+	UpdatedAt int   `xorm:"updated"`
+	DeletedAt int   `xorm:"deleted"`
+	Cid       uint  `xorm:"index"` //楼中楼上一层的id,自动生成
 	Text      string
 	IsMD      bool                `xorm:"default false"` //t:markdown,f:str
 	Author    uint                `xorm:"index"`
@@ -76,9 +76,9 @@ type VideoCommentReply struct { //楼中楼的回复.......
 
 type Forum struct { //获取视频和获取评论分开
 	Id        int64 //xorm自动主键
-	CreatedAt int  `xorm:"created"` //使用时间戳而非time.time(字符串)
-	UpdatedAt int  `xorm:"updated"`
-	DeletedAt int  `xorm:"deleted"`
+	CreatedAt int   `xorm:"created"` //使用时间戳而非time.time(字符串)
+	UpdatedAt int   `xorm:"updated"`
+	DeletedAt int   `xorm:"deleted"`
 	Title     string
 	Comment   []ForumComment `gorm:"ForeignKey:Mid"` //评论
 	Views     uint           `xorm:"default 0"`      //这是播放量
@@ -87,14 +87,14 @@ type Forum struct { //获取视频和获取评论分开
 
 type ForumComment struct {
 	Id        int64 //xorm自动主键
-	CreatedAt int  `xorm:"created"` //使用时间戳而非time.time(字符串)
-	UpdatedAt int  `xorm:"updated"`
-	DeletedAt int  `xorm:"deleted"`
-	Mid       uint `xorm:"index"` //所属页面的id
+	CreatedAt int   `xorm:"created"` //使用时间戳而非time.time(字符串)
+	UpdatedAt int   `xorm:"updated"`
+	DeletedAt int   `xorm:"deleted"`
+	Mid       uint  `xorm:"index"` //所属页面的id
 	Text      string
-	IsMD      bool `xorm:"default false"` //t:markdown,f:str
-	Author    uint `xorm:"index"`
-	// Emoji  []uint 	//先摸了
+	IsMD      bool    `xorm:"default false"` //t:markdown,f:str
+	Author    uint    `xorm:"index"`
+	Emoji     [9]uint //先摸了
 }
 
 // 正在转码压制中的视频

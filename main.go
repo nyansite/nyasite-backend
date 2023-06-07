@@ -1,10 +1,14 @@
 package main
 
 import (
-	"github.com/gin-contrib/sessions"
 	"net/http"
+	"strconv"
 	"time"
+
+	"github.com/gin-contrib/sessions"
+
 	// "github.com/gin-contrib/sessions/memstore"
+
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 	_ "github.com/mattn/go-sqlite3"
@@ -38,14 +42,16 @@ func main() {
 	// TODO csrf防护,需要前端支持
 
 	var err error
-	db, err = xorm.NewEngine("sqlite3", "./test.db")
+	db, err = xorm.NewEngine("sqlite3", "./test.sqlite3")
 	if err != nil {
 		panic("我数据库呢???我那么大一个数据库呢???还我数据库!!!")
 	}
 	db.Logger().SetLevel(log.LOG_INFO)
-	db.Sync(&User{}, &Video{}, &VideoComment{}, &Tag{}, &Forum{}, &ForumComment{})
+	db.Sync(&User{}, &Video{}, &VideoComment{}, &Tag{}, &Forum{})
+	DBaddMainForum("114", "514", 1, false)
+	DBaddUtilForum("114", 1, 1, false)
+	DBaddEmoji(1, 1, 1)
 	db.SetDefaultCacher(xcach.NewLRUCacher(xcach.NewMemoryStore(), 1000))
-
 	group := r.Group("/api")
 	{
 		group.GET("/user_status", GetSelfUserData)
@@ -74,6 +80,21 @@ func main() {
 		})
 		group.GET("/add_file", func(ctx *gin.Context) {
 			ctx.HTML(http.StatusOK, "addfile.html", gin.H{})
+		})
+		group.POST("/main_forum", func(ctx *gin.Context) {
+			strFid := ctx.PostForm("fid")
+			intFid, _ := strconv.Atoi(strFid)
+			uintFid := uint(intFid)
+			FindMainForum(uintFid, ctx)
+		})
+		group.POST("/unit_forum", func(ctx *gin.Context) {
+			strFid := ctx.PostForm("fid")
+			intFid, _ := strconv.Atoi(strFid)
+			uintFid := uint(intFid)
+			strId := ctx.PostForm("id")
+			intId, _ := strconv.Atoi(strId)
+			uintId := uint(intId)
+			FindUnitForum(uintFid, uintId, ctx)
 		})
 	}
 	//管理员页面
