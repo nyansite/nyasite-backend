@@ -8,7 +8,7 @@ require (
 	github.com/gin-gonic/gin v1.9.1
 	github.com/google/uuid v1.3.0
 	github.com/ipfs/go-ipfs-api v0.6.0
-	github.com/mattn/go-sqlite3 v2.0.3+incompatible
+	github.com/lib/pq v1.10.9
 	github.com/u2takey/ffmpeg-go v0.4.1
 	xorm.io/xorm v1.3.2
 )
@@ -16,6 +16,7 @@ require (
 require (
 	github.com/aws/aws-sdk-go v1.44.275 // indirect
 	github.com/benbjohnson/clock v1.3.5 // indirect
+	github.com/boj/redistore v0.0.0-20180917114910-cd5dcc76aeff // indirect
 	github.com/bytedance/sonic v1.9.1 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311 // indirect
 	github.com/crackcomm/go-gitignore v0.0.0-20170627025303-887ab5e44cc3 // indirect
@@ -27,6 +28,7 @@ require (
 	github.com/go-playground/validator/v10 v10.14.1 // indirect
 	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
+	github.com/gomodule/redigo v2.0.0+incompatible // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/gorilla/context v1.1.1 // indirect
 	github.com/gorilla/securecookie v1.1.1 // indirect

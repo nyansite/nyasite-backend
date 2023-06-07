@@ -1,20 +1,17 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
-
 	"github.com/gin-contrib/sessions"
-
-	// "github.com/gin-contrib/sessions/memstore"
-
-	"github.com/gin-contrib/sessions/cookie"
+	sred "github.com/gin-contrib/sessions/redis"
 	"github.com/gin-gonic/gin"
-	_ "github.com/mattn/go-sqlite3"
+	_ "github.com/lib/pq"
 	"xorm.io/xorm"
-	xcach "xorm.io/xorm/caches"
-	"xorm.io/xorm/log"
+	"xorm.io/xorm/caches"
+	
 )
 
 var (
@@ -29,29 +26,30 @@ func main() {
 	// config.AllowCredentials = true	//cookie一并发给跨域请求
 	// r.Use(cors.New(config))
 
-	store := cookie.NewStore([]byte("just_secret")) //不安全但是方便测试,记得清cookie
-	// store := memstore.NewStore([]byte("secret"))
-
+	store, err := sred.NewStore(10, "tcp", "localhost:6379", "", []byte("secret"))
+	if err != nil {
+		fmt.Println("redis坏掉了😵")
+		panic(err)
+	}
 	store.Options(sessions.Options{
 		Secure:   true, //跟下面那条基本上可以防住csrf了,但是还是稳一点好
 		HttpOnly: true,
 		Path:     "/",
-		MaxAge:   1200000}) //凑个整,差一点点到2w
+		MaxAge:   1200000}) //凑个整,差一点点到2week
 	r.Use(sessions.Sessions("session_id", store))
 	r.LoadHTMLGlob("templates/**/*")
 	// TODO csrf防护,需要前端支持
 
-	var err error
-	db, err = xorm.NewEngine("sqlite3", "./test.sqlite3")
+	
+	db, err = xorm.NewEngine("postgres", "postgresql://postgres:114514@localhost:5432/dbs?sslmode=disable")
 	if err != nil {
 		panic("我数据库呢???我那么大一个数据库呢???还我数据库!!!")
 	}
-	db.Logger().SetLevel(log.LOG_INFO)
+
 	db.Sync(&User{}, &Video{}, &VideoComment{}, &Tag{}, &Forum{})
-	DBaddMainForum("114", "514", 1, false)
-	DBaddUtilForum("114", 1, 1, false)
-	DBaddEmoji(1, 1, 1)
-	db.SetDefaultCacher(xcach.NewLRUCacher(xcach.NewMemoryStore(), 1000))
+	db.SetDefaultCacher(caches.NewLRUCacher(caches.NewMemoryStore(), 1000))
+
+
 	group := r.Group("/api")
 	{
 		group.GET("/user_status", GetSelfUserData)
