@@ -2,7 +2,6 @@ package main
 
 import (
 	"crypto/rand"
-	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -57,7 +56,6 @@ func main() {
 	for _, v := range old_secrets {
 		secrets = append(secrets, v.Authentication, v.Encryption)
 	}
-	fmt.Println(secrets)
 	store := cookie.NewStore(secrets...)
 	store.Options(sessions.Options{
 		Secure:   true, //跟下面那条基本上可以防住csrf了,但是还是稳一点好
