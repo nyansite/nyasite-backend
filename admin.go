@@ -49,3 +49,9 @@ func UploadVideo(c *gin.Context) {
 	c.SaveUploadedFile(f, fpath)
 	go SaveVideo(fpath, title, description, uuid.String())
 }
+
+
+func GetSessionSecret() [][]byte {
+	
+	return nil
+}
