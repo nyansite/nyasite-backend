@@ -47,8 +47,7 @@ func GetVideoComment(c *gin.Context) {
 		return
 	}
 	var comments []VideoComment
-	// db.Preload("CommentPage", "Count = ?", pg).Preload("Cid = 0 OR (Count < 3)").First(&video, id)
-	// db.Limit(3).Order("likes").Preload("VideoCommentReply").Limit(20).Offset(pg-1).Where("Vid = ?", id).Find(&comments)
+	
 	db.Desc("Likes").Limit(20, (pg-1)*20).Where("Vid = ?", id).Find(&comments)
 	fmt.Println(&comments)
 }
