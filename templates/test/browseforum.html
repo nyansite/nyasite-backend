@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <body>
 
-    <a href="/admin/upload_video">上传视频</a>
+    <a href="/add_forum/">上传</a>
     <hr>
     <div id="main"></div>
     <div id="foot"></div>
@@ -83,7 +83,6 @@
         });
         if (page > 1) {
             var a = document.createElement("button");
-            // a.href = Number(page) - 1;
             pg = page - 1;
             a.onclick = function (e){
                 page -=1;
@@ -94,7 +93,6 @@
         }
         if (data.PageCount > page) {
             var b = document.createElement("button");
-            // b.href = Number(page) + 1;
             pg = page + 1;
             b.onclick = function (e){
                 page +=1;

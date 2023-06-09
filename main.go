@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"strconv"
 	"time"
 
 	"github.com/gin-contrib/sessions"
@@ -98,21 +97,6 @@ func main() {
 		group.GET("/add_file", func(ctx *gin.Context) {
 			ctx.HTML(http.StatusOK, "addfile.html", gin.H{})
 		})
-		group.POST("/main_forum", func(ctx *gin.Context) {
-			strFid := ctx.PostForm("fid")
-			intFid, _ := strconv.Atoi(strFid)
-			uintFid := uint(intFid)
-			FindMainForum(uintFid, ctx)
-		})
-		group.POST("/unit_forum", func(ctx *gin.Context) {
-			strFid := ctx.PostForm("fid")
-			intFid, _ := strconv.Atoi(strFid)
-			uintFid := uint(intFid)
-			strId := ctx.PostForm("id")
-			intId, _ := strconv.Atoi(strId)
-			uintId := uint(intId)
-			FindUnitForum(uintFid, uintId, ctx)
-		})
 	}
 	//管理员页面
 	group = r.Group("/admin")
@@ -121,14 +105,25 @@ func main() {
 		group.GET("/browse_video/", func(ctx *gin.Context) {
 			ctx.HTML(http.StatusOK, "browsevideo.html", gin.H{})
 		})
+		group.GET("/browse_forum/", func(ctx *gin.Context) {
+			ctx.HTML(http.StatusOK, "browseforum.html", gin.H{})
+		})
 		group.GET("/upload_video", func(ctx *gin.Context) {
 			ctx.HTML(http.StatusOK, "uploadvideo.html", gin.H{})
 		})
 
 		group.POST("/browse_video/:page", AdminVideoPost)
+
 		group.POST("/upload_video", UploadVideo)
 	}
 
+	r.GET("/browse_forum/", func(ctx *gin.Context) {
+		ctx.HTML(http.StatusOK, "browseforum.html", gin.H{})
+	})
+	r.POST("/browse_forum/:page", BrowseForumPost)
+	r.GET("/add_forum/", func(ctx *gin.Context) {
+		ctx.String(http.StatusOK, "下次一定做")
+	})
 	//  https://gin-gonic.com/zh-cn/docs/examples/graceful-restart-or-stop/
 	srv := &http.Server{
 		Addr:    ":8080",

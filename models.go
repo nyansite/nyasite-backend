@@ -47,7 +47,6 @@ type VideoComment struct {
 	Model  `xorm:"extends"`
 	Vid    uint `xorm:"index"` //所属页面的id
 	Text   string
-	IsMD   bool `xorm:"default false"` //t:markdown,f:str
 	Author uint `xorm:"index"`         //发表评论的用户
 	likes  uint `xorm:"default 0"`     //芝士点赞数量
 }
@@ -56,7 +55,6 @@ type VideoCommentReply struct { //楼中楼的回复.......
 	Model  `xorm:"extends"`
 	Cid    uint `xorm:"index"` //楼中楼上一层的id,自动生成
 	Text   string
-	IsMD   bool `xorm:"default false"` //t:markdown,f:str
 	Author uint `xorm:"index"`
 	likes  uint `xorm:"default 0"` //芝士点赞数量
 }
@@ -74,10 +72,9 @@ type Forum struct { //获取视频和获取评论分开
 
 type ForumComment struct {
 	Model  `xorm:"extends"`
-	Mid    uint `xorm:"index"` //所属页面的id
+	Mid    uint64 `xorm:"index"` //所属论坛的id
 	Text   string
-	IsMD   bool   `xorm:"default false"` //t:markdown,f:str
-	Author uint   `xorm:"index"`
+	Author uint64   `xorm:"index"`
 	Emoji  []uint //先摸了
 }
 

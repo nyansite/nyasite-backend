@@ -2,52 +2,31 @@ package main
 
 import (
 	"net/http"
-
+	"strconv"
 	"github.com/gin-gonic/gin"
+	"log"
+	"math"
 )
 
-func DBaddMainForum(text string, title string, author uint, ismd bool) {
-	forum := Forum{Title: title, Author: author}
-	// forum.Comment = append(forum.Comment, ForumComment{Text: text, Author: author, IsMD: ismd})
-	db.Insert(&forum)
-	return
-}
-
-func DBaddUtilForum(text string, fid uint, author uint, ismd bool) {
-	var forum Forum
-	db.ID(fid).Get(&forum)
-	// forum.Comment = append(forum.Comment, ForumComment{Text: text, IsMD: ismd, Author: author})
-	db.Update(&forum)
-	return
-}
-
-func DBaddEmoji(fid uint, id uint, emoji uint) {
-	var forum Forum
-	db.ID(fid).Get(&forum)
-	// forum.Comment[id-1].Emoji[emoji] = forum.Comment[id-1].Emoji[emoji] + 1
-	db.Update(&forum)
-	return
-}
-
-func FindMainForum(fid uint, c *gin.Context) {
-	var forum Forum
-	db.ID(fid).Get(&forum)
-	var user User
-	db.ID(forum.Author).Get(&user)
-	authorName := user.Name
-	c.JSON(http.StatusOK, gin.H{"title": forum.Title,
-		"authorID": forum.Author, "author": authorName, "views": forum.Views, "creatTime": forum.CreatedAt})
-	return
-}
-func FindUnitForum(fid uint, id uint, c *gin.Context) {
-	var forum Forum
-	db.ID(fid).Get(&forum)
-	// unitForum := forum.Comment[id-1]
-	// var user User
-	// db.ID(unitForum.Author).Get(&user)
-	// authorName := user.Name
-	// c.JSON(http.StatusOK, gin.H{"text": unitForum.Text, "idmd": unitForum.IsMD,
-	// 	"authorID": unitForum.Author, "author": authorName, "creatTime": forum.CreatedAt,
-	// 	"emoji": unitForum.Emoji})
-	return
+func BrowseForumPost(ctx *gin.Context)  {
+	vpg := ctx.Param("page")
+	pg, err := strconv.Atoi(vpg)
+	if err != nil || pg < 1 {
+		ctx.AbortWithStatus(http.StatusBadRequest) //400
+		return
+	}
+	var forums []Video
+	var count int64 //总数,Count比rowsaffected更快(懒得用变量缓存了
+	pg -= 1
+	count, err = db.Count(&Forum{})
+	if err != nil{
+		ctx.AbortWithStatus(http.StatusInternalServerError) //500,正常情况下不会出现
+		log.Println(err)
+		return
+	}
+	db.Limit(20, pg*20).Find(&forums)
+	ctx.JSON(http.StatusOK, gin.H{
+		"Body":      forums,
+		"PageCount": math.Ceil(float64(count) / 20), //总页数
+	})
 }
