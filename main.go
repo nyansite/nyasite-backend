@@ -1,8 +1,12 @@
 package main
 
 import (
+	"context"
 	"crypto/rand"
+	"log"
 	"net/http"
+	"os"
+	"os/signal"
 	"strconv"
 	"time"
 
@@ -19,7 +23,7 @@ var (
 )
 
 const (
-	TTL = 1200000 //session的寿命,单位秒
+	TTL = 1200000 //session的寿命,单位秒,接近两周
 )
 
 func main() {
@@ -44,12 +48,11 @@ func main() {
 	var old_secrets []SessionSecret
 	s1, _ := rand.Prime(rand.Reader, 512)
 	s2, _ := rand.Prime(rand.Reader, 512)
-	_, err = db.Insert(&SessionSecret{Authentication: s1.Bytes(), Encryption: s2.Bytes()})
-	if err != nil {
-		panic(err)
-	}
-	_, err = db.Where("created_at > ?", time.Now().Unix()+ TTL).Delete(&SessionSecret{})	//删除过期
-	err = db.Where("created_at < ?", time.Now().Unix()+ TTL).Find(&old_secrets)				
+	defer db.Insert(&SessionSecret{Authentication: s1.Bytes(), Encryption: s2.Bytes()})
+
+	secrets = append(secrets, s1.Bytes(), s2.Bytes())
+	db.Where("created_at < ?", time.Now().Unix()-TTL).Delete(&SessionSecret{}) //删除过期
+	err = db.Where("created_at >= ?", time.Now().Unix()-TTL).Find(&old_secrets)
 	if err != nil {
 		panic(err)
 	}
@@ -61,7 +64,7 @@ func main() {
 		Secure:   true, //跟下面那条基本上可以防住csrf了,但是还是稳一点好
 		HttpOnly: true,
 		Path:     "/",
-		MaxAge:   TTL}) //凑个整,差一点点到2week
+		MaxAge:   TTL})
 	r.Use(sessions.Sessions("session_id", store))
 	r.LoadHTMLGlob("templates/**/*")
 	// TODO csrf防护,需要前端支持
@@ -126,7 +129,29 @@ func main() {
 		group.POST("/upload_video", UploadVideo)
 	}
 
-	r.Run(":8000") // 8000
+	//  https://gin-gonic.com/zh-cn/docs/examples/graceful-restart-or-stop/
+	srv := &http.Server{
+		Addr:    ":8080",
+		Handler: r,
+	}
+	go func() {
+		log.Println("服务器启动")
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("listen: %s\n", err)
+		}
+	}()
+	quit := make(chan os.Signal)
+	signal.Notify(quit, os.Interrupt)
+	<-quit //等待信号,阻塞
+
+	log.Println("服务器关闭中~~~")
+
+	ctx, channel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer channel()
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Fatal("服务器关闭错误(不用管):", err)
+	}
+	log.Println("服务器关闭")
 }
 
 func coffee(c *gin.Context) { //没有人能拒绝愚人节彩蛋
