@@ -46,8 +46,8 @@ func main() {
 
 	var secrets [][]byte
 	var old_secrets []SessionSecret
-	s1, _ := rand.Prime(rand.Reader, 512)
-	s2, _ := rand.Prime(rand.Reader, 512)
+	s1, _ := rand.Prime(rand.Reader, 256) //最多32字节,也就是256
+	s2, _ := rand.Prime(rand.Reader, 256)
 	defer db.Insert(&SessionSecret{Authentication: s1.Bytes(), Encryption: s2.Bytes()})
 
 	secrets = append(secrets, s1.Bytes(), s2.Bytes())

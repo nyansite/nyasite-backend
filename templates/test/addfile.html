@@ -18,7 +18,7 @@
         formElem.onsubmit = async (e) => {
             e.preventDefault();
 
-            let response = await fetch('http://127.0.0.1:8000/test/api/add_file', {
+            let response = await fetch('/test/api/add_file', {
                 method: 'POST',
                 body: new FormData(formElem)
             });
@@ -27,7 +27,7 @@
                 case 200:
                     alert("200上传成功");
                     document.getElementById("ret").innerText = result;
-                    document.getElementById("ret").href = 'http://127.0.0.1:8000/test/get_file?file='+result;
+                    document.getElementById("ret").href = '/test/get_file?file='+result;
                     break;
                 case 500:
                     alert("500服务器错误,也许是没开ipfs deamon?");
