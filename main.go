@@ -8,10 +8,10 @@ import (
 	"os"
 	"os/signal"
 	"time"
-	"github.com/gin-contrib/static"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-contrib/static"
 	_ "github.com/lib/pq"
 	"xorm.io/xorm"
 	"xorm.io/xorm/caches"
@@ -68,7 +68,6 @@ func main() {
 	r.LoadHTMLGlob("templates/**/*")
 	r.Use(static.Serve("/", static.LocalFile("cute_web/build/", false)))
 	// TODO csrf防护,需要前端支持
-
 	group := r.Group("/api")
 	{
 		group.GET("/user_status", GetSelfUserData)
@@ -128,7 +127,7 @@ func main() {
 
 
 	// TODO 芝士分隔符
-	r.GET("")
+	
 
 	//  https://gin-gonic.com/zh-cn/docs/examples/graceful-restart-or-stop/
 	srv := &http.Server{
