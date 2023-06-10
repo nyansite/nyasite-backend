@@ -25,7 +25,7 @@ type localFileSystem struct {
 
 func LocalFile(root string, indexes bool) *localFileSystem {
 	return &localFileSystem{
-		FileSystem: Dir(root, indexes),
+		FileSystem: gin.Dir(root, indexes),
 		root:       root,
 		indexes:    indexes,
 	}
@@ -65,13 +65,9 @@ func Serve(urlPrefix string, fs ServeFileSystem) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		if fs.Exists(urlPrefix, c.Request.URL.Path) {
-			
 			ext := path.Ext(c.Request.URL.Path)
-			if ext != ""{
-				c.Header("Content-Encoding", "br")  //声明压缩格式,否则会被当作二进制文件下载
-				c.Header("Vary", "Accept-Encoding") //客户端使用缓存
-				// fmt.Println(ext)
-				c.Request.URL.Path = c.Request.URL.Path + ".br"
+			usebr := true
+			if ext != "" {
 				switch ext {
 				case ".html":
 					c.Header("content-type", "text/html")
@@ -79,54 +75,25 @@ func Serve(urlPrefix string, fs ServeFileSystem) gin.HandlerFunc {
 				case ".js":
 					c.Header("content-type", "text/javascript")
 					break
+				case ".png":
+					c.Header("content-type", "image/png")
+					break
+				default:
+					usebr = false
 				}
+			} else { //直接进主页
+				c.Request.URL.Path = c.Request.URL.Path + "index.html" //虽然会本来就自带跳转,但是那样的话就没办法用br了
+				c.Header("content-type", "text/html")
 			}
-			
-			
+			if usebr {
+				c.Header("Content-Encoding", "br")  //声明压缩格式,否则会被当作二进制文件下载
+				c.Header("Vary", "Accept-Encoding") //客户端使用缓存
+				c.Request.URL.Path = c.Request.URL.Path + ".br"
+			} else {
+				fmt.Println(c.Request.URL.Path)
+			}
 			fileserver.ServeHTTP(c.Writer, c.Request)
 			c.Abort()
 		}
 	}
-}
-
-type onlyFilesFS struct {
-	fs http.FileSystem
-}
-
-type neuteredReaddirFile struct {
-	http.File
-}
-
-// Dir returns a http.FileSystem that can be used by http.FileServer(). It is used internally
-// in router.Static().
-// if listDirectory == true, then it works the same as http.Dir() otherwise it returns
-// a filesystem that prevents http.FileServer() to list the directory files.
-func Dir(root string, listDirectory bool) http.FileSystem {
-
-	fs := http.Dir(root)
-	if listDirectory {
-		return fs
-	}
-	return &onlyFilesFS{fs}
-}
-
-// Open conforms to http.Filesystem.
-func (fs onlyFilesFS) Open(name string) (http.File, error) {
-	// n := strings.Split(name, "/")
-	// na := n[len(n)-1]
-	// if na != "" {
-	// 	name = name + ".br"
-	// }
-	fmt.Println(name)
-	f, err := fs.fs.Open(name)
-	if err != nil {
-		return nil, err
-	}
-	return neuteredReaddirFile{f}, nil
-}
-
-// Readdir overrides the http.File default implementation.
-func (f neuteredReaddirFile) Readdir(count int) ([]os.FileInfo, error) {
-	// this disables directory listing
-	return nil, nil
 }
