@@ -1,0 +1,3 @@
+[submodule "cute_web"]
+	path = cute_web
+	url = git@github.com:nyansite/cute_web.git
