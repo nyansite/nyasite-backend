@@ -8,7 +8,7 @@ import (
 	"os"
 	"os/signal"
 	"time"
-
+	"github.com/gin-contrib/static"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
@@ -66,6 +66,7 @@ func main() {
 		MaxAge:   TTL})
 	r.Use(sessions.Sessions("session_id", store))
 	r.LoadHTMLGlob("templates/**/*")
+	r.Use(static.Serve("/", static.LocalFile("cute_web/build/", false)))
 	// TODO csrf防护,需要前端支持
 
 	group := r.Group("/api")
@@ -124,6 +125,11 @@ func main() {
 	r.GET("/add_forum/", func(ctx *gin.Context) {
 		ctx.String(http.StatusOK, "下次一定做")
 	})
+
+
+	// TODO 芝士分隔符
+	r.GET("")
+
 	//  https://gin-gonic.com/zh-cn/docs/examples/graceful-restart-or-stop/
 	srv := &http.Server{
 		Addr:    ":8080",
