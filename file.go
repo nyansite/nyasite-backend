@@ -14,7 +14,6 @@ var (
 	NoIpfsDaemon = errors.New("ipfs daemon被你吃了?")
 )
 
-
 // 从ipfs获取文件,测试用
 // 只有用AddFile上传的文件才能用,因为存储的是压缩数据
 func GetFile(path string) ([]byte, error) {
