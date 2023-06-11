@@ -3,15 +3,16 @@ package main
 import (
 	"context"
 	"crypto/rand"
+	"cute_site/static"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
+
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
-	"cute_site/static"
 	_ "github.com/lib/pq"
 	"xorm.io/xorm"
 	"xorm.io/xorm/caches"
@@ -102,43 +103,23 @@ func main() {
 	group = r.Group("/admin")
 	group.Use(AdminCheck())
 	{
-		group.GET("/browse_video/", func(ctx *gin.Context) {
-			ctx.HTML(http.StatusOK, "browsevideo.html", gin.H{})
-		})
-		group.GET("/browse_forum/", func(ctx *gin.Context) {
-			ctx.HTML(http.StatusOK, "browseforum.html", gin.H{})
-		})
-		group.GET("/upload_video", func(ctx *gin.Context) {
-			ctx.HTML(http.StatusOK, "uploadvideo.html", gin.H{})
-		})
-
 		group.POST("/browse_video/:page", AdminVideoPost)
 
 		group.POST("/upload_video", UploadVideo)
 	}
 
-	r.GET("/browse_forum/", func(ctx *gin.Context) {
-		ctx.HTML(http.StatusOK, "browseforum.html", gin.H{})
-	})
-	r.POST("/browse_forum/:page", BrowseForumPost)
-	r.GET("/add_forum/", func(ctx *gin.Context) {
-		ctx.String(http.StatusOK, "下次一定做")
-	})
-
-
-	// TODO 芝士分隔符
-	
-
 	//  https://gin-gonic.com/zh-cn/docs/examples/graceful-restart-or-stop/
 	srv := &http.Server{
-		Addr:    ":8080",
+		Addr:    ":8000",
 		Handler: r,
 	}
 	go func() {
 		log.Println("服务器启动")
+		
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("listen: %s\n", err)
 		}
+
 	}()
 	quit := make(chan os.Signal)
 	signal.Notify(quit, os.Interrupt)

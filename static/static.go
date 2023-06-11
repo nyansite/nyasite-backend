@@ -10,11 +10,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-const INDEX = "index.html"
-
 type ServeFileSystem interface {
 	http.FileSystem
-	Exists(prefix string, path string) bool
+	Exists(prefix string, c *gin.Context) bool
 }
 
 type localFileSystem struct {
@@ -31,18 +29,26 @@ func LocalFile(root string, indexes bool) *localFileSystem {
 	}
 }
 
-func (l *localFileSystem) Exists(prefix string, filepath string) bool {
+func (l *localFileSystem) Exists(prefix string, c *gin.Context) bool {
+	filepath := c.Request.URL.Path
 	if p := strings.TrimPrefix(filepath, prefix); len(p) < len(filepath) {
 		name := path.Join(l.root, p)
 		stats, err := os.Stat(name)
 		if err != nil {
 			return false
 		}
+
 		if stats.IsDir() {
 			if !l.indexes {
-				index := path.Join(name, INDEX)
+				index := path.Join(name, "index.html")
 				_, err := os.Stat(index)
-				if err != nil {
+				if err != nil { //.index.html没结果,下面尝试.html
+					index := name + ".html"
+					_, err := os.Stat(index)
+					if err == nil {
+						c.Request.URL.Path += ".html"
+						return true
+					}
 					return false
 				}
 			}
@@ -63,7 +69,7 @@ func Serve(urlPrefix string, fs ServeFileSystem) gin.HandlerFunc {
 		fileserver = http.StripPrefix(urlPrefix, fileserver)
 	}
 	return func(c *gin.Context) {
-		if fs.Exists(urlPrefix, c.Request.URL.Path) {
+		if fs.Exists(urlPrefix, c) {
 			usebr(c)
 			fileserver.ServeHTTP(c.Writer, c.Request)
 			c.Abort()
@@ -84,11 +90,13 @@ func usebr(c *gin.Context) {
 			case ".png":
 				setbr(c, "image/png")
 			default:
-				fmt.Println(ext)
+				fmt.Println(c.Request.URL.Path)
 			}
 		} else { //直接进主页
-			c.Request.URL.Path = c.Request.URL.Path + "index.html" //虽然会本来就自带跳转,但是那样的话就没办法用br了
-			setbr(c, "text/html")
+			if c.Request.URL.Path == "/" {
+				c.Request.URL.Path = c.Request.URL.Path + "index.html" //虽然会本来就自带跳转,但是那样的话就没办法用br了
+				setbr(c, "text/html")
+			}
 		}
 	}
 }
