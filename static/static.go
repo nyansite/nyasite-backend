@@ -63,37 +63,39 @@ func Serve(urlPrefix string, fs ServeFileSystem) gin.HandlerFunc {
 		fileserver = http.StripPrefix(urlPrefix, fileserver)
 	}
 	return func(c *gin.Context) {
-
 		if fs.Exists(urlPrefix, c.Request.URL.Path) {
-			ext := path.Ext(c.Request.URL.Path)
-			usebr := true
-			if ext != "" {
-				switch ext {
-				case ".html":
-					c.Header("content-type", "text/html")
-					break
-				case ".js":
-					c.Header("content-type", "text/javascript")
-					break
-				case ".png":
-					c.Header("content-type", "image/png")
-					break
-				default:
-					usebr = false
-				}
-			} else { //直接进主页
-				c.Request.URL.Path = c.Request.URL.Path + "index.html" //虽然会本来就自带跳转,但是那样的话就没办法用br了
-				c.Header("content-type", "text/html")
-			}
-			if usebr {
-				c.Header("Content-Encoding", "br")  //声明压缩格式,否则会被当作二进制文件下载
-				c.Header("Vary", "Accept-Encoding") //客户端使用缓存
-				c.Request.URL.Path = c.Request.URL.Path + ".br"
-			} else {
-				fmt.Println(c.Request.URL.Path)
-			}
+			usebr(c)
 			fileserver.ServeHTTP(c.Writer, c.Request)
 			c.Abort()
 		}
 	}
+}
+
+func usebr(c *gin.Context) {
+	ext := path.Ext(c.Request.URL.Path)
+	supportbr := strings.Contains(c.GetHeader("Accept-Encoding"), "br")
+	if supportbr {
+		if ext != "" {
+			switch ext {
+			case ".html":
+				setbr(c, "text/html")
+			case ".js":
+				setbr(c, "text/javascript")
+			case ".png":
+				setbr(c, "image/png")
+			default:
+				fmt.Println(ext)
+			}
+		} else { //直接进主页
+			c.Request.URL.Path = c.Request.URL.Path + "index.html" //虽然会本来就自带跳转,但是那样的话就没办法用br了
+			setbr(c, "text/html")
+		}
+	}
+}
+
+func setbr(c *gin.Context, mime string) {
+	c.Header("content-type", mime)     //压缩的文件必须显式指明mime type,否则会被当作二进制文件
+	c.Header("Content-Encoding", "br") //声明压缩格式,否则会被当作二进制文件下载
+	// c.Header("Vary", "Accept-Encoding") //客户端使用缓存,开发阶段先去掉
+	c.Request.URL.Path = c.Request.URL.Path + ".br"
 }
