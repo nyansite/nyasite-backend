@@ -83,6 +83,8 @@ func usebr(c *gin.Context) {
 				setbr(c, "text/javascript")
 			case ".png":
 				setbr(c, "image/png")
+			case ".css":
+				setbr(c, "text/css")
 			default:
 				fmt.Println(c.Request.URL.Path)
 			}
