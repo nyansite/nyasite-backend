@@ -28,13 +28,13 @@ type User struct {
 }
 
 type Video struct { //获取视频和获取评论分开
-	Model       `xorm:"extends"`
 	Title       string `xorm:"default '芝士标题'"`
 	Description string `xorm:"default '简介不见惹'"`
 	Tag         []uint `xorm:"index"`     //tag的id
 	likes       uint   `xorm:"default 0"` //芝士点赞数量
 	Views       uint   `xorm:"default 0"` //这是播放量
 	Author      uint   `xorm:"index"`     //作者/上传者
+	Model       `xorm:"extends"`
 }
 
 type Tag struct {
@@ -44,38 +44,44 @@ type Tag struct {
 }
 
 type VideoComment struct {
-	Model  `xorm:"extends"`
 	Vid    uint `xorm:"index"` //所属页面的id
 	Text   string
-	Author uint `xorm:"index"`         //发表评论的用户
-	likes  uint `xorm:"default 0"`     //芝士点赞数量
+	Author uint `xorm:"index"`     //发表评论的用户
+	likes  uint `xorm:"default 0"` //芝士点赞数量
+	Model  `xorm:"extends"`
 }
 
 type VideoCommentReply struct { //楼中楼的回复.......
-	Model  `xorm:"extends"`
 	Cid    uint `xorm:"index"` //楼中楼上一层的id,自动生成
 	Text   string
 	Author uint `xorm:"index"`
 	likes  uint `xorm:"default 0"` //芝士点赞数量
+	Model  `xorm:"extends"`
 }
 
 // 论坛部分
 // 不需要楼中楼,直接引用
 
 type Forum struct { //获取视频和获取评论分开
-	Model   `xorm:"extends"`
-	Title   string
-	Comment []ForumComment `xorm:"extends"`   //评论
-	Views   uint           `xorm:"default 0"` //这是播放量
-	Author  uint           `xorm:"index"`
+	Title  string
+	Views  uint `xorm:"default 0"` //这是浏览量
+	Author uint `xorm:"index"`
+	Model  `xorm:"extends"`
 }
 
 type ForumComment struct {
-	Model  `xorm:"extends"`
-	Mid    uint64 `xorm:"index"` //所属论坛的id
-	Text   string
-	Author uint64   `xorm:"index"`
-	Emoji  []uint //先摸了
+	Mid      uint `xorm:"index"` //所属论坛的id
+	Text     string
+	Author   uint `xorm:"index"`
+	Like     uint
+	Dislike  uint
+	Smile    uint
+	Firework uint
+	Unhappy  uint
+	Heart    uint
+	Rocket   uint
+	Eyes     uint
+	Model    `xorm:"extends"`
 }
 
 // 正在转码压制中的视频

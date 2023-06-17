@@ -33,9 +33,8 @@ func main() {
 		panic("我数据库呢???我那么大一个数据库呢???还我数据库!!!")
 	}
 
-	db.Sync(&User{}, &Video{}, &VideoComment{}, &Tag{}, &Forum{}, &SessionSecret{})
+	db.Sync(&User{}, &Video{}, &VideoComment{}, &Tag{}, &Forum{}, &SessionSecret{}, &ForumComment{})
 	db.SetDefaultCacher(caches.NewLRUCacher(caches.NewMemoryStore(), 1000))
-
 	//上面的是sql
 
 	r := gin.Default()
@@ -104,7 +103,6 @@ func main() {
 	group.Use(AdminCheck())
 	{
 		group.POST("/browse_video/:page", AdminVideoPost)
-
 		group.POST("/upload_video", UploadVideo)
 	}
 
@@ -115,7 +113,7 @@ func main() {
 	}
 	go func() {
 		log.Println("服务器启动")
-		
+
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("listen: %s\n", err)
 		}
