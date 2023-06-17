@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"math"
 	"net/http"
@@ -31,6 +30,7 @@ func BrowseForumPost(ctx *gin.Context) {
 		"Body":      forums,
 		"PageCount": math.Ceil(float64(count) / 20), //总页数
 	})
+	return
 }
 
 func BrowseUnitforumPost(ctx *gin.Context) {
@@ -39,20 +39,21 @@ func BrowseUnitforumPost(ctx *gin.Context) {
 	vpg := ctx.Param("page")
 	pg, err := strconv.Atoi(vpg)
 	var mainforum Forum
-	has, err := db.ID(mid).Get(mainforum)
+	has, err := db.ID(mid).Get(&mainforum)
 	if err != nil || pg < 1 || has == false {
 		ctx.AbortWithStatus(http.StatusBadRequest) //400
 		return
 	}
-	var unitforums []ForumComment
 	var count int64
 	pg -= 1
-	count, err = db.Where("mid = ?", mid).Count(&unitforums)
+	var unitforum ForumComment
+	count, err = db.Where("mid = ?", mid).Count(&unitforum)
 	if err != nil {
 		ctx.AbortWithStatus(http.StatusInternalServerError) //500,正常情况下不会出现
 		log.Println(err)
 		return
 	}
+	var unitforums []ForumComment
 	db.Limit(20, pg*20).Find(&unitforums)
 	ctx.JSON(http.StatusOK, gin.H{
 		"Body":      unitforums,

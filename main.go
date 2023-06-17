@@ -81,6 +81,8 @@ func main() {
 		group.POST("/new_tag", NewTag)
 		group.POST("/add_comment", AddComment)
 		group.POST("/upload_video", UploadVideo)
+		group.POST("/browse_forum/:page", BrowseForumPost)
+		group.POST("/browse_unitforum/:page/:mid", BrowseUnitforumPost)
 	}
 
 	group = r.Group("/test")
