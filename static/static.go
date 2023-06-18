@@ -85,6 +85,10 @@ func usebr(c *gin.Context) {
 				setbr(c, "image/png")
 			case ".css":
 				setbr(c, "text/css")
+			case ".gif":
+				setbr(c, "image/gif")
+			case ".svg":
+				setbr(c, "image/svg+xml") //为啥
 			default:
 				fmt.Println(c.Request.URL.Path)
 			}
