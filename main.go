@@ -47,7 +47,6 @@ func main() {
 	var old_secrets []SessionSecret
 	s1, _ := rand.Prime(rand.Reader, 256) //最多32字节,也就是256
 	s2, _ := rand.Prime(rand.Reader, 256)
-	defer db.Insert(&SessionSecret{Authentication: s1.Bytes(), Encryption: s2.Bytes()})
 
 	secrets = append(secrets, s1.Bytes(), s2.Bytes())
 	db.Where("created_at < ?", time.Now().Unix()-TTL).Delete(&SessionSecret{}) //删除过期
@@ -55,6 +54,8 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	
+	db.Insert(&SessionSecret{Authentication: s1.Bytes(), Encryption: s2.Bytes()})
 	for _, v := range old_secrets {
 		secrets = append(secrets, v.Authentication, v.Encryption)
 	}

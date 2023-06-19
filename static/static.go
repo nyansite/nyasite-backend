@@ -78,28 +78,28 @@ func usebr(c *gin.Context) {
 		if ext != "" {
 			switch ext {
 			case ".html":
-				setbr(c, "text/html")
+				set_brotli(c, "text/html")
 			case ".js":
-				setbr(c, "text/javascript")
+				set_brotli(c, "text/javascript")
 			case ".png":
-				setbr(c, "image/png")
+				set_brotli(c, "image/png")
 			case ".css":
-				setbr(c, "text/css")
+				set_brotli(c, "text/css")
 			case ".gif":
-				setbr(c, "image/gif")
+				set_brotli(c, "image/gif")
 			case ".svg":
-				setbr(c, "image/svg+xml") //为啥
+				set_brotli(c, "image/svg+xml") //为啥
 			default:
 				fmt.Println(c.Request.URL.Path)
 			}
 		} else { //直接进主页
 			c.Request.URL.Path = c.Request.URL.Path + "/index.html" //虽然会本来就自带跳转,但是那样的话就没办法用br了
-			setbr(c, "text/html")
+			set_brotli(c, "text/html")
 		}
 	}
 }
 
-func setbr(c *gin.Context, mime string) {
+func set_brotli(c *gin.Context, mime string) {
 	c.Header("content-type", mime)     //压缩的文件必须显式指明mime type,否则会被当作二进制文件
 	c.Header("Content-Encoding", "br") //声明压缩格式,否则会被当作二进制文件下载
 	// c.Header("Vary", "Accept-Encoding") //客户端使用缓存,开发阶段先去掉
