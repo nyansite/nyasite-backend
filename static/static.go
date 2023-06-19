@@ -102,6 +102,8 @@ func usebr(c *gin.Context) {
 func set_brotli(c *gin.Context, mime string) {
 	c.Header("content-type", mime)     //压缩的文件必须显式指明mime type,否则会被当作二进制文件
 	c.Header("Content-Encoding", "br") //声明压缩格式,否则会被当作二进制文件下载
-	// c.Header("Vary", "Accept-Encoding") //客户端使用缓存,开发阶段先去掉
+	c.Header("Vary", "Accept-Encoding")
+	c.Header("Cache-control", "no-store") //强制不使用缓存,测试用
+	// c.Header("Cache-control", "public, immutable, max-age=3600") //客户端使用缓存,开发阶段先去掉
 	c.Request.URL.Path = c.Request.URL.Path + ".br"
 }
