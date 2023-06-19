@@ -47,14 +47,12 @@ func main() {
 	var old_secrets []SessionSecret
 	s1, _ := rand.Prime(rand.Reader, 256) //最多32字节,也就是256
 	s2, _ := rand.Prime(rand.Reader, 256)
-
 	secrets = append(secrets, s1.Bytes(), s2.Bytes())
 	db.Where("created_at < ?", time.Now().Unix()-TTL).Delete(&SessionSecret{}) //删除过期
 	err = db.Where("created_at >= ?", time.Now().Unix()-TTL).Find(&old_secrets)
 	if err != nil {
 		panic(err)
 	}
-	
 	db.Insert(&SessionSecret{Authentication: s1.Bytes(), Encryption: s2.Bytes()})
 	for _, v := range old_secrets {
 		secrets = append(secrets, v.Authentication, v.Encryption)
@@ -64,7 +62,8 @@ func main() {
 		Secure:   true, //跟下面那条基本上可以防住csrf了,但是还是稳一点好
 		HttpOnly: true,
 		Path:     "/",
-		MaxAge:   TTL})
+		MaxAge:   TTL,
+		SameSite: http.SameSiteStrictMode})
 	r.Use(sessions.Sessions("session_id", store))
 	r.LoadHTMLGlob("templates/**/*")
 	r.Use(static.Serve("/", static.LocalFile("cute_web/build/", false)))
@@ -85,7 +84,6 @@ func main() {
 		group.POST("/browse_forum/:page", BrowseForumPost)
 		group.POST("/browse_unitforum/:page/:mid", BrowseUnitforumPost)
 	}
-
 	group = r.Group("/test")
 	{
 		group.GET("/", func(ctx *gin.Context) {
@@ -116,11 +114,9 @@ func main() {
 	}
 	go func() {
 		log.Println("服务器启动")
-
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("listen: %s\n", err)
 		}
-
 	}()
 	quit := make(chan os.Signal)
 	signal.Notify(quit, os.Interrupt)
