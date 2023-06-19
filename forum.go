@@ -74,3 +74,28 @@ func DBaddUnitforum(text string, mid uint, author uint) {
 	db.Insert(unitforum)
 	return
 }
+
+func DBaddEmoji(emoji uint, uid uint) {
+	var unitforum ForumComment
+	db.ID(uid).Get(&unitforum)
+	switch emoji {
+	case 0:
+		unitforum.Like++
+	case 1:
+		unitforum.Dislike++
+	case 2:
+		unitforum.Smile++
+	case 3:
+		unitforum.Firework++
+	case 4:
+		unitforum.Unhappy++
+	case 5:
+		unitforum.Heart++
+	case 6:
+		unitforum.Rocket++
+	case 7:
+		unitforum.Eyes++
+	}
+	db.ID(uid).Update(&unitforum)
+	return
+}
