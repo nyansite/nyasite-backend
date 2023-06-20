@@ -73,7 +73,7 @@ type ForumComment struct {
 	Mid      uint `xorm:"index"` //所属论坛的id
 	Text     string
 	Author   uint `xorm:"index"`
-	Like     uint
+	Like     uint //uint8只有255，可能不太够用
 	Dislike  uint
 	Smile    uint
 	Firework uint

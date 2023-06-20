@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/gin-contrib/sessions"
+
 	"log"
 	"math"
 	"net/http"
@@ -97,5 +99,37 @@ func DBaddEmoji(emoji uint, uid uint) {
 		unitforum.Eyes++
 	}
 	db.ID(uid).Update(&unitforum)
+	return
+}
+
+func AddMainforum(ctx *gin.Context) {
+	session := sessions.Default(ctx)
+	title, text := ctx.PostForm("title"), ctx.PostForm("text")
+	author := session.Get("id")
+	vauthor, _ := author.(int)
+	uauthor := uint(vauthor)
+	DBaddMainforum(title, text, uauthor)
+	return
+}
+
+func AddUnitforum(ctx *gin.Context) {
+	session := sessions.Default(ctx)
+	author := session.Get("id")
+	vauthor, _ := author.(int)
+	uauthor := uint(vauthor)
+	mid, text := ctx.PostForm("mid"), ctx.PostForm("text")
+	vmid, _ := strconv.Atoi(mid)
+	umid := uint(vmid)
+	DBaddUnitforum(text, umid, uauthor)
+	return
+}
+
+func AddEmoji(ctx *gin.Context) {
+	emoji, uid := ctx.PostForm("emoji"), ctx.PostForm("uid")
+	vuid, _ := strconv.Atoi(uid)
+	vemoji, _ := strconv.Atoi(emoji)
+	uuid := uint(vuid)
+	uemoji := uint(vemoji)
+	DBaddEmoji(uemoji, uuid)
 	return
 }

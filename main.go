@@ -59,7 +59,7 @@ func main() {
 	}
 	store := cookie.NewStore(secrets...)
 	store.Options(sessions.Options{
-		Secure:   true, //跟下面那条基本上可以防住csrf了,但是还是稳一点好
+		//Secure:   true, //跟下面那条基本上可以防住csrf了,但是还是稳一点好
 		HttpOnly: true,
 		Path:     "/",
 		MaxAge:   TTL,
@@ -84,6 +84,7 @@ func main() {
 		group.POST("/browse_forum/:page", BrowseForumPost)
 		group.POST("/browse_unitforum/:page/:mid", BrowseUnitforumPost)
 	}
+
 	group = r.Group("/test")
 	{
 		group.GET("/", func(ctx *gin.Context) {
@@ -106,7 +107,13 @@ func main() {
 		group.POST("/browse_video/:page", AdminVideoPost)
 		group.POST("/upload_video", UploadVideo)
 	}
-
+	group = r.Group("/uapi")
+	group.Use(CheckLogin())
+	{
+		group.POST("/addmainforum", AddMainforum)
+		group.POST("/addunitforum", AddUnitforum)
+		group.POST("/addemoji", AddEmoji)
+	}
 	//  https://gin-gonic.com/zh-cn/docs/examples/graceful-restart-or-stop/
 	srv := &http.Server{
 		Addr:    ":8000",
