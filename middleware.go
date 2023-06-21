@@ -1,38 +1,25 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 )
 
-func AdminCheck() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		session := sessions.Default(c)
+func PrivilegeLevel(level uint8) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		session := sessions.Default(ctx)
 		if session.Get("is_login") != true {
-			c.AbortWithStatus(http.StatusUnauthorized) //返回401
+			ctx.AbortWithStatus(http.StatusUnauthorized) //未登录返回401
 			return
 		}
-		level := session.Get("level").(uint8)
-		privilege_level := level >> 4
-		if privilege_level < 15 { //15满级权限才能进入
-			c.String(http.StatusForbidden, "梦里啥都有") //403
-			c.Abort()
+		ulevel := session.Get("level").(uint8)
+		if (ulevel >> 4) < level {
+			fmt.Println(ulevel >> 4)
+			ctx.AbortWithStatus(http.StatusForbidden) //403
 			return
-		}
-	}
-}
-
-func CheckLogin() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		session := sessions.Default(c)
-
-		if session.Get("is_login") != true {
-			c.AbortWithStatus(http.StatusUnauthorized) //返回401
-			return
-		} else {
-			c.Next()
 		}
 	}
 }

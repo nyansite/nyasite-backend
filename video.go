@@ -17,12 +17,6 @@ func NewTag(c *gin.Context) {
 		c.AbortWithStatus(http.StatusUnauthorized) //返回401
 		return
 	}
-	level := session.Get("level").(uint)
-	privilege_level := level >> 4
-	if privilege_level < 10 { //10以上权限能新建tag
-		c.AbortWithStatus(http.StatusForbidden) //403
-		return
-	}
 	tagname := c.PostForm("tagname")
 	if has, _ :=db.Exist(&Tag{Text: tagname}); has == true {
 		c.AbortWithStatus(StatusRepeatTag)

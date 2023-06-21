@@ -64,7 +64,7 @@ func main() {
 		Path:     "/",
 		MaxAge:   TTL,
 		SameSite: http.SameSiteStrictMode})
-	r.Use(sessions.Sessions("session_id", store))
+	r.Use(sessions.Sessions("session", store))
 	r.LoadHTMLGlob("templates/**/*")
 	r.Use(static.Serve("/", static.LocalFile("cute_web/build/", false)))
 	// TODO csrf防护,需要前端支持
@@ -74,46 +74,24 @@ func main() {
 		group.GET("/user_status/:id", GetUserData)
 		group.GET("/video_comment/:id/:pg", GetVideoComment)
 		group.GET("/video_img/:id", GetVideoImg)
-		group.GET("/coffee", coffee)
+		group.GET("/coffee", PrivilegeLevel(11), coffee)
 
 		group.POST("/register", Register)
 		group.POST("/login", Login)
-		group.POST("/new_tag", NewTag)
+		group.POST("/new_tag", PrivilegeLevel(10), NewTag)
 		group.POST("/add_comment", AddComment)
 		group.POST("/upload_video", UploadVideo)
 		group.POST("/browse_forum/:page", BrowseForumPost)
 		group.POST("/browse_unitforum/:page/:mid", BrowseUnitforumPost)
 	}
 
-	group = r.Group("/test")
-	{
-		group.GET("/", func(ctx *gin.Context) {
-			ctx.HTML(http.StatusOK, "index.html", gin.H{})
-		})
-		group.GET("/login", func(ctx *gin.Context) {
-			ctx.HTML(http.StatusOK, "login.html", gin.H{})
-		})
-		group.GET("/register", func(ctx *gin.Context) {
-			ctx.HTML(http.StatusOK, "register.html", gin.H{})
-		})
-		group.GET("/add_file", func(ctx *gin.Context) {
-			ctx.HTML(http.StatusOK, "addfile.html", gin.H{})
-		})
-	}
-	//管理员页面
-	group = r.Group("/admin")
-	group.Use(AdminCheck())
-	{
-		group.POST("/browse_video/:page", AdminVideoPost)
-		group.POST("/upload_video", UploadVideo)
-	}
 	group = r.Group("/uapi")
-	group.Use(CheckLogin())
 	{
-		group.POST("/addmainforum", AddMainforum)
-		group.POST("/addunitforum", AddUnitforum)
-		group.POST("/addemoji", AddEmoji)
+		group.POST("/addmainforum", PrivilegeLevel(0), AddMainforum)
+		group.POST("/addunitforum", PrivilegeLevel(0), AddUnitforum)
+		group.POST("/addemoji", PrivilegeLevel(0), AddEmoji)
 	}
+
 	//  https://gin-gonic.com/zh-cn/docs/examples/graceful-restart-or-stop/
 	srv := &http.Server{
 		Addr:    ":8000",
@@ -143,6 +121,6 @@ func coffee(c *gin.Context) { //没有人能拒绝愚人节彩蛋
 	if time.Now().Month() == 4 && time.Now().Day() == 1 {
 		c.String(http.StatusTeapot, "我拒绝泡咖啡,因为我是茶壶")
 	} else {
-		c.String(http.StatusForbidden, "我拒绝泡咖啡,因为我是服务器")
+		c.String(http.StatusServiceUnavailable, "我拒绝泡咖啡,因为我是服务器")
 	}
 }
