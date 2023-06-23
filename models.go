@@ -66,22 +66,24 @@ type Forum struct { //获取视频和获取评论分开
 	Title  string
 	Views  uint `xorm:"default 0"` //这是浏览量
 	Author uint `xorm:"index"`
-	Model  `xorm:"extends"`
+	Kind   uint8
+	//0:官方通知区;1:用户反馈区;2:结束的用户反馈区;3:Thread贴;4:完结的Thread贴;5:资源贴
+	Model `xorm:"extends"`
 }
 
 type ForumComment struct {
-	Mid      uint `xorm:"index"` //所属论坛的id
-	Text     string
-	Author   uint `xorm:"index"`
-	Like     uint //uint8只有255，可能不太够用
-	Dislike  uint
-	Smile    uint
-	Firework uint
-	Unhappy  uint
-	Heart    uint
-	Rocket   uint
-	Eyes     uint
-	Model    `xorm:"extends"`
+	Mid         uint `xorm:"index"` //所属论坛的id
+	Text        string
+	Author      uint `xorm:"index"`
+	Like        uint //uint8只有255，可能不太够用
+	Dislike     uint
+	Smile       uint
+	Celebration uint
+	Confused    uint
+	Heart       uint
+	Rocket      uint
+	Eyes        uint
+	Model       `xorm:"extends"`
 }
 
 // 正在转码压制中的视频

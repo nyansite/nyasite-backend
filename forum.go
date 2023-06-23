@@ -58,13 +58,14 @@ func BrowseUnitforumPost(ctx *gin.Context) {
 	var unitforums []ForumComment
 	db.Limit(20, pg*20).Find(&unitforums)
 	ctx.JSON(http.StatusOK, gin.H{
+		"Origin":    mainforum,
 		"Body":      unitforums,
 		"PageCount": math.Ceil(float64(count) / 20), //总页数
 	})
 }
 
-func DBaddMainforum(title string, text string, author uint) {
-	mainforum := &Forum{Title: title, Author: author, Views: 0}
+func DBaddMainforum(title string, text string, author uint, kind uint8) {
+	mainforum := &Forum{Title: title, Author: author, Views: 0, Kind: kind}
 	db.Insert(mainforum)
 	unitforum := ForumComment{Text: text, Mid: uint(mainforum.Id), Author: author}
 	db.Insert(unitforum)
@@ -88,9 +89,9 @@ func DBaddEmoji(emoji uint, uid uint) {
 	case 2:
 		unitforum.Smile++
 	case 3:
-		unitforum.Firework++
+		unitforum.Celebration++
 	case 4:
-		unitforum.Unhappy++
+		unitforum.Confused++
 	case 5:
 		unitforum.Heart++
 	case 6:
@@ -104,11 +105,24 @@ func DBaddEmoji(emoji uint, uid uint) {
 
 func AddMainforum(ctx *gin.Context) {
 	session := sessions.Default(ctx)
-	title, text := ctx.PostForm("title"), ctx.PostForm("text")
+	title, text, kind := ctx.PostForm("title"), ctx.PostForm("text"), ctx.PostForm("type")
+	vkind, _ := strconv.Atoi(kind)
+	var ukind uint8
+	switch vkind {
+	case 0:
+		ukind = 1
+	case 1:
+		ukind = 3
+	case 2:
+		ukind = 5
+	default:
+		ctx.AbortWithStatus(http.StatusBadRequest) //传入了错误的分区数据
+		return
+	}
 	author := session.Get("id")
 	vauthor, _ := author.(int)
 	uauthor := uint(vauthor)
-	DBaddMainforum(title, text, uauthor)
+	DBaddMainforum(title, text, uauthor, ukind)
 	return
 }
 
@@ -130,6 +144,10 @@ func AddEmoji(ctx *gin.Context) {
 	vemoji, _ := strconv.Atoi(emoji)
 	uuid := uint(vuid)
 	uemoji := uint(vemoji)
+	if uemoji > 7 {
+		ctx.AbortWithStatus(http.StatusBadRequest) //传入的表情编号>7(不存在)
+		return
+	}
 	DBaddEmoji(uemoji, uuid)
 	return
 }

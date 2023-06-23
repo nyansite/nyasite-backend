@@ -60,7 +60,7 @@ func main() {
 	store := cookie.NewStore(secrets...)
 	store.Options(sessions.Options{
 		//Secure:   true, //跟下面那条基本上可以防住csrf了,但是还是稳一点好
-		HttpOnly: true,
+		HttpOnly: true, //测试阶段调ssl有点麻烦
 		Path:     "/",
 		MaxAge:   TTL,
 		SameSite: http.SameSiteStrictMode})
@@ -75,14 +75,14 @@ func main() {
 		group.GET("/video_comment/:id/:pg", GetVideoComment)
 		group.GET("/video_img/:id", GetVideoImg)
 		group.GET("/coffee", PrivilegeLevel(11), coffee)
+		group.GET("/browse_forum/:page", BrowseForumPost)
+		group.GET("/browse_unitforum/:mid/:page", BrowseUnitforumPost)
 
 		group.POST("/register", Register)
 		group.POST("/login", Login)
 		group.POST("/new_tag", PrivilegeLevel(10), NewTag)
 		group.POST("/add_comment", AddComment)
 		group.POST("/upload_video", UploadVideo)
-		group.POST("/browse_forum/:page", BrowseForumPost)
-		group.POST("/browse_unitforum/:page/:mid", BrowseUnitforumPost)
 	}
 
 	group = r.Group("/uapi")
