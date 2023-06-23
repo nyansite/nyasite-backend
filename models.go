@@ -67,7 +67,7 @@ type Forum struct { //获取视频和获取评论分开
 	Views  uint `xorm:"default 0"` //这是浏览量
 	Author uint `xorm:"index"`
 	Kind   uint8
-	//0:官方通知区;1:用户反馈区;2:结束的用户反馈区;3:Thread贴;4:完结的Thread贴;5:资源贴
+	//0:官方通知区;1:用户反馈区;2:关闭的用户反馈区;3:Thread贴;4:完结的Thread贴;5:资源贴
 	Model `xorm:"extends"`
 }
 

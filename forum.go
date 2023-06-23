@@ -11,7 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func BrowseForumPost(ctx *gin.Context) {
+func BrowseAllForumPost(ctx *gin.Context) {
 	vpg := ctx.Param("page")
 	pg, err := strconv.Atoi(vpg)
 	if err != nil || pg < 1 {
@@ -35,6 +35,43 @@ func BrowseForumPost(ctx *gin.Context) {
 	return
 }
 
+func BrowseForumPost(ctx *gin.Context) {
+	vkind := ctx.Param("board")
+	kind, err := strconv.Atoi(vkind)
+	vpg := ctx.Param("page")
+	pg, err := strconv.Atoi(vpg)
+	var chose []int
+	switch kind {
+	case 0:
+		chose = append(chose, 0)
+	case 1:
+		chose = append(chose, 1, 2)
+	case 2:
+		chose = append(chose, 3, 4)
+	case 3:
+		chose = append(chose, 5)
+	default:
+		ctx.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+	var forums []Forum
+	var count int64 //总数,Count比rowsaffected更快(懒得用变量缓存了
+	pg -= 1
+	count, err = db.In("kind", chose).Count(&Forum{})
+	if err != nil {
+		ctx.AbortWithStatus(http.StatusInternalServerError) //500,正常情况下不会出现
+		log.Println(err)
+		return
+	}
+	db.In("kind", chose).Limit(20, pg*20).Find(&forums)
+	ctx.JSON(http.StatusOK, gin.H{
+		"Body":      forums,
+		"PageCount": math.Ceil(float64(count) / 20), //总页数
+	})
+	return
+
+}
+
 func BrowseUnitforumPost(ctx *gin.Context) {
 	vmid := ctx.Param("mid")
 	mid, err := strconv.Atoi(vmid)
@@ -56,7 +93,7 @@ func BrowseUnitforumPost(ctx *gin.Context) {
 		return
 	}
 	var unitforums []ForumComment
-	db.Limit(20, pg*20).Find(&unitforums)
+	db.In("mid", mid).Limit(20, pg*20).Find(&unitforums)
 	ctx.JSON(http.StatusOK, gin.H{
 		"Origin":    mainforum,
 		"Body":      unitforums,
@@ -149,5 +186,15 @@ func AddEmoji(ctx *gin.Context) {
 		return
 	}
 	DBaddEmoji(uemoji, uuid)
+	return
+}
+
+func FinishForum(ctx *gin.Context) {
+	mid := ctx.PostForm("mid")
+	vmid, _ := strconv.Atoi(mid)
+	var mainforum Forum
+	db.ID(vmid).Get(&mainforum)
+	mainforum.Kind++
+	db.ID(vmid).Update(&mainforum)
 	return
 }
