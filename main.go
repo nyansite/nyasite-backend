@@ -65,7 +65,6 @@ func main() {
 		MaxAge:   TTL,
 		SameSite: http.SameSiteStrictMode})
 	r.Use(sessions.Sessions("session", store))
-	r.LoadHTMLGlob("templates/**/*")
 	r.Use(static.Serve("/", static.LocalFile("cute_web/build/", false)))
 	// TODO csrf防护,需要前端支持
 	group := r.Group("/api")
