@@ -57,7 +57,7 @@
 
 ### uapi/addunitforum
 
-跟帖;无等级限制;传入表单;属性是mid(被跟的帖子的id),text
+跟帖;无等级限制;传入表单;属性是uid(被跟的帖子的id),text
 
 ### uapi/addemoji
 

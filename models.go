@@ -74,8 +74,9 @@ type Forum struct { //获取视频和获取评论分开
 type ForumComment struct {
 	Mid         uint `xorm:"index"` //所属论坛的id
 	Text        string
-	Author      uint `xorm:"index"`
-	Like        uint //uint8只有255，可能不太够用
+	Author      uint  `xorm:"index"`
+	Choose      uint8 `xorm:"-"`
+	Like        uint  //uint8只有255，可能不太够用
 	Dislike     uint
 	Smile       uint
 	Celebration uint
@@ -84,6 +85,12 @@ type ForumComment struct {
 	Rocket      uint
 	Eyes        uint
 	Model       `xorm:"extends"`
+}
+
+type EmojiRecord struct {
+	Author uint
+	Uid    uint
+	Emoji  uint8
 }
 
 // 正在转码压制中的视频

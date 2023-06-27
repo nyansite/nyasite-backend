@@ -73,6 +73,10 @@ func BrowseForumPost(ctx *gin.Context) {
 }
 
 func BrowseUnitforumPost(ctx *gin.Context) {
+	session := sessions.Default(ctx)
+	author := session.Get("userid")
+	vauthor, _ := author.(int)
+	uauthor := uint(vauthor)
 	vmid := ctx.Param("mid")
 	mid, err := strconv.Atoi(vmid)
 	vpg := ctx.Param("page")
@@ -86,14 +90,25 @@ func BrowseUnitforumPost(ctx *gin.Context) {
 	var count int64
 	pg -= 1
 	var unitforum ForumComment
-	count, err = db.Where("mid = ?", mid).Count(&unitforum)
+	count, err = db.In("mid", mid).Count(&unitforum)
+	var unitforums []ForumComment
 	if err != nil {
 		ctx.AbortWithStatus(http.StatusInternalServerError) //500,正常情况下不会出现
 		log.Println(err)
 		return
 	}
-	var unitforums []ForumComment
 	db.In("mid", mid).Limit(20, pg*20).Find(&unitforums)
+	for i := 0; i <= len(unitforums)-1; i++ {
+		var emojiRecord EmojiRecord
+		count, _ := db.Where("author = ? AND uid = ?", author, unitforums[i].Id).Count(&EmojiRecord{})
+		println(count)
+		if count == 0 {
+			unitforums[i].Choose = 0
+		} else {
+			db.Where("author = ? AND uid = ?", uauthor, unitforums[i].Id).Get(&emojiRecord)
+			unitforums[i].Choose = uint8(emojiRecord.Emoji + 1)
+		}
+	}
 	ctx.JSON(http.StatusOK, gin.H{
 		"Origin":    mainforum,
 		"Body":      unitforums,
@@ -115,7 +130,7 @@ func DBaddUnitforum(text string, mid uint, author uint) {
 	return
 }
 
-func DBaddEmoji(emoji uint, uid uint) {
+func DBaddEmoji(emoji uint, uid uint, author uint) {
 	var unitforum ForumComment
 	db.ID(uid).Get(&unitforum)
 	switch emoji {
@@ -136,6 +151,8 @@ func DBaddEmoji(emoji uint, uid uint) {
 	case 7:
 		unitforum.Eyes++
 	}
+	emojiRecord := EmojiRecord{Author: author, Uid: uid, Emoji: uint8(emoji)}
+	db.Insert(&emojiRecord)
 	db.ID(uid).Update(&unitforum)
 	return
 }
@@ -156,8 +173,8 @@ func AddMainforum(ctx *gin.Context) {
 		ctx.AbortWithStatus(http.StatusBadRequest) //传入了错误的分区数据
 		return
 	}
-	author := session.Get("id")
-	vauthor, _ := author.(int)
+	author := session.Get("userid")
+	vauthor := author.(int64)
 	uauthor := uint(vauthor)
 	DBaddMainforum(title, text, uauthor, ukind)
 	return
@@ -165,8 +182,8 @@ func AddMainforum(ctx *gin.Context) {
 
 func AddUnitforum(ctx *gin.Context) {
 	session := sessions.Default(ctx)
-	author := session.Get("id")
-	vauthor, _ := author.(int)
+	author := session.Get("userid")
+	vauthor := author.(int64)
 	uauthor := uint(vauthor)
 	mid, text := ctx.PostForm("mid"), ctx.PostForm("text")
 	vmid, _ := strconv.Atoi(mid)
@@ -176,6 +193,10 @@ func AddUnitforum(ctx *gin.Context) {
 }
 
 func AddEmoji(ctx *gin.Context) {
+	session := sessions.Default(ctx)
+	author := session.Get("userid")
+	vauthor := author.(int64)
+	uauthor := uint(vauthor)
 	emoji, uid := ctx.PostForm("emoji"), ctx.PostForm("uid")
 	vuid, _ := strconv.Atoi(uid)
 	vemoji, _ := strconv.Atoi(emoji)
@@ -185,16 +206,24 @@ func AddEmoji(ctx *gin.Context) {
 		ctx.AbortWithStatus(http.StatusBadRequest) //传入的表情编号>7(不存在)
 		return
 	}
-	DBaddEmoji(uemoji, uuid)
+	DBaddEmoji(uemoji, uuid, uauthor)
 	return
 }
 
 func FinishForum(ctx *gin.Context) {
+	session := sessions.Default(ctx)
 	mid := ctx.PostForm("mid")
 	vmid, _ := strconv.Atoi(mid)
+	author := session.Get("userid")
+	vauthor := author.(int64)
+	uauthor := uint(vauthor)
 	var mainforum Forum
 	db.ID(vmid).Get(&mainforum)
-	mainforum.Kind++
+	if uauthor == mainforum.Author {
+		mainforum.Kind++
+	} else {
+		ctx.AbortWithStatus(http.StatusBadRequest) //如果不是贴主不能完结
+	}
 	db.ID(vmid).Update(&mainforum)
 	return
 }

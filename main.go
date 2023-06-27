@@ -33,7 +33,7 @@ func main() {
 		panic("我数据库呢???我那么大一个数据库呢???还我数据库!!!")
 	}
 
-	db.Sync(&User{}, &Video{}, &VideoComment{}, &Tag{}, &Forum{}, &SessionSecret{}, &ForumComment{})
+	db.Sync(&User{}, &Video{}, &VideoComment{}, &Tag{}, &Forum{}, &SessionSecret{}, &ForumComment{}, &EmojiRecord{})
 	db.SetDefaultCacher(caches.NewLRUCacher(caches.NewMemoryStore(), 1000))
 	//上面的是sql
 
