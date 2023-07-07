@@ -2,13 +2,15 @@ package main
 
 import (
 	"fmt"
-	"github.com/gin-contrib/sessions"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
 
-	ffmpeg "github.com/u2takey/ffmpeg-go"
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-gonic/gin"
+
 	"os"
+
+	ffmpeg "github.com/u2takey/ffmpeg-go"
 )
 
 func NewTag(c *gin.Context) {
@@ -18,7 +20,7 @@ func NewTag(c *gin.Context) {
 		return
 	}
 	tagname := c.PostForm("tagname")
-	if has, _ :=db.Exist(&Tag{Text: tagname}); has == true {
+	if has, _ := db.Exist(&Tag{Text: tagname}); has == true {
 		c.AbortWithStatus(StatusRepeatTag)
 		return
 	}
@@ -41,7 +43,7 @@ func GetVideoComment(c *gin.Context) {
 		return
 	}
 	var comments []VideoComment
-	
+
 	db.Desc("Likes").Limit(20, (pg-1)*20).Where("Vid = ?", id).Find(&comments)
 	fmt.Println(&comments)
 }
@@ -100,7 +102,7 @@ func SaveVideo(src string, title string, description string, uuid string) {
 	video.Title = title
 	video.Description = description
 	video.Views = 0
-	db.Insert(&video)
+
 	err := ffmpeg.Input(src).Output(src+".mp4", ffmpeg.KwArgs{
 		// "c:v": "libsvtav1",
 	}).Run()
@@ -108,17 +110,11 @@ func SaveVideo(src string, title string, description string, uuid string) {
 		fmt.Println(err)
 		return
 	}
-	os.Mkdir("./temporary/"+uuid, os.ModePerm)
-	err = ffmpeg.Input(src+".mp4").Output("./temporary/"+uuid+"/w.m3u8", ffmpeg.KwArgs{
-		// "codec":         "copy",		//只有音频,原因未知
-		"start_number":  0,
-		"hls_list_size": 0,
-		"hls_time":      5,
-		"f":             "hls",
-	}).Run()
-	err = Addpath("./temporary/"+uuid, "/video/"+strconv.Itoa(int(video.Id)))
+
 	if err != nil {
 		fmt.Println(err)
 	}
-
+	video.IpfsHash = Upload(src + ".mp4")
+	db.Insert(&video)
+	return
 }
