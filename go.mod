@@ -3,7 +3,6 @@ module cute_site
 go 1.20
 
 require (
-	github.com/andybalholm/brotli v1.0.5
 	github.com/gin-contrib/sessions v0.0.5
 	github.com/gin-gonic/gin v1.9.1
 	github.com/google/uuid v1.3.0
