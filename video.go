@@ -8,8 +8,6 @@ import (
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 
-	"os"
-
 	ffmpeg "github.com/u2takey/ffmpeg-go"
 )
 
@@ -48,33 +46,33 @@ func GetVideoComment(c *gin.Context) {
 	fmt.Println(&comments)
 }
 
-func GetVideoImg(c *gin.Context) {
+// func GetVideoImg(c *gin.Context) {
 
-	strid := c.Param("id")
-	if strid == "" {
-		c.AbortWithStatus(http.StatusBadRequest) //400
-		return
-	}
-	id, err := strconv.Atoi(strid)
+// 	strid := c.Param("id")
+// 	if strid == "" {
+// 		c.AbortWithStatus(http.StatusBadRequest) //400
+// 		return
+// 	}
+// 	id, err := strconv.Atoi(strid)
 
-	if err != nil {
-		c.AbortWithStatus(http.StatusBadRequest) //返回400
-		return
-	}
-	fimg, err := GetFile("/img/" + strconv.Itoa(id))
-	if err != nil {
-		if err == NotFound {
-			c.String(http.StatusNotFound, "梦里啥都有,'"+("/img/"+strconv.Itoa(id))+"'什么都没有")
-			return
-		}
-		c.String(http.StatusInternalServerError, err.Error()) //500
-		return
-	}
+// 	if err != nil {
+// 		c.AbortWithStatus(http.StatusBadRequest) //返回400
+// 		return
+// 	}
+// 	fimg, err := GetFile("/img/" + strconv.Itoa(id))
+// 	if err != nil {
+// 		if err == NotFound {
+// 			c.String(http.StatusNotFound, "梦里啥都有,'"+("/img/"+strconv.Itoa(id))+"'什么都没有")
+// 			return
+// 		}
+// 		c.String(http.StatusInternalServerError, err.Error()) //500
+// 		return
+// 	}
 
-	c.Header("Content-Encoding", "br")  //声明压缩格式,否则会被当作二进制文件下载
-	c.Header("Vary", "Accept-Encoding") //客户端使用缓存
-	c.Data(http.StatusOK, "image/webp", fimg)
-}
+// 	c.Header("Content-Encoding", "br")  //声明压缩格式,否则会被当作二进制文件下载
+// 	c.Header("Vary", "Accept-Encoding") //客户端使用缓存
+// 	c.Data(http.StatusOK, "image/webp", fimg)
+// }
 
 // TODO 先摸了
 func AddComment(c *gin.Context) {

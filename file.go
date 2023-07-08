@@ -1,12 +1,8 @@
 package main
 
 import (
-	"bytes"
-	"context"
 	"errors"
-	"io"
-
-	"github.com/andybalholm/brotli"
+	"os"
 	shell "github.com/ipfs/go-ipfs-api"
 )
 

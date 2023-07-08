@@ -72,7 +72,6 @@ func main() {
 		group.GET("/user_status", GetSelfUserData)
 		group.GET("/user_status/:id", GetUserData)
 		group.GET("/video_comment/:id/:pg", GetVideoComment)
-		group.GET("/video_img/:id", GetVideoImg)
 		group.GET("/coffee", PrivilegeLevel(11), coffee)
 		group.GET("/all_forum/:page", BrowseAllForumPost)
 		group.GET("/browse_forum/:board/:page", BrowseForumPost)
