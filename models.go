@@ -29,6 +29,7 @@ type User struct {
 
 type Video struct { //获取视频和获取评论分开
 	IpfsHash    string
+	CoverPath   string
 	Title       string `xorm:"default '芝士标题'"`
 	Description string `xorm:"default '简介不见惹'"`
 	Tag         []uint `xorm:"index"`     //tag的id

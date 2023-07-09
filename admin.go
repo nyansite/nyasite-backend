@@ -7,6 +7,7 @@ import (
 	"path"
 	"strconv"
 
+	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	UUID "github.com/google/uuid"
 )
@@ -22,7 +23,7 @@ func AdminVideoPost(ctx *gin.Context) {
 	var count int64 //总数,Count比rowsaffected更快(懒得用变量缓存了
 	pg -= 1
 	count, err = db.Count(&Video{})
-	if err != nil{
+	if err != nil {
 		ctx.AbortWithStatus(http.StatusInternalServerError) //500,正常情况下不会出现
 		fmt.Println(err)
 		return
@@ -36,22 +37,28 @@ func AdminVideoPost(ctx *gin.Context) {
 
 // 不审核直接上传,测试接口
 func UploadVideo(c *gin.Context) {
+	session := sessions.Default(c)
 	title := c.PostForm("Title")
 	description := c.PostForm("Description") //简介
-	f, err := c.FormFile("file")
-	if err != nil {
+	f, err1 := c.FormFile("file")
+	cover, err2 := c.FormFile("cover")
+	if err1 != nil || err2 != nil {
 		c.AbortWithStatus(http.StatusBadRequest) //400
 		return
 	}
-
+	author := session.Get("userid")
+	vauthor := author.(int64)
+	uauthor := uint(vauthor)
 	uuid := UUID.New()
-	fpath := "./temporary/" + uuid.String() + path.Ext(f.Filename)
+	sid := uuid.String()
+	fpath := "./temporary/" + sid + path.Ext(f.Filename)
+	cpath := "./temporary/" + sid + path.Ext(cover.Filename)
 	c.SaveUploadedFile(f, fpath)
-	go SaveVideo(fpath, title, description, uuid.String())
+	c.SaveUploadedFile(cover, cpath)
+	go SaveVideo(uauthor, fpath, cpath, title, description, sid)
 }
 
-
 func GetSessionSecret() [][]byte {
-	
+
 	return nil
 }

@@ -30,7 +30,7 @@ func main() {
 	var err error
 	db, err = xorm.NewEngine("postgres", "postgresql://postgres:114514@localhost:5432/dbs?sslmode=disable")
 	if err != nil {
-		panic("我数据库呢???我那么大一个数据库呢???还我数据库!!!")
+		panic(err)
 	}
 
 	db.Sync(&User{}, &Video{}, &VideoComment{}, &Tag{}, &Forum{}, &SessionSecret{}, &ForumComment{}, &EmojiRecord{})
@@ -51,7 +51,7 @@ func main() {
 	db.Where("created_at < ?", time.Now().Unix()-TTL).Delete(&SessionSecret{}) //删除过期
 	err = db.Where("created_at >= ?", time.Now().Unix()-TTL).Find(&old_secrets)
 	if err != nil {
-		panic(err)
+		panic("数据库丢失")
 	}
 	db.Insert(&SessionSecret{Authentication: s1.Bytes(), Encryption: s2.Bytes()})
 	for _, v := range old_secrets {
@@ -71,6 +71,7 @@ func main() {
 	{
 		group.GET("/user_status", GetSelfUserData)
 		group.GET("/user_status/:id", GetUserData)
+		group.GET("/get_video_img/:id", GetVideoImg)
 		group.GET("/video_comment/:id/:pg", GetVideoComment)
 		group.GET("/coffee", PrivilegeLevel(11), coffee)
 		group.GET("/all_forum/:page", BrowseAllForumPost)
@@ -80,12 +81,15 @@ func main() {
 		group.POST("/register", Register)
 		group.POST("/login", Login)
 		group.POST("/add_comment", AddComment)
-		group.POST("/upload_video", UploadVideo)
+
 	}
 
 	group = r.Group("/uapi")
 	{
 		group.POST("/new_tag", PrivilegeLevel(10), NewTag)
+		//video
+		group.POST("/upload_video", UploadVideo)
+		//fourm
 		group.POST("/addmainforum", PrivilegeLevel(0), AddMainforum)
 		group.POST("/addunitforum", PrivilegeLevel(0), AddUnitforum)
 		group.POST("/addemoji", PrivilegeLevel(0), AddEmoji)
