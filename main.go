@@ -30,7 +30,7 @@ func main() {
 	var err error
 	db, err = xorm.NewEngine("postgres", "postgresql://postgres:114514@localhost:5432/dbs?sslmode=disable")
 	if err != nil {
-		panic(err)
+		panic(err) //连接失败不会在这里挂
 	}
 
 	db.Sync(&User{}, &Video{}, &VideoComment{}, &Tag{}, &Forum{}, &SessionSecret{}, &ForumComment{}, &EmojiRecord{})
@@ -51,7 +51,7 @@ func main() {
 	db.Where("created_at < ?", time.Now().Unix()-TTL).Delete(&SessionSecret{}) //删除过期
 	err = db.Where("created_at >= ?", time.Now().Unix()-TTL).Find(&old_secrets)
 	if err != nil {
-		panic("数据库丢失")
+		panic("我数据库呢???我那么大一个数据库呢???还我数据库!!!")
 	}
 	db.Insert(&SessionSecret{Authentication: s1.Bytes(), Encryption: s2.Bytes()})
 	for _, v := range old_secrets {
