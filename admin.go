@@ -64,7 +64,7 @@ func UploadVideo(c *gin.Context) {
 	c.SaveUploadedFile(f, fpath)
 	c.SaveUploadedFile(cover, cpath)
 	fCover, _ := os.Open(cpath)
-	image, _, err3 := image.Decode(fCover)
+	image, _, _ := image.Decode(fCover)
 	cpath = "./temporary/" + sid + ".webp"
 	outfile, _ := os.Create(cpath)
 	b := bufio.NewWriter(outfile)
