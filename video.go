@@ -100,17 +100,15 @@ func SaveVideo(author uint, src string, cscr string, title string, description s
 	video.Description = description
 	video.Views = 0
 	video.CoverPath = cscr
+	//the error ffmpeg part
 	err := ffmpeg.Input(src).Output(src+".mp4", ffmpeg.KwArgs{
 		// "c:v": "libsvtav1",
 	}).Run()
 	if err != nil {
-		fmt.Println(err)
+		panic(err)
 		return
 	}
-
-	if err != nil {
-		fmt.Println(err)
-	}
+	//
 	video.IpfsHash = Upload(src + ".mp4")
 	db.Insert(&video)
 	return

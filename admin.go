@@ -63,17 +63,14 @@ func UploadVideo(c *gin.Context) {
 	cpath := "./temporary/" + sid + path.Ext(cover.Filename)
 	c.SaveUploadedFile(f, fpath)
 	c.SaveUploadedFile(cover, cpath)
+	//encode cover into webp image
 	fCover, _ := os.Open(cpath)
 	image, _, _ := image.Decode(fCover)
 	cpath = "./temporary/" + sid + ".webp"
 	outfile, _ := os.Create(cpath)
 	b := bufio.NewWriter(outfile)
 	webp.Encode(b, image, &webp.Options{Lossless: false})
-	if err1 != nil {
-		c.AbortWithStatus(http.StatusInternalServerError)
-		panic(err1)
-		return
-	}
+	//
 	err1 = b.Flush()
 	if err1 != nil {
 		c.AbortWithStatus(http.StatusInternalServerError)
