@@ -63,7 +63,7 @@ func UploadVideo(c *gin.Context) {
 	cpath := "./temporary/" + sid + path.Ext(cover.Filename)
 	c.SaveUploadedFile(f, fpath)
 	c.SaveUploadedFile(cover, cpath)
-	//encode cover into webp image
+	//transform cover into webp image
 	fCover, _ := os.Open(cpath)
 	image, _, _ := image.Decode(fCover)
 	cpath = "./temporary/" + sid + ".webp"
