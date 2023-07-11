@@ -1,12 +1,20 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"image"
+	_ "image/gif"
+	_ "image/jpeg"
+	_ "image/png"
+
 	"math"
 	"net/http"
+	"os"
 	"path"
 	"strconv"
 
+	"github.com/chai2010/webp"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	UUID "github.com/google/uuid"
@@ -55,6 +63,22 @@ func UploadVideo(c *gin.Context) {
 	cpath := "./temporary/" + sid + path.Ext(cover.Filename)
 	c.SaveUploadedFile(f, fpath)
 	c.SaveUploadedFile(cover, cpath)
+	fCover, _ := os.Open(cpath)
+	image, _, err3 := image.Decode(fCover)
+	cpath = "./temporary/" + sid + ".webp"
+	outfile, _ := os.Create(cpath)
+	b := bufio.NewWriter(outfile)
+	webp.Encode(b, image, &webp.Options{Lossless: false})
+	if err1 != nil {
+		c.AbortWithStatus(http.StatusInternalServerError)
+		panic(err1)
+		return
+	}
+	err1 = b.Flush()
+	if err1 != nil {
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
 	go SaveVideo(uauthor, fpath, cpath, title, description, sid)
 }
 

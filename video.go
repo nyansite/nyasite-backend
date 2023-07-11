@@ -69,6 +69,7 @@ func GetVideoImg(c *gin.Context) {
 	c.Header("Vary", "Accept-Encoding")
 	//c.Header("Content-Encoding", "br") //声明压缩格式,否则会被当作二进制文件下载
 	c.File(video.CoverPath)
+	return
 }
 
 // TODO 先摸了
