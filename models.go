@@ -49,7 +49,7 @@ type VideoComment struct {
 	Vid    uint `xorm:"index"` //所属页面的id
 	Text   string
 	Author uint `xorm:"index"`     //发表评论的用户
-	likes  uint `xorm:"default 0"` //芝士点赞数量
+	Likes  uint `xorm:"default 0"` //芝士点赞数量
 	Model  `xorm:"extends"`
 }
 
@@ -57,7 +57,7 @@ type VideoCommentReply struct { //楼中楼的回复.......
 	Cid    uint `xorm:"index"` //楼中楼上一层的id,自动生成
 	Text   string
 	Author uint `xorm:"index"`
-	likes  uint `xorm:"default 0"` //芝士点赞数量
+	Likes  uint `xorm:"default 0"` //芝士点赞数量
 	Model  `xorm:"extends"`
 }
 

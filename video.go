@@ -73,24 +73,16 @@ func GetVideoImg(c *gin.Context) {
 }
 
 // TODO 先摸了
-func AddComment(c *gin.Context) {
-	// var video Video
-	// db.Preload("CommentP").First(&video, vid)
-
-	// // fmt.Println(video.CommentP[len(video.CommentP)-1].ID)
-	// var com []VideoComment
-	// db.Find(&com, "Pid = ?", video.CommentP[len(video.CommentP)-1].ID)
-
-	// if len(com) >= 16 {
-	// 	video.CommentP = append(video.CommentP, VideoCommentPage{Vid: video.ID})
-
-	// }
-	// pg := video.CommentP[len(video.CommentP)-1]
-
-	// if cid == 0 {
-	// 	pg.Comment = append(pg.Comment, VideoComment{Text: str})
-	// 	db.Save(&pg)
-	// }
+func AddVideoComment(ctx *gin.Context) {
+	session := sessions.Default(ctx)
+	author := session.Get("userid")
+	vauthor := author.(int64)
+	uauthor := uint(vauthor)
+	vid, text := ctx.PostForm("vid"), ctx.PostForm("text")
+	vvid, _ := strconv.Atoi(vid)
+	uvid := uint(vvid)
+	DBaddVideoComment(uvid, uauthor, text)
+	return
 }
 
 func SaveVideo(author uint, src string, cscr string, title string, description string, uuid string) {
@@ -103,7 +95,7 @@ func SaveVideo(author uint, src string, cscr string, title string, description s
 	//the error ffmpeg part
 	err := ffmpeg.Input(src).Output(src+".mp4", ffmpeg.KwArgs{
 		// "c:v": "libsvtav1",
-	}).Run()
+	}).OverWriteOutput().ErrorToStdOut().Run()
 	if err != nil {
 		panic(err)
 		return
@@ -111,5 +103,11 @@ func SaveVideo(author uint, src string, cscr string, title string, description s
 	//
 	video.IpfsHash = Upload(src + ".mp4")
 	db.Insert(&video)
+	return
+}
+
+func DBaddVideoComment(vid uint, author uint, text string) {
+	vComment := VideoComment{Vid: vid, Author: author, Text: text, Likes: 0}
+	db.Insert(vComment)
 	return
 }

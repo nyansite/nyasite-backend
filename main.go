@@ -80,8 +80,6 @@ func main() {
 
 		group.POST("/register", Register)
 		group.POST("/login", Login)
-		group.POST("/add_comment", AddComment)
-
 	}
 
 	group = r.Group("/uapi")
@@ -89,6 +87,7 @@ func main() {
 		group.POST("/new_tag", PrivilegeLevel(10), NewTag)
 		//video
 		group.POST("/upload_video", UploadVideo)
+		group.POST("/add_video_comment", AddVideoComment)
 		//fourm
 		group.POST("/addmainforum", PrivilegeLevel(0), AddMainforum)
 		group.POST("/addunitforum", PrivilegeLevel(0), AddUnitforum)
