@@ -89,10 +89,10 @@ func main() {
 		group.POST("/upload_video", UploadVideo)
 		group.POST("/add_video_comment", AddVideoComment)
 		//fourm
-		group.POST("/addmainforum", PrivilegeLevel(0), AddMainforum)
-		group.POST("/addunitforum", PrivilegeLevel(0), AddUnitforum)
-		group.POST("/addemoji", PrivilegeLevel(0), AddEmoji)
-		group.POST("/finishforum", PrivilegeLevel(0), FinishForum)
+		group.POST("/add_mainforum", PrivilegeLevel(0), AddMainforum)
+		group.POST("/add_unitforum", PrivilegeLevel(0), AddUnitforum)
+		group.POST("/add_emoji", PrivilegeLevel(0), AddEmoji)
+		group.POST("/finish_forum", PrivilegeLevel(0), FinishForum)
 	}
 
 	//  https://gin-gonic.com/zh-cn/docs/examples/graceful-restart-or-stop/
