@@ -85,6 +85,7 @@ func GetVideoTags(c *gin.Context) {
 	count, _ := db.Where("kind = ? AND pid = ?", 1, id).Count(&tags)
 	if count == 0 {
 		c.AbortWithStatus(http.StatusNotFound)
+		return
 	}
 	db.Where("kind = ? AND pid = ?", 1, id).Find(&tags)
 	var tagModel TagModel

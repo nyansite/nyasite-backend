@@ -17,7 +17,6 @@ func PrivilegeLevel(level uint8) gin.HandlerFunc {
 		}
 		ulevel := session.Get("level").(uint8)
 		if (ulevel >> 4) < level {
-			fmt.Println(ulevel >> 4)
 			ctx.AbortWithStatus(http.StatusForbidden) //403
 			return
 		}
