@@ -34,7 +34,7 @@ func main() {
 		panic(err) //连接失败不会在这里挂
 	}
 
-	db.Sync(&User{}, &Video{}, &VideoComment{}, &Tag{}, &Forum{}, &SessionSecret{}, &ForumComment{}, &EmojiRecord{})
+	db.Sync(&User{}, &Video{}, &VideoComment{}, &Tag{}, &TagModel{}, &Forum{}, &SessionSecret{}, &ForumComment{}, &EmojiRecord{})
 	db.SetDefaultCacher(caches.NewLRUCacher(caches.NewMemoryStore(), 1000))
 	//上面的是sql
 
@@ -75,6 +75,7 @@ func main() {
 		group.GET("/user_status/:id", GetUserData)
 		group.GET("/get_video_img/:id", GetVideoImg)
 		group.GET("/video_comment/:id/:pg", GetVideoComment)
+		group.GET("/get_video_tags/:id", GetVideoTags)
 		group.GET("/coffee", PrivilegeLevel(11), coffee)
 		group.GET("/all_forum/:page", BrowseAllForumPost)
 		group.GET("/browse_forum/:board/:page", BrowseForumPost)
@@ -90,6 +91,7 @@ func main() {
 		//video
 		group.POST("/upload_video", UploadVideo)
 		group.POST("/add_video_comment", AddVideoComment)
+		group.POST("/add_video_tag", AddVideoTag)
 		//fourm
 		group.POST("/add_mainforum", PrivilegeLevel(0), AddMainforum)
 		group.POST("/add_unitforum", PrivilegeLevel(0), AddUnitforum)

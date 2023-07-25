@@ -20,6 +20,21 @@ import (
 	UUID "github.com/google/uuid"
 )
 
+func NewTag(c *gin.Context) {
+	session := sessions.Default(c)
+	if session.Get("is_login") != true {
+		c.AbortWithStatus(http.StatusUnauthorized) //返回401
+		return
+	}
+	tagname := c.PostForm("tagname")
+	if has, _ := db.Exist(&TagModel{Text: tagname}); has == true {
+		c.AbortWithStatus(StatusRepeatTag)
+		return
+	}
+	db.Insert(&TagModel{Text: tagname})
+	c.AbortWithStatus(http.StatusOK)
+}
+
 func AdminVideoPost(ctx *gin.Context) {
 	vpg := ctx.Param("page")
 	pg, err := strconv.Atoi(vpg)

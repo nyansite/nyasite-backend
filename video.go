@@ -11,19 +11,14 @@ import (
 	ffmpeg "github.com/u2takey/ffmpeg-go"
 )
 
-func NewTag(c *gin.Context) {
-	session := sessions.Default(c)
-	if session.Get("is_login") != true {
-		c.AbortWithStatus(http.StatusUnauthorized) //返回401
-		return
-	}
-	tagname := c.PostForm("tagname")
-	if has, _ := db.Exist(&Tag{Text: tagname}); has == true {
-		c.AbortWithStatus(StatusRepeatTag)
-		return
-	}
-	db.Insert(&Tag{Text: tagname})
-	c.AbortWithStatus(http.StatusOK)
+func AddVideoTag(c *gin.Context) {
+	strVid := c.PostForm("vid")
+	vVid, _ := strconv.Atoi(strVid)
+	uVid := uint(vVid)
+	strTagId := c.PostForm("tagid")
+	vTagId, _ := strconv.Atoi(strTagId)
+	uTagId := uint(vTagId)
+	DBaddVideoTag(uVid, uTagId)
 }
 
 func GetVideoComment(c *gin.Context) {
@@ -44,6 +39,7 @@ func GetVideoComment(c *gin.Context) {
 
 	db.Desc("Likes").Limit(20, (pg-1)*20).Where("Vid = ?", id).Find(&comments)
 	fmt.Println(&comments)
+	return
 }
 
 func GetVideoImg(c *gin.Context) {
@@ -69,6 +65,40 @@ func GetVideoImg(c *gin.Context) {
 	c.Header("Vary", "Accept-Encoding")
 	//c.Header("Content-Encoding", "br") //声明压缩格式,否则会被当作二进制文件下载
 	c.File(video.CoverPath)
+	return
+}
+
+func GetVideoTags(c *gin.Context) {
+	var tagTexts []string
+	var tagIds []int
+	strid := c.Param("id")
+	if strid == "" {
+		c.AbortWithStatus(http.StatusBadRequest) //400
+		return
+	}
+	id, err := strconv.Atoi(strid)
+
+	if err != nil {
+		c.AbortWithStatus(http.StatusBadRequest) //返回400 		return
+	}
+	var tags []Tag
+	count, _ := db.Where("kind = ? AND pid = ?", 1, id).Count(&tags)
+	if count == 0 {
+		c.AbortWithStatus(http.StatusNotFound)
+	}
+	db.Where("kind = ? AND pid = ?", 1, id).Find(&tags)
+	var tagModel TagModel
+	var tid int
+	for _, value := range tags {
+		tid = int(value.Tid)
+		db.ID(tid).Get(&tagModel)
+		tagTexts = append(tagTexts, tagModel.Text)
+		tagIds = append(tagIds, tid)
+	}
+	c.JSONP(http.StatusOK, gin.H{
+		"tagtext": tagTexts,
+		"tagid":   tagIds,
+	})
 	return
 }
 
@@ -109,5 +139,11 @@ func SaveVideo(author uint, src string, cscr string, title string, description s
 func DBaddVideoComment(vid uint, author uint, text string) {
 	vComment := VideoComment{Vid: vid, Author: author, Text: text, Likes: 0}
 	db.Insert(vComment)
+	return
+}
+
+func DBaddVideoTag(vid uint, tagid uint) {
+	tag := Tag{Tid: tagid, Kind: 1, Pid: vid}
+	db.Insert(tag)
 	return
 }

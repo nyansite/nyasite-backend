@@ -73,7 +73,7 @@ func Login(c *gin.Context) {
 		c.AbortWithStatus(StatusPasswordError)
 		return
 	}
-
+	println(user.Level)
 	session.Set("userid", user.Id)
 	session.Set("is_login", true)
 	session.Set("level", user.Level)

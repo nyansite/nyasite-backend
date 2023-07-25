@@ -39,10 +39,18 @@ type Video struct { //获取视频和获取评论分开
 	Model       `xorm:"extends"`
 }
 
-type Tag struct {
+type TagModel struct {
 	Id        int64  //xorm自动主键
 	CreatedAt int    `xorm:"created"`
 	Text      string `xorm:"unique"`
+	Times     uint
+}
+type Tag struct {
+	Id        int64 //xorm自动主键
+	CreatedAt int   `xorm:"created"`
+	Tid       uint
+	Kind      uint //0:论坛 1:视频站
+	Pid       uint
 }
 
 type VideoComment struct {
