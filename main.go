@@ -80,6 +80,7 @@ func main() {
 		group.GET("/all_forum/:page", BrowseAllForumPost)
 		group.GET("/browse_forum/:board/:page", BrowseForumPost)
 		group.GET("/browse_unitforum/:mid/:page", BrowseUnitforumPost)
+		group.GET("/search/taglist/:tc", SearchTag)
 
 		group.POST("/register", Register)
 		group.POST("/login", Login)
