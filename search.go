@@ -7,17 +7,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func InString(stack []string) func(string) bool {
-	set := make(map[string]struct{})
-	for _, i := range stack {
-		set[i] = struct{}{}
-	}
-	return func(needle string) bool {
-		_, have := set[needle]
-		return have
-	}
-}
-
 func SearchTag(c *gin.Context) {
 	var tagMs []TagModel
 	var tagList []string
