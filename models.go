@@ -116,3 +116,12 @@ type SessionSecret struct {
 	Authentication []byte
 	Encryption     []byte
 }
+
+//搜索部分
+
+type SearchFourmsReturn struct {
+	Id    int64
+	Title string
+	Text  string
+	Kind  uint8
+}

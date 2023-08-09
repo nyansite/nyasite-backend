@@ -3,8 +3,20 @@ package main
 import (
 	"net/http"
 
+	mapset "github.com/deckarep/golang-set"
 	"github.com/gin-gonic/gin"
 )
+
+func InString(stack []string) func(string) bool {
+	set := make(map[string]struct{})
+	for _, i := range stack {
+		set[i] = struct{}{}
+	}
+	return func(needle string) bool {
+		_, have := set[needle]
+		return have
+	}
+}
 
 func SearchTag(c *gin.Context) {
 	var tagMs []TagModel
@@ -15,4 +27,38 @@ func SearchTag(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"results": tagList})
 	return
+}
+
+func SearchFourms(c *gin.Context) {
+	var fourm Forum
+	var forumsC []ForumComment
+	var fourmsTitle []Forum //这里是检索标题后的结果
+	var forumSearch SearchFourmsReturn
+	var forumsS []SearchFourmsReturn
+	titles := mapset.NewSet()
+	textCondition := c.Param("tc")
+	db.Where("Text like ?", "%"+textCondition+"%").Find(&forumsC)
+	for _, i := range forumsC {
+		db.ID(i.Mid).Get(&fourm)
+		if !titles.Contains(fourm.Title) {
+			forumSearch.Id = fourm.Id
+			forumSearch.Text = i.Text
+			forumSearch.Title = fourm.Title
+			forumSearch.Kind = fourm.Kind
+			titles.Add(fourm.Title)
+			forumsS = append(forumsS, forumSearch)
+		}
+	}
+	db.Where("Title like ?", "%"+textCondition+"%").Find(&fourmsTitle)
+	for _, i := range fourmsTitle {
+		if !titles.Contains(i.Title) {
+			forumSearch.Id = i.Id
+			forumSearch.Title = i.Title
+			forumSearch.Kind = i.Kind
+			forumsS = append(forumsS, forumSearch)
+		}
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"forum": forumsS,
+	})
 }
