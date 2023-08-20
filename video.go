@@ -129,7 +129,6 @@ func SaveVideo(author uint, src string, cscr string, title string, description s
 	}).OverWriteOutput().ErrorToStdOut().Run()
 	if err != nil {
 		panic(err)
-		return
 	}
 	//
 	video.IpfsHash = Upload(src + ".mp4")
