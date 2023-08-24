@@ -1,6 +1,3 @@
-[submodule "cute_web"]
-	path = cute_web
-	url = git@github.com:nyansite/cute_web.git
 [submodule "cirno_web"]
 	path = cirno_web
 	url = git@github.com:nyansite/cirno_web.git
