@@ -32,7 +32,6 @@ type Video struct { //获取视频和获取评论分开
 	CoverPath   string
 	Title       string `xorm:"default '芝士标题'"`
 	Description string `xorm:"default '简介不见惹'"`
-	Tag         []uint `xorm:"index"`     //tag的id
 	likes       uint   `xorm:"default 0"` //芝士点赞数量
 	Views       uint   `xorm:"default 0"` //这是播放量
 	Author      uint   `xorm:"index"`     //作者/上传者

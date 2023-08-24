@@ -2,8 +2,11 @@ package main
 
 import (
 	"net/http"
+	//"strings"
 
-	mapset "github.com/deckarep/golang-set"
+	"fmt"
+
+	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/gin-gonic/gin"
 )
 
@@ -24,23 +27,27 @@ func SearchFourms(c *gin.Context) {
 	var fourmsTitle []Forum //这里是检索标题后的结果
 	var forumSearch SearchFourmsReturn
 	var forumsS []SearchFourmsReturn
-	titles := mapset.NewSet()
-	textCondition := c.Param("tc")
+	ids := mapset.NewSet[uint]()
+	textCondition := c.Param("text")
 	db.Where("Text like ?", "%"+textCondition+"%").Find(&forumsC)
 	for _, i := range forumsC {
-		db.ID(i.Mid).Get(&fourm)
-		if !titles.Contains(fourm.Title) {
+		fmt.Println(ids)
+		fmt.Println(ids.Contains(i.Mid))
+		if !ids.Contains(i.Mid) {
+			db.ID(i.Mid).Get(&fourm)
 			forumSearch.Id = fourm.Id
 			forumSearch.Text = i.Text
 			forumSearch.Title = fourm.Title
 			forumSearch.Kind = fourm.Kind
-			titles.Add(fourm.Title)
+			fmt.Println(i.Mid)
+			ids.Add(i.Mid)
 			forumsS = append(forumsS, forumSearch)
 		}
 	}
 	db.Where("Title like ?", "%"+textCondition+"%").Find(&fourmsTitle)
 	for _, i := range fourmsTitle {
-		if !titles.Contains(i.Title) {
+		fmt.Println(ids.Contains(uint(i.Id)))
+		if !ids.Contains(uint(i.Id)) {
 			forumSearch.Id = i.Id
 			forumSearch.Title = i.Title
 			forumSearch.Kind = i.Kind
@@ -50,4 +57,27 @@ func SearchFourms(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"forum": forumsS,
 	})
+
+	return
 }
+
+/*
+func SearchVideos(c *gin.Context) {
+	var tagModel TagModel
+	var tags []Tag
+	vids := mapset.NewSet[uint]()
+	tagCondition := c.Param("tags")
+	textCondition := c.Param("text")
+	sTags := strings.Split(tagCondition, ",")
+	for _, i := range sTags {
+		db.In("text", i).Find(&tagModel)
+		db.In("tid", tagModel.Id).Find(&tags)
+		for _, j := range tags {
+			vids.Add(uint(j.Id))
+		}
+	}
+	for _, i := range vids.Iter() {
+
+	}
+}
+*/
