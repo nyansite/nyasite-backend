@@ -2,9 +2,9 @@ package main
 
 import (
 	"net/http"
-	//"strings"
+	"strings"
 
-	"fmt"
+	//"fmt"
 
 	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/gin-gonic/gin"
@@ -25,28 +25,24 @@ func SearchFourms(c *gin.Context) {
 	var fourm Forum
 	var forumsC []ForumComment
 	var fourmsTitle []Forum //这里是检索标题后的结果
-	var forumSearch SearchFourmsReturn
-	var forumsS []SearchFourmsReturn
+	var forumSearch SearchFourmReturn
+	var forumsS []SearchFourmReturn //返回的模板
 	ids := mapset.NewSet[uint]()
 	textCondition := c.Param("text")
 	db.Where("Text like ?", "%"+textCondition+"%").Find(&forumsC)
 	for _, i := range forumsC {
-		fmt.Println(ids)
-		fmt.Println(ids.Contains(i.Mid))
-		if !ids.Contains(i.Mid) {
+		if !ids.Contains(i.Mid) { //排除同一主帖子下子帖子反复出现关键词
 			db.ID(i.Mid).Get(&fourm)
 			forumSearch.Id = fourm.Id
 			forumSearch.Text = i.Text
 			forumSearch.Title = fourm.Title
 			forumSearch.Kind = fourm.Kind
-			fmt.Println(i.Mid)
 			ids.Add(i.Mid)
 			forumsS = append(forumsS, forumSearch)
 		}
 	}
 	db.Where("Title like ?", "%"+textCondition+"%").Find(&fourmsTitle)
 	for _, i := range fourmsTitle {
-		fmt.Println(ids.Contains(uint(i.Id)))
 		if !ids.Contains(uint(i.Id)) {
 			forumSearch.Id = i.Id
 			forumSearch.Title = i.Title
@@ -61,23 +57,41 @@ func SearchFourms(c *gin.Context) {
 	return
 }
 
-/*
 func SearchVideos(c *gin.Context) {
 	var tagModel TagModel
 	var tags []Tag
+	var videosReturn []SearchVideoReturn
+	var videoReturn SearchVideoReturn
+	var video Video
+	vidsCount := make(map[uint]uint)
 	vids := mapset.NewSet[uint]()
 	tagCondition := c.Param("tags")
 	textCondition := c.Param("text")
-	sTags := strings.Split(tagCondition, ",")
+	sTags := strings.Split(tagCondition, ",") //将用","链接的tags字符串转化为切片
+	nTags := uint(len(sTags))
 	for _, i := range sTags {
-		db.In("text", i).Find(&tagModel)
+		db.In("text", i).Get(&tagModel)
 		db.In("tid", tagModel.Id).Find(&tags)
 		for _, j := range tags {
-			vids.Add(uint(j.Id))
+			if j.Kind == 1 {
+				vids.Add(uint(j.Pid))
+				vidsCount[j.Pid]++
+			}
 		}
 	}
-	for _, i := range vids.Iter() {
-
+	for i := range vids.Iter() {
+		if vidsCount[i] == nTags {
+			db.ID(i).Get(&video)
+			if strings.Contains(video.Title, textCondition) || strings.Contains(video.Description, textCondition) {
+				videoReturn.Id = video.Id
+				videoReturn.Title = video.Title
+				videoReturn.CoverPath = video.CoverPath
+				videoReturn.Views = video.Views
+				videosReturn = append(videosReturn, videoReturn)
+			}
+		}
 	}
+	c.JSON(http.StatusOK, gin.H{
+		"video": videosReturn,
+	})
 }
-*/

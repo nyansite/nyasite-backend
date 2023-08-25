@@ -39,17 +39,15 @@ type Video struct { //获取视频和获取评论分开
 }
 
 type TagModel struct {
-	Id        int64  //xorm自动主键
-	CreatedAt int    `xorm:"created"`
-	Text      string `xorm:"unique"`
-	Times     uint
+	Id    int64  //xorm自动主键
+	Text  string `xorm:"unique"`
+	Times uint
 }
 type Tag struct {
-	Id        int64 //xorm自动主键
-	CreatedAt int   `xorm:"created"`
-	Tid       uint
-	Kind      uint //0:论坛 1:视频站
-	Pid       uint
+	Id   int64 //xorm自动主键
+	Tid  uint
+	Kind uint //0:论坛 1:视频站
+	Pid  uint
 }
 
 type VideoComment struct {
@@ -118,9 +116,16 @@ type SessionSecret struct {
 
 //搜索部分
 
-type SearchFourmsReturn struct {
+type SearchFourmReturn struct {
 	Id    int64
 	Title string
 	Text  string
 	Kind  uint8
+}
+
+type SearchVideoReturn struct {
+	Id        int64
+	CoverPath string
+	Title     string
+	Views     uint
 }
