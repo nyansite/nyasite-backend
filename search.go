@@ -68,21 +68,22 @@ func SearchVideos(c *gin.Context) {
 	tagCondition := c.Param("tags")
 	textCondition := c.Param("text")
 	sTags := strings.Split(tagCondition, ",") //将用","链接的tags字符串转化为切片
-	nTags := uint(len(sTags))
+	nTags := uint(len(sTags))                 //统计tag种类的总数
 	for _, i := range sTags {
 		db.In("text", i).Get(&tagModel)
 		db.In("tid", tagModel.Id).Find(&tags)
 		for _, j := range tags {
 			if j.Kind == 1 {
 				vids.Add(uint(j.Pid))
-				vidsCount[j.Pid]++
+				vidsCount[j.Pid]++ //如果视频在tags出现一次就+1
 			}
 		}
 	}
 	for i := range vids.Iter() {
-		if vidsCount[i] == nTags {
+		if vidsCount[i] == nTags { //如果视频出现在每一种tag中，vidsCount对应项与tag种类总数相等
 			db.ID(i).Get(&video)
 			if strings.Contains(video.Title, textCondition) || strings.Contains(video.Description, textCondition) {
+				//判断是否又对应text部分
 				videoReturn.Id = video.Id
 				videoReturn.Title = video.Title
 				videoReturn.CoverPath = video.CoverPath
