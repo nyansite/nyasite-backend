@@ -31,13 +31,13 @@ func SearchFourms(c *gin.Context) {
 	textCondition := c.Param("text")
 	db.Where("Text like ?", "%"+textCondition+"%").Find(&forumsC)
 	for _, i := range forumsC {
-		if !ids.Contains(i.Mid) { //排除同一主帖子下子帖子反复出现关键词
+		if !ids.Contains(uint(i.Mid)) { //排除同一主帖子下子帖子反复出现关键词
 			db.ID(i.Mid).Get(&fourm)
 			forumSearch.Id = fourm.Id
 			forumSearch.Text = i.Text
 			forumSearch.Title = fourm.Title
 			forumSearch.Kind = fourm.Kind
-			ids.Add(i.Mid)
+			ids.Add(uint(i.Mid))
 			forumsS = append(forumsS, forumSearch)
 		}
 	}
@@ -75,7 +75,7 @@ func SearchVideos(c *gin.Context) {
 		for _, j := range tags {
 			if j.Kind == 1 {
 				vids.Add(uint(j.Pid))
-				vidsCount[j.Pid]++ //如果视频在tags出现一次就+1
+				vidsCount[uint(j.Pid)]++ //如果视频在tags出现一次就+1
 			}
 		}
 	}

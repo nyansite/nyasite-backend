@@ -14,10 +14,10 @@ import (
 func AddVideoTag(c *gin.Context) {
 	strVid := c.PostForm("vid")
 	vVid, _ := strconv.Atoi(strVid)
-	uVid := uint(vVid)
+	uVid := int(vVid)
 	strTagId := c.PostForm("tagid")
 	vTagId, _ := strconv.Atoi(strTagId)
-	uTagId := uint(vTagId)
+	uTagId := int(vTagId)
 	DBaddVideoTag(uVid, uTagId)
 }
 
@@ -108,15 +108,15 @@ func AddVideoComment(ctx *gin.Context) {
 	session := sessions.Default(ctx)
 	author := session.Get("userid")
 	vauthor := author.(int64)
-	uauthor := uint(vauthor)
+	uauthor := int(vauthor)
 	vid, text := ctx.PostForm("vid"), ctx.PostForm("text")
 	vvid, _ := strconv.Atoi(vid)
-	uvid := uint(vvid)
+	uvid := int(vvid)
 	DBaddVideoComment(uvid, uauthor, text)
 	return
 }
 
-func SaveVideo(author uint, src string, cscr string, title string, description string, uuid string) {
+func SaveVideo(author int, src string, cscr string, title string, description string, uuid string) {
 	var video Video
 	video.Author = author
 	video.Title = title
@@ -136,13 +136,13 @@ func SaveVideo(author uint, src string, cscr string, title string, description s
 	return
 }
 
-func DBaddVideoComment(vid uint, author uint, text string) {
+func DBaddVideoComment(vid int, author int, text string) {
 	vComment := VideoComment{Vid: vid, Author: author, Text: text, Likes: 0}
 	db.Insert(vComment)
 	return
 }
 
-func DBaddVideoTag(vid uint, tagid uint) {
+func DBaddVideoTag(vid int, tagid int) {
 	tag := Tag{Tid: tagid, Kind: 1, Pid: vid}
 	db.Insert(tag)
 	return
