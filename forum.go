@@ -116,15 +116,15 @@ func BrowseUnitforumPost(ctx *gin.Context) {
 	})
 }
 
-func DBaddMainforum(title string, text string, author uint, kind uint) {
+func DBaddMainforum(title string, text string, author int, kind int) {
 	mainforum := &Forum{Title: title, Author: author, Views: 0, Kind: kind}
 	db.Insert(mainforum)
-	unitforum := ForumComment{Text: text, Mid: uint(mainforum.Id), Author: author}
+	unitforum := ForumComment{Text: text, Mid: int(mainforum.Id), Author: author}
 	db.Insert(unitforum)
 	return
 }
 
-func DBaddUnitforum(text string, mid uint, author uint) {
+func DBaddUnitforum(text string, mid int, author int) {
 	unitforum := ForumComment{Text: text, Mid: mid, Author: author}
 	db.Insert(unitforum)
 	return
@@ -151,7 +151,7 @@ func DBaddEmoji(emoji int, uid int, author int) {
 	case 7:
 		unitforum.Eyes++
 	}
-	emojiRecord := EmojiRecord{Author: author, Uid: uid, Emoji: uint(emoji)}
+	emojiRecord := EmojiRecord{Author: author, Uid: uid, Emoji: int(emoji)}
 	db.Insert(&emojiRecord)
 	db.ID(uid).Update(&unitforum)
 	return
@@ -175,8 +175,8 @@ func AddMainforum(ctx *gin.Context) {
 	}
 	author := session.Get("userid")
 	vauthor := author.(int64)
-	uauthor := uint(vauthor)
-	DBaddMainforum(title, text, uauthor, uint(ukind))
+	uauthor := int(vauthor)
+	DBaddMainforum(title, text, uauthor, int(ukind))
 	return
 }
 
@@ -187,8 +187,8 @@ func AddUnitforum(ctx *gin.Context) {
 	uauthor := int(vauthor)
 	mid, text := ctx.PostForm("mid"), ctx.PostForm("text")
 	vmid, _ := strconv.Atoi(mid)
-	umid := uint(vmid)
-	DBaddUnitforum(text, umid, uint(uauthor))
+	umid := int(vmid)
+	DBaddUnitforum(text, umid, uauthor)
 	return
 }
 
@@ -216,7 +216,7 @@ func FinishForum(ctx *gin.Context) {
 	vmid, _ := strconv.Atoi(mid)
 	author := session.Get("userid")
 	vauthor := author.(int64)
-	uauthor := uint(vauthor)
+	uauthor := int(vauthor)
 	var mainforum Forum
 	db.ID(vmid).Get(&mainforum)
 	if uauthor == mainforum.Author {

@@ -24,7 +24,7 @@ type User struct {
 	Name   string `xorm:"unique"`
 	Passwd []byte
 	Email  string `xorm:"unique"`
-	Level  uint8    `xorm:"default 0"` //4位权限4位等级,所以满级15(要不了这么多)
+	Level  int    `xorm:"default 0"` //4位权限4位等级,所以满级15(要不了这么多)
 }
 
 type Video struct { //获取视频和获取评论分开
@@ -32,37 +32,37 @@ type Video struct { //获取视频和获取评论分开
 	CoverPath   string
 	Title       string `xorm:"default '芝士标题'"`
 	Description string `xorm:"default '简介不见惹'"`
-	likes       uint    `xorm:"default 0"` //芝士点赞数量
-	Views       uint    `xorm:"default 0"` //这是播放量
-	Author      uint    `xorm:"index"`     //作者/上传者
+	likes       int    `xorm:"default 0"` //芝士点赞数量
+	Views       int    `xorm:"default 0"` //这是播放量
+	Author      int    `xorm:"index"`     //作者/上传者
 	Model       `xorm:"extends"`
 }
 
 type TagModel struct {
 	Id    int64  //xorm自动主键
 	Text  string `xorm:"unique"`
-	Times uint
+	Times int
 }
 type Tag struct {
 	Id   int64 //xorm自动主键
-	Tid  uint
-	Kind uint //0:论坛 1:视频站
-	Pid  uint
+	Tid  int
+	Kind int //0:论坛 1:视频站
+	Pid  int
 }
 
 type VideoComment struct {
-	Vid    uint `xorm:"index"` //所属页面的id
+	Vid    int `xorm:"index"` //所属页面的id
 	Text   string
-	Author uint `xorm:"index"`     //发表评论的用户
-	Likes  uint `xorm:"default 0"` //芝士点赞数量
+	Author int `xorm:"index"`     //发表评论的用户
+	Likes  int `xorm:"default 0"` //芝士点赞数量
 	Model  `xorm:"extends"`
 }
 
 type VideoCommentReply struct { //楼中楼的回复.......
-	Cid    uint `xorm:"index"` //楼中楼上一层的id,自动生成
+	Cid    int `xorm:"index"` //楼中楼上一层的id,自动生成
 	Text   string
-	Author uint `xorm:"index"`
-	Likes  uint `xorm:"default 0"` //芝士点赞数量
+	Author int `xorm:"index"`
+	Likes  int `xorm:"default 0"` //芝士点赞数量
 	Model  `xorm:"extends"`
 }
 
@@ -71,33 +71,33 @@ type VideoCommentReply struct { //楼中楼的回复.......
 
 type Forum struct { //获取视频和获取评论分开
 	Title  string
-	Views  uint `xorm:"default 0"` //这是浏览量
-	Author uint `xorm:"index"`
-	Kind   uint
+	Views  int `xorm:"default 0"` //这是浏览量
+	Author int `xorm:"index"`
+	Kind   int
 	//0:官方通知区;1:用户反馈区;2:关闭的用户反馈区;3:Thread贴;4:完结的Thread贴;5:资源贴
 	Model `xorm:"extends"`
 }
 
 type ForumComment struct {
-	Mid         uint `xorm:"index"` //所属论坛的id
+	Mid         int `xorm:"index"` //所属论坛的id
 	Text        string
-	Author      uint `xorm:"index"`
-	Choose      uint `xorm:"-"`
-	Like        uint
-	Dislike     uint
-	Smile       uint
-	Celebration uint
-	Confused    uint
-	Heart       uint
-	Rocket      uint
-	Eyes        uint
+	Author      int `xorm:"index"`
+	Choose      int `xorm:"-"`
+	Like        int //uint8只有255，可能不太够用
+	Dislike     int
+	Smile       int
+	Celebration int
+	Confused    int
+	Heart       int
+	Rocket      int
+	Eyes        int
 	Model       `xorm:"extends"`
 }
 
 type EmojiRecord struct {
 	Author int
 	Uid    int
-	Emoji  uint
+	Emoji  int
 }
 
 // 正在转码压制中的视频
@@ -120,12 +120,12 @@ type SearchFourmReturn struct {
 	Id    int64
 	Title string
 	Text  string
-	Kind  uint
+	Kind  int
 }
 
 type SearchVideoReturn struct {
 	Id        int64
 	CoverPath string
 	Title     string
-	Views     uint
+	Views     int
 }

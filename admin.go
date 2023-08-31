@@ -71,7 +71,7 @@ func UploadVideo(c *gin.Context) {
 	}
 	author := session.Get("userid")
 	vauthor := author.(int64)
-	uauthor := uint(vauthor)
+	uauthor := int(vauthor)
 	uuid := UUID.New()
 	sid := uuid.String()
 	fpath := "./temporary/" + sid + path.Ext(f.Filename)
