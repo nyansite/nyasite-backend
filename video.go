@@ -17,7 +17,7 @@ func AddVideoTag(c *gin.Context) {
 	uVid := int(vVid)
 	strTagId := c.PostForm("tagid")
 	vTagId, _ := strconv.Atoi(strTagId)
-	uTagId := int(vTagId)
+	uTagId := int16(vTagId)
 	DBaddVideoTag(uVid, uTagId)
 }
 
@@ -142,7 +142,7 @@ func DBaddVideoComment(vid int, author int, text string) {
 	return
 }
 
-func DBaddVideoTag(vid int, tagid int) {
+func DBaddVideoTag(vid int, tagid int16) {
 	tag := Tag{Tid: tagid, Kind: 1, Pid: vid}
 	db.Insert(tag)
 	return
