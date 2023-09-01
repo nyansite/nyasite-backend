@@ -17,8 +17,7 @@ func SearchTag(c *gin.Context) {
 	for _, i := range tagMs {
 		tagList = append(tagList, i.Text)
 	}
-	c.JSON(http.StatusOK, gin.H{"results": tagList})
-	return
+	c.JSONP(http.StatusOK, gin.H{"results": tagList})
 }
 
 func SearchFourms(c *gin.Context) {
