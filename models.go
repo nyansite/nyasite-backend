@@ -28,15 +28,15 @@ type User struct {
 	Name   string `xorm:"unique"`
 	Passwd []byte
 	Email  string `xorm:"unique"`
-	Level  int8   `xorm:"TINYINT default 0"` //4位权限4位等级,所以满级15(要不了这么多)
+	Level  uint8   `xorm:"TINYINT default 0"` //4位权限4位等级,所以满级15(要不了这么多)
 }
 
 type Video struct { //获取视频和获取评论分开
 	CoverPath   string
 	Title       string `xorm:"default '芝士标题'"`
 	Description string `xorm:"default '简介不见惹'"`
-	Likes       int `xorm:"default 0"` //芝士点赞数量
-	Views       int `xorm:"default 0"` //这是播放量
+	Likes       int    `xorm:"default 0"` //芝士点赞数量
+	Views       int    `xorm:"default 0"` //这是播放量
 	Author      int    `xorm:"index"`     //作者/上传者
 	Model       `xorm:"extends"`
 }
@@ -47,9 +47,9 @@ type TagModel struct {
 	Times int
 }
 type Tag struct {
-	Id   int64 //xorm自动主键
-	Tid  int
-	Pid  int
+	Id  int64 //xorm自动主键
+	Tid int
+	Pid int
 }
 
 type VideoComment struct {

@@ -99,7 +99,7 @@ func main() {
 		group.POST("/add_emoji", PrivilegeLevel(0), AddEmoji)
 		group.POST("/finish_forum", PrivilegeLevel(0), FinishForum)
 	}
-	_, err = db.Insert(Video{Likes: 1294967290})
+	// _, err = db.Insert(User{Level: 255})
 	if err != nil {
 		panic(err)
 	}
