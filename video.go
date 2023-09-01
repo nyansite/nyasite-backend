@@ -131,7 +131,7 @@ func SaveVideo(author int, src string, cscr string, title string, description st
 		panic(err)
 	}
 	//
-	video.IpfsHash = Upload(src + ".mp4")
+	// video.IpfsHash = Upload(src + ".mp4")
 	db.Insert(&video)
 	return
 }
@@ -143,7 +143,7 @@ func DBaddVideoComment(vid int, author int, text string) {
 }
 
 func DBaddVideoTag(vid int, tagid int) {
-	tag := Tag{Tid: tagid, Kind: 1, Pid: vid}
+	tag := Tag{Tid: tagid, Pid: vid}
 	db.Insert(tag)
 	return
 }

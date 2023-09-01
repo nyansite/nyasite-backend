@@ -78,9 +78,9 @@ func main() {
 		group.GET("/all_forum/:page", BrowseAllForumPost)
 		group.GET("/browse_forum/:board/:page", BrowseForumPost)
 		group.GET("/browse_unitforum/:mid/:page", BrowseUnitforumPost)
-		group.GET("/search/taglist", SearchTag)
-		group.GET("/search/forum/:text", SearchFourms)
-		group.GET("/search/video/:tags/:text", SearchVideos)
+		// group.GET("/search/taglist", SearchTag)
+		// group.GET("/search/forum/:text", SearchFourms)
+		// group.GET("/search/video/:tags/:text", SearchVideos)
 
 		group.POST("/register", Register)
 		group.POST("/login", Login)
@@ -99,7 +99,10 @@ func main() {
 		group.POST("/add_emoji", PrivilegeLevel(0), AddEmoji)
 		group.POST("/finish_forum", PrivilegeLevel(0), FinishForum)
 	}
-
+	_, err = db.Insert(Video{Likes: 1294967290})
+	if err != nil {
+		panic(err)
+	}
 	//  https://gin-gonic.com/zh-cn/docs/examples/graceful-restart-or-stop/
 	srv := &http.Server{
 		Addr:    ":8000",
