@@ -24,7 +24,7 @@ type User struct {
 	Name   string `xorm:"unique"`
 	Passwd []byte
 	Email  string `xorm:"unique"`
-	Level  int16  `xorm:"default 0"` //4位权限4位等级,所以满级15(要不了这么多)
+	Level  uint8    `xorm:"default 0"` //4位权限4位等级,所以满级15(要不了这么多)
 }
 
 type Video struct { //获取视频和获取评论分开
@@ -45,8 +45,8 @@ type TagModel struct {
 }
 type Tag struct {
 	Id   int64 //xorm自动主键
-	Tid  int16
-	Kind int16 //0:论坛 1:视频站
+	Tid  int
+	Kind int //0:论坛 1:视频站
 	Pid  int
 }
 
