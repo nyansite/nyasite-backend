@@ -28,7 +28,7 @@ type User struct {
 	Name   string `xorm:"unique"`
 	Passwd []byte
 	Email  string `xorm:"unique"`
-	Level  uint8   `xorm:"TINYINT default 0"` //4位权限4位等级,所以满级15(要不了这么多)
+	Level  uint8  `xorm:"TINYINT default 0"` //4位权限4位等级,所以满级15(要不了这么多)
 }
 
 type Video struct { //获取视频和获取评论分开
@@ -48,7 +48,7 @@ type TagModel struct {
 }
 type Tag struct {
 	Id  int64 //xorm自动主键
-	Tid int
+	Tid int   `xorm:"SMALLINT"`
 	Pid int
 }
 
