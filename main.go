@@ -9,7 +9,6 @@ import (
 	"os/signal"
 	"time"
 
-	// "github.com/gin-contrib/cors"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
@@ -40,8 +39,6 @@ func main() {
 	r := gin.Default()
 	// config := cors.DefaultConfig()
 	// config.AllowOrigins = []string{"http://google.com"}	//允许访问信息的第三方,比如说广告供应商
-	// config.AllowHeaders = []string{"Origin", "X-Requested-With", "Content-Type",
-	// 	"Accept", "Authorization", "Access-Control-Allow-Origin"}
 	// config.AllowCredentials = true //cookie一并发给跨域请求
 	// r.Use(cors.New(config))
 	var secrets [][]byte
