@@ -33,7 +33,7 @@ func main() {
 	}
 
 	db.Sync(&User{}, &Video{}, &VideoComment{}, &Tag{}, &TagModel{}, &Forum{}, &SessionSecret{}, &ForumComment{}, &EmojiRecord{})
-	db.SetDefaultCacher(caches.NewLRUCacher(caches.NewMemoryStore(), 1000))
+	db.SetDefaultCacher(caches.NewLRUCacher(caches.NewMemoryStore(), 10000))
 	//上面的是sql
 
 	r := gin.Default()
@@ -47,18 +47,18 @@ func main() {
 	s2, _ := rand.Prime(rand.Reader, 256)
 	secrets = append(secrets, s1.Bytes(), s2.Bytes())
 	db.Where("created_at < ?", time.Now().Unix()-TTL).Delete(&SessionSecret{}) //删除过期
-	err = db.Where("created_at >= ?", time.Now().Unix()-TTL).Find(&old_secrets)
+	err = db.Where("created_at >= ?", time.Now().Unix()-TTL).Find(&old_secrets)//没过期的取出来
 	if err != nil {
-		panic("我数据库呢???我那么大一个数据库呢???还我数据库!!!")
+		panic("我数据库呢???我那么大一个数据库呢???还我数据库!!!")//数据库连不上会在这里挂,而不是上面
 	}
-	db.Insert(&SessionSecret{Authentication: s1.Bytes(), Encryption: s2.Bytes()})
+	db.Insert(&SessionSecret{Authentication: s1.Bytes(), Encryption: s2.Bytes()})//新密钥进数据库,避免kill 9
 	for _, v := range old_secrets {
 		secrets = append(secrets, v.Authentication, v.Encryption)
 	}
-	store := cookie.NewStore(secrets...)
+	store := cookie.NewStore(secrets...)//密钥成对定义以允许密钥轮换.使用新的密钥加密但是旧的仍然有效
 	store.Options(sessions.Options{
 		Secure:   true, //跟下面那条基本上可以防住csrf了,但是还是稳一点好
-		HttpOnly: true, //测试阶段调ssl有点麻烦
+		HttpOnly: true, //localhost或者https
 		Path:     "/",
 		MaxAge:   TTL,
 		SameSite: http.SameSiteStrictMode})
