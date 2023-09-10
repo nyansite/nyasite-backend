@@ -98,15 +98,14 @@ func BrowseUnitforumPost(ctx *gin.Context) {
 		return
 	}
 	db.In("mid", mid).Limit(20, pg*20).Find(&unitforums)
-	for i := 0; i <= len(unitforums)-1; i++ {
+	for _, i := range unitforums {
 		var emojiRecord EmojiRecord
-		count, _ := db.Where("author = ? AND uid = ?", author, unitforums[i].Id).Count(&EmojiRecord{})
-		println(count)
+		count, _ := db.Where("author = ? AND uid = ?", author, i.Id).Count(&EmojiRecord{})
 		if count == 0 {
-			unitforums[i].Choose = 0
+			i.Choose = 0
 		} else {
-			db.Where("author = ? AND uid = ?", uauthor, unitforums[i].Id).Get(&emojiRecord)
-			unitforums[i].Choose = emojiRecord.Emoji + 1
+			db.Where("author = ? AND uid = ?", uauthor, i.Id).Get(&emojiRecord)
+			i.Choose = emojiRecord.Emoji + 1
 		}
 	}
 	ctx.JSON(http.StatusOK, gin.H{
@@ -202,6 +201,11 @@ func AddEmoji(ctx *gin.Context) {
 	vemoji, _ := strconv.Atoi(emoji)
 	uuid := int(vuid)
 	uemoji := int(vemoji)
+	exist, _ := db.Where("author = ? and uid = ?", uauthor, uid).Count(&EmojiRecord{})
+	if exist != 0 {
+		ctx.AbortWithStatus(http.StatusAlreadyReported)
+		return
+	}
 	if uemoji > 7 {
 		ctx.AbortWithStatus(http.StatusBadRequest) //传入的表情编号>7(不存在)
 		return
