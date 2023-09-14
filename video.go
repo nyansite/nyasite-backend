@@ -21,11 +21,26 @@ func AddVideoTag(c *gin.Context) {
 	DBaddVideoTag(uVid, uTagId)
 }
 
+func ClickLike(c *gin.Context) {
+	session := sessions.Default(c)
+	author := session.Get("userid")
+	vauthor, _ := author.(int64)
+	uauthor := int(vauthor)
+	strVid := c.PostForm("vid")
+	vid, _ := strconv.Atoi(strVid)
+	exsit, _ := db.Where("author = ? and vid = ?", uauthor, vid).Count(&VideoLikeRecord{})
+	if exsit != 0 {
+		DBchangeLike(uauthor, vid, false)
+		return
+	}
+	DBchangeLike(uauthor, vid, true)
+	return
+}
+
 func GetVideoComment(c *gin.Context) {
-	strid := c.Param("id")
+	strId := c.Param("id")
 	spg := c.Param("pg")
-	sid, err := strconv.Atoi(strid)
-	id := uint(sid) //视频id
+	id, err := strconv.Atoi(strId)
 	if err != nil {
 		c.AbortWithStatus(http.StatusBadRequest) //返回400
 		return
@@ -145,5 +160,20 @@ func DBaddVideoComment(vid int, author int, text string) {
 func DBaddVideoTag(vid int, tagid int) {
 	tag := Tag{Tid: tagid, Pid: vid}
 	db.Insert(tag)
+	return
+}
+func DBchangeLike(author int, vid int, add bool) {
+	var video Video
+	db.ID(vid).Get(&video)
+	if add {
+		video.Likes++
+		videoLikeRecord := VideoLikeRecord{Vid: vid, Author: author}
+		db.Insert(&videoLikeRecord)
+	} else {
+		video.Likes--
+		var videoLikeRecord VideoLikeRecord
+		db.Where("author = ? and vid = ?", author, vid).Delete(&videoLikeRecord)
+	}
+	db.ID(vid).Update(&video)
 	return
 }

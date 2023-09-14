@@ -9,6 +9,8 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+
+	"fmt"
 )
 
 func BrowseAllForumPost(ctx *gin.Context) {
@@ -98,6 +100,7 @@ func BrowseUnitforumPost(ctx *gin.Context) {
 		return
 	}
 	db.In("mid", mid).Limit(20, pg*20).Find(&unitforums)
+	var unitforumsReturn []ForumComment
 	for _, i := range unitforums {
 		var emojiRecord EmojiRecord
 		count, _ := db.Where("author = ? AND uid = ?", author, i.Id).Count(&EmojiRecord{})
@@ -107,13 +110,24 @@ func BrowseUnitforumPost(ctx *gin.Context) {
 			db.Where("author = ? AND uid = ?", uauthor, i.Id).Get(&emojiRecord)
 			i.Choose = emojiRecord.Emoji + 1
 		}
+		i.Like--
+		i.Dislike--
+		i.Smile--
+		i.Celebration--
+		i.Confused--
+		i.Heart--
+		i.Rocket--
+		i.Eyes--
+		unitforumsReturn = append(unitforumsReturn, i)
 	}
 	ctx.JSON(http.StatusOK, gin.H{
 		"Origin":    mainforum,
-		"Body":      unitforums,
+		"Body":      unitforumsReturn,
 		"PageCount": math.Ceil(float64(count) / 20), //总页数
 	})
 }
+
+//因为xorm 值为0默认不update 所以表情从1开始计数
 
 func DBaddMainforum(title string, text string, author int, kind int) {
 	mainforum := &Forum{Title: title, Author: author, Views: 0, Kind: kind}
@@ -124,7 +138,7 @@ func DBaddMainforum(title string, text string, author int, kind int) {
 }
 
 func DBaddUnitforum(text string, mid int, author int) {
-	unitforum := ForumComment{Text: text, Mid: mid, Author: author}
+	unitforum := ForumComment{Text: text, Mid: mid, Author: author, Like: 1, Dislike: 1, Smile: 1, Celebration: 1, Confused: 1, Heart: 1, Rocket: 1, Eyes: 1}
 	db.Insert(unitforum)
 	return
 }
@@ -150,9 +164,61 @@ func DBaddEmoji(emoji int, uid int, author int) {
 	case 7:
 		unitforum.Eyes++
 	}
-	emojiRecord := EmojiRecord{Author: author, Uid: uid, Emoji: int(emoji)}
+	emojiRecord := EmojiRecord{Author: author, Uid: uid, Emoji: emoji}
 	db.Insert(&emojiRecord)
 	db.ID(uid).Update(&unitforum)
+	return
+}
+
+func DBchangeEmoji(emoji int, uid int, author int) {
+	var unitforum ForumComment
+	var emojiRecord EmojiRecord
+	db.ID(uid).Get(&unitforum)
+	db.Where("author = ? and uid = ?", author, uid).Get(&emojiRecord)
+	fmt.Println(unitforum)
+	fmt.Println(emojiRecord)
+	oEmoji := emojiRecord.Emoji
+	switch oEmoji {
+	case 0:
+		unitforum.Like--
+	case 1:
+		unitforum.Dislike--
+	case 2:
+		unitforum.Smile--
+	case 3:
+		unitforum.Celebration--
+	case 4:
+		unitforum.Confused--
+	case 5:
+		unitforum.Heart--
+	case 6:
+		unitforum.Rocket--
+	case 7:
+		unitforum.Eyes--
+	}
+	switch emoji {
+	case 0:
+		unitforum.Like++
+	case 1:
+		unitforum.Dislike++
+	case 2:
+		unitforum.Smile++
+	case 3:
+		unitforum.Celebration++
+	case 4:
+		unitforum.Confused++
+	case 5:
+		unitforum.Heart++
+	case 6:
+		unitforum.Rocket++
+	case 7:
+		unitforum.Eyes++
+	}
+	emojiRecord.Emoji = emoji
+	fmt.Println(unitforum)
+	fmt.Println(emojiRecord)
+	db.ID(uid).Update(&unitforum)
+	db.Where("author = ? and uid = ?", author, uid).Cols("emoji").Update(&emojiRecord)
 	return
 }
 
@@ -199,18 +265,16 @@ func AddEmoji(ctx *gin.Context) {
 	emoji, uid := ctx.PostForm("emoji"), ctx.PostForm("uid")
 	vuid, _ := strconv.Atoi(uid)
 	vemoji, _ := strconv.Atoi(emoji)
-	uuid := int(vuid)
-	uemoji := int(vemoji)
 	exist, _ := db.Where("author = ? and uid = ?", uauthor, uid).Count(&EmojiRecord{})
 	if exist != 0 {
-		ctx.AbortWithStatus(http.StatusAlreadyReported)
+		DBchangeEmoji(vemoji, vuid, uauthor)
 		return
 	}
-	if uemoji > 7 {
+	if vemoji > 7 {
 		ctx.AbortWithStatus(http.StatusBadRequest) //传入的表情编号>7(不存在)
 		return
 	}
-	DBaddEmoji(uemoji, uuid, uauthor)
+	DBaddEmoji(vemoji, vuid, uauthor)
 	return
 }
 

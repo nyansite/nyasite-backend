@@ -31,6 +31,20 @@ type User struct {
 	Level  uint8  `xorm:"TINYINT default 0"` //4位权限4位等级,所以满级15(要不了这么多)
 }
 
+// 标签部分
+type TagModel struct {
+	Id    int64  //xorm自动主键
+	Text  string `xorm:"unique"`
+	Times int
+}
+
+type Tag struct {
+	Id  int64 //xorm自动主键
+	Tid int   `xorm:"SMALLINT"`
+	Pid int
+}
+
+// 视频部分
 type Video struct { //获取视频和获取评论分开
 	CoverPath   string
 	Title       string `xorm:"default '芝士标题'"`
@@ -39,17 +53,6 @@ type Video struct { //获取视频和获取评论分开
 	Views       int    `xorm:"default 0"` //这是播放量
 	Author      int    `xorm:"index"`     //作者/上传者
 	Model       `xorm:"extends"`
-}
-
-type TagModel struct {
-	Id    int64  //xorm自动主键
-	Text  string `xorm:"unique"`
-	Times int
-}
-type Tag struct {
-	Id  int64 //xorm自动主键
-	Tid int   `xorm:"SMALLINT"`
-	Pid int
 }
 
 type VideoComment struct {
@@ -66,6 +69,11 @@ type VideoCommentReply struct { //楼中楼的回复.......
 	Author int `xorm:"index"`
 	Likes  int `xorm:"default 0"` //芝士点赞数量
 	Model  `xorm:"extends"`
+}
+
+type VideoLikeRecord struct {
+	Author int
+	Vid    int
 }
 
 // 论坛部分
