@@ -6,7 +6,7 @@ import (
 
 	//"fmt"
 
-	mapset "github.com/deckarep/golang-set/v2"
+	mapset "github.com/deckarep/golang-set/v2" //看看文档，这里大量用到set特性
 	"github.com/gin-gonic/gin"
 )
 
@@ -29,7 +29,7 @@ func SearchFourms(c *gin.Context) {
 	var forumsS []SearchFourmReturn //返回的模板
 	ids := mapset.NewSet[uint]()
 	textCondition := c.Param("text")
-	db.Where("Text like ?", "%"+textCondition+"%").Find(&forumsC)
+	db.Where("Text like ?", "%"+textCondition+"%").Find(&forumsC) //检索帖子内容
 	for _, i := range forumsC {
 		if !ids.Contains(uint(i.Mid)) { //排除同一主帖子下子帖子反复出现关键词
 			db.ID(i.Mid).Get(&fourm)
@@ -41,7 +41,7 @@ func SearchFourms(c *gin.Context) {
 			forumsS = append(forumsS, forumSearch)
 		}
 	}
-	db.Where("Title like ?", "%"+textCondition+"%").Find(&fourmsTitle)
+	db.Where("Title like ?", "%"+textCondition+"%").Find(&fourmsTitle) //检索帖子标题
 	for _, i := range fourmsTitle {
 		if !ids.Contains(uint(i.Id)) {
 			forumSearch.Id = i.Id

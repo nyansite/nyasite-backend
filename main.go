@@ -75,7 +75,7 @@ func main() {
 		group.GET("/all_forum/:page", BrowseAllForumPost)
 		group.GET("/browse_forum/:board/:page", BrowseForumPost)
 		group.GET("/browse_unitforum/:mid/:page", BrowseUnitforumPost)
-		// group.GET("/search/taglist", SearchTag)
+		group.GET("/search/taglist", SearchTag)
 		// group.GET("/search/forum/:text", SearchFourms)
 		// group.GET("/search/video/:tags/:text", SearchVideos)
 
