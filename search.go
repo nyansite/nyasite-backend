@@ -81,7 +81,7 @@ func SearchVideos(c *gin.Context) {
 	for i := range vids.Iter() {
 		if vidsCount[i] == nTags { //如果视频出现在每一种tag中，vidsCount对应项与tag种类总数相等
 			db.ID(i).Get(&video)
-			if strings.Contains(video.Title, textCondition) || strings.Contains(video.Description, textCondition) {
+			if strings.Contains(video.Title, textCondition) || strings.Contains(video.Description, textCondition) || tagCondition == "" {
 				//判断是否又对应text部分
 				videoReturn.Id = video.Id
 				videoReturn.Title = video.Title

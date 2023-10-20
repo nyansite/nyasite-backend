@@ -118,6 +118,7 @@ func BrowseUnitforumPost(ctx *gin.Context) {
 		i.Heart--
 		i.Rocket--
 		i.Eyes--
+		//从1开始计数，所以默认-1
 		unitforumsReturn = append(unitforumsReturn, i)
 	}
 	ctx.JSON(http.StatusOK, gin.H{
