@@ -83,7 +83,7 @@ func Login(c *gin.Context) {
 }
 
 func Register(c *gin.Context) {
-	username, passwd, mail := c.PostForm("username"), c.PostForm("passwd"), c.PostForm("email")
+	username, passwd, mail, avatar := c.PostForm("username"), c.PostForm("passwd"), c.PostForm("email"), c.PostForm("avatar")
 
 	if username == "" || passwd == "" || mail == "" {
 		c.AbortWithStatus(http.StatusBadRequest) //400
@@ -105,7 +105,7 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	user := User{Name: username, Passwd: encrypt_passwd([]byte(passwd)), Email: mail}
+	user := User{Name: username, Passwd: encrypt_passwd([]byte(passwd)), Email: mail, Avatar: avatar}
 	_, err := db.Insert(&user)
 	if err != nil {
 		fmt.Println(err)
