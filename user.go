@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/gin-contrib/sessions"
-	"github.com/gin-gonic/gin"
-
 	"crypto/rand"
 	"crypto/sha512"
 	"regexp"
 	"strconv"
+
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-gonic/gin"
 )
 
 func GetSelfUserData(c *gin.Context) {
@@ -141,4 +141,13 @@ func check_passwd(passwd []byte, passwd2 []byte) bool {
 		}
 	}
 	return ret
+}
+
+func getUserDataShow(userid int) UserDataShow {
+	var userDataShow UserDataShow
+	var user User
+	db.ID(userid).Get(&user)
+	userDataShow.Name = user.Name
+	userDataShow.Avatar = user.Avatar
+	return userDataShow
 }

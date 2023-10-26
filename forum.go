@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/deckarep/golang-set/v2"
 	"github.com/gin-gonic/gin"
 
 	"fmt"
@@ -20,6 +21,8 @@ func BrowseAllForumPost(ctx *gin.Context) {
 		ctx.AbortWithStatus(http.StatusBadRequest) //400
 		return
 	}
+	userIds := mapset.NewSet[int]()
+	var userDataShows []UserDataShow
 	var forums []Forum
 	var count int64 //总数,Count比rowsaffected更快(懒得用变量缓存了
 	pg -= 1
@@ -30,8 +33,16 @@ func BrowseAllForumPost(ctx *gin.Context) {
 		return
 	}
 	db.Limit(20, pg*20).Find(&forums)
+
+	for _, i := range forums {
+		if !userIds.Contains(i.Author) {
+			userIds.Add(i.Author)
+			userDataShows = append(userDataShows, getUserDataShow(i.Author)) //from user.go
+		}
+	}
 	ctx.JSON(http.StatusOK, gin.H{
 		"Body":      forums,
+		"UserShow":  userDataShows,
 		"PageCount": math.Ceil(float64(count) / 20), //总页数
 	})
 	return
@@ -56,6 +67,8 @@ func BrowseForumPost(ctx *gin.Context) {
 		ctx.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
+	userIds := mapset.NewSet[int]()
+	var userDataShows []UserDataShow
 	var forums []Forum
 	var count int64 //总数,Count比rowsaffected更快(懒得用变量缓存了
 	pg -= 1
@@ -66,8 +79,15 @@ func BrowseForumPost(ctx *gin.Context) {
 		return
 	}
 	db.In("kind", chose).Limit(20, pg*20).Find(&forums)
+	for _, i := range forums {
+		if !userIds.Contains(i.Author) {
+			userIds.Add(i.Author)
+			userDataShows = append(userDataShows, getUserDataShow(i.Author)) //from user.go
+		}
+	}
 	ctx.JSON(http.StatusOK, gin.H{
 		"Body":      forums,
+		"UserShow":  userDataShows,
 		"PageCount": math.Ceil(float64(count) / 20), //总页数
 	})
 	return
@@ -93,6 +113,8 @@ func BrowseUnitforumPost(ctx *gin.Context) {
 	pg -= 1
 	var unitforum ForumComment
 	count, err = db.In("mid", mid).Count(&unitforum)
+	userIds := mapset.NewSet[int]()
+	var userDataShows []UserDataShow
 	var unitforums []ForumComment
 	if err != nil {
 		ctx.AbortWithStatus(http.StatusInternalServerError) //500,正常情况下不会出现
@@ -121,9 +143,16 @@ func BrowseUnitforumPost(ctx *gin.Context) {
 		//从1开始计数，所以默认-1
 		unitforumsReturn = append(unitforumsReturn, i)
 	}
+	for _, i := range unitforumsReturn {
+		if !userIds.Contains(i.Author) {
+			userIds.Add(i.Author)
+			userDataShows = append(userDataShows, getUserDataShow(i.Author)) //from user.go
+		}
+	}
 	ctx.JSON(http.StatusOK, gin.H{
 		"Origin":    mainforum,
 		"Body":      unitforumsReturn,
+		"UserShow":  userDataShows,
 		"PageCount": math.Ceil(float64(count) / 20), //总页数
 	})
 }

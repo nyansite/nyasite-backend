@@ -23,13 +23,20 @@ type Model struct {
 	UpdatedAt int   `xorm:"updated"`
 	DeletedAt int   `xorm:"deleted"` //用模型本身的id
 }
+
+// 用户部分
 type User struct {
-	Model  `xorm:"extends"`
 	Name   string `xorm:"unique"`
 	Passwd []byte
 	Email  string `xorm:"unique"`
 	Avatar string `xorm:"TEXT"`
 	Level  uint8  `xorm:"TINYINT default 0"` //4位权限4位等级,所以满级15(要不了这么多)
+	Model  `xorm:"extends"`
+}
+
+type UserDataShow struct {
+	Name   string
+	Avatar string
 }
 
 // 标签部分
