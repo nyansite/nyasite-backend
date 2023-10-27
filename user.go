@@ -29,11 +29,13 @@ func GetSelfUserData(c *gin.Context) {
 
 	session.Flashes() //重新set cookie,使得cookie生命周期重置,但是值不会重置
 	session.Save()
-
+	vuserid, _ := userid.(int64)
+	println(vuserid)
 	c.JSON(http.StatusOK, gin.H{
 		"userid": userid,
 		"mail":   mail,
 		"level":  level,
+		"avatar": DBGetUserDataShow(int(vuserid)).Avatar,
 	})
 }
 
@@ -143,7 +145,7 @@ func check_passwd(passwd []byte, passwd2 []byte) bool {
 	return ret
 }
 
-func getUserDataShow(userid int) UserDataShow {
+func DBGetUserDataShow(userid int) UserDataShow {
 	var userDataShow UserDataShow
 	var user User
 	db.ID(userid).Get(&user)

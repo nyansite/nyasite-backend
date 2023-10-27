@@ -37,7 +37,7 @@ func BrowseAllForumPost(ctx *gin.Context) {
 	for _, i := range forums {
 		if !userIds.Contains(i.Author) {
 			userIds.Add(i.Author)
-			userDataShows = append(userDataShows, getUserDataShow(i.Author)) //from user.go
+			userDataShows = append(userDataShows, DBGetUserDataShow(i.Author)) //from user.go
 		}
 	}
 	ctx.JSON(http.StatusOK, gin.H{
@@ -82,7 +82,7 @@ func BrowseForumPost(ctx *gin.Context) {
 	for _, i := range forums {
 		if !userIds.Contains(i.Author) {
 			userIds.Add(i.Author)
-			userDataShows = append(userDataShows, getUserDataShow(i.Author)) //from user.go
+			userDataShows = append(userDataShows, DBGetUserDataShow(i.Author)) //from user.go
 		}
 	}
 	ctx.JSON(http.StatusOK, gin.H{
@@ -146,7 +146,7 @@ func BrowseUnitforumPost(ctx *gin.Context) {
 	for _, i := range unitforumsReturn {
 		if !userIds.Contains(i.Author) {
 			userIds.Add(i.Author)
-			userDataShows = append(userDataShows, getUserDataShow(i.Author)) //from user.go
+			userDataShows = append(userDataShows, DBGetUserDataShow(i.Author)) //from user.go
 		}
 	}
 	ctx.JSON(http.StatusOK, gin.H{
