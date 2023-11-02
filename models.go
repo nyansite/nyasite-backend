@@ -37,6 +37,7 @@ type User struct {
 type UserDataShow struct {
 	Name   string
 	Avatar string
+	Id     int64
 }
 
 // 标签部分
@@ -146,4 +147,13 @@ type SearchVideoReturn struct {
 	CoverPath string
 	Title     string
 	Views     int
+}
+
+// 消息部分
+type MessageForum struct {
+	Kind      bool //0:mainfourm 1:forumcomment
+	Author    int  //被回应的用户
+	Mainfourm int  //被回应的帖子
+	Replier   int  //回应的用户
+	Replied   int  //回应的帖子
 }

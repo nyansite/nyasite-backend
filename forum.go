@@ -162,8 +162,7 @@ func BrowseUnitforumPost(ctx *gin.Context) {
 func DBaddMainforum(title string, text string, author int, kind int) {
 	mainforum := &Forum{Title: title, Author: author, Views: 0, Kind: kind}
 	db.Insert(mainforum)
-	unitforum := ForumComment{Text: text, Mid: int(mainforum.Id), Author: author}
-	db.Insert(unitforum)
+	DBaddUnitforum(text, int(mainforum.Id), author)
 	return
 }
 

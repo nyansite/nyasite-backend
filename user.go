@@ -151,5 +151,6 @@ func DBGetUserDataShow(userid int) UserDataShow {
 	db.ID(userid).Get(&user)
 	userDataShow.Name = user.Name
 	userDataShow.Avatar = user.Avatar
+	userDataShow.Id = user.Id
 	return userDataShow
 }
