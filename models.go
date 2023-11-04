@@ -65,18 +65,18 @@ type Video struct { //获取视频和获取评论分开
 }
 
 type VideoComment struct {
-	Vid    int `xorm:"index"` //所属页面的id
-	Text   string
-	Author int `xorm:"index"`     //发表评论的用户
-	Likes  int `xorm:"default 0"` //芝士点赞数量
+	Vid    int    `xorm:"index"` //所属页面的id
+	Text   string `xorm:"TEXT"`
+	Author int    `xorm:"index"`     //发表评论的用户
+	Likes  int    `xorm:"default 0"` //芝士点赞数量
 	Model  `xorm:"extends"`
 }
 
 type VideoCommentReply struct { //楼中楼的回复.......
-	Cid    int `xorm:"index"` //楼中楼上一层的id,自动生成
-	Text   string
-	Author int `xorm:"index"`
-	Likes  int `xorm:"default 0"` //芝士点赞数量
+	Cid    int    `xorm:"index"` //楼中楼上一层的id,自动生成
+	Text   string `xorm:"TEXT"`
+	Author int    `xorm:"index"`
+	Likes  int    `xorm:"default 0"` //芝士点赞数量
 	Model  `xorm:"extends"`
 }
 
@@ -93,16 +93,16 @@ type Forum struct { //获取视频和获取评论分开
 	Views  int `xorm:"default 0"` //这是浏览量
 	Author int `xorm:"index"`
 	Kind   int
-	//0:官方通知区;1:用户反馈区;2:关闭的用户反馈区;3:Thread贴;4:完结的Thread贴;5:资源贴
+	//0:官方通知区;1:用户反馈区;2:关闭的用户反馈区;3:Thread贴;4:完结的Thread贴;5:资源贴;6:灌水区
 	Model `xorm:"extends"`
 }
 
 type ForumComment struct {
-	Mid         int `xorm:"index"` //所属论坛的id
-	Text        string
-	Author      int `xorm:"index"`
-	Choose      int `xorm:"-"`
-	Like        int //uint8只有255，可能不太够用
+	Mid         int    `xorm:"index"` //所属论坛的id
+	Text        string `xorm:"TEXT"`
+	Author      int    `xorm:"index"`
+	Choose      int    `xorm:"-"`
+	Like        int    //uint8只有255，可能不太够用
 	Dislike     int
 	Smile       int
 	Celebration int

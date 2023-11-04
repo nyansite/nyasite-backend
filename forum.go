@@ -63,6 +63,9 @@ func BrowseForumPost(ctx *gin.Context) {
 		chose = append(chose, 3, 4)
 	case 3:
 		chose = append(chose, 5)
+	case 4:
+		chose = append(chose, 6)
+	//0:官方通知区;1:用户反馈区;2:关闭的用户反馈区;3:Thread贴;4:完结的Thread贴;5:资源贴;6:灌水区
 	default:
 		ctx.AbortWithStatus(http.StatusBadRequest)
 		return
@@ -263,10 +266,13 @@ func AddMainforum(ctx *gin.Context) {
 		ukind = 3
 	case 2:
 		ukind = 5
+	case 3:
+		ukind = 6
 	default:
 		ctx.AbortWithStatus(http.StatusBadRequest) //传入了错误的分区数据
 		return
 	}
+	//0:官方通知区;1:用户反馈区;2:关闭的用户反馈区;3:Thread贴;4:完结的Thread贴;5:资源贴;6:灌水区
 	author := session.Get("userid")
 	vauthor := author.(int64)
 	uauthor := int(vauthor)
