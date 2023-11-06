@@ -141,11 +141,11 @@
 
 | emoji | 含意             |
 | ----- | -------------- |
-| 0     | Like 👍        |
-| 1     | Dislike 👎     |
-| 2     | Smile 😄       |
-| 3     | Celebration 🎉 |
-| 4     | Confused 😕    |
-| 5     | Heart ❤️       |
-| 6     | Rocket 🚀      |
-| 7     | Eyes 👀        |
+| 1     | Like 👍        |
+| 2     | Dislike 👎     |
+| 3     | Smile 😄       |
+| 4     | Celebration 🎉 |
+| 5     | Confused 😕    |
+| 6     | Heart ❤️       |
+| 7     | Rocket 🚀      |
+| 8     | Eyes 👀        |

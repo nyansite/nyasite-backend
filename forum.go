@@ -179,21 +179,21 @@ func DBaddEmoji(emoji int, uid int, author int) {
 	var unitforum ForumComment
 	db.ID(uid).Get(&unitforum)
 	switch emoji {
-	case 0:
-		unitforum.Like++
 	case 1:
-		unitforum.Dislike++
+		unitforum.Like++
 	case 2:
-		unitforum.Smile++
+		unitforum.Dislike++
 	case 3:
-		unitforum.Celebration++
+		unitforum.Smile++
 	case 4:
-		unitforum.Confused++
+		unitforum.Celebration++
 	case 5:
-		unitforum.Heart++
+		unitforum.Confused++
 	case 6:
-		unitforum.Rocket++
+		unitforum.Heart++
 	case 7:
+		unitforum.Rocket++
+	case 8:
 		unitforum.Eyes++
 	}
 	emojiRecord := EmojiRecord{Author: author, Uid: uid, Emoji: emoji}
@@ -211,39 +211,39 @@ func DBchangeEmoji(emoji int, uid int, author int) {
 	fmt.Println(emojiRecord)
 	oEmoji := emojiRecord.Emoji
 	switch oEmoji {
-	case 0:
-		unitforum.Like--
 	case 1:
-		unitforum.Dislike--
+		unitforum.Like--
 	case 2:
-		unitforum.Smile--
+		unitforum.Dislike--
 	case 3:
-		unitforum.Celebration--
+		unitforum.Smile--
 	case 4:
-		unitforum.Confused--
+		unitforum.Celebration--
 	case 5:
-		unitforum.Heart--
+		unitforum.Confused--
 	case 6:
-		unitforum.Rocket--
+		unitforum.Heart--
 	case 7:
+		unitforum.Rocket--
+	case 8:
 		unitforum.Eyes--
 	}
 	switch emoji {
-	case 0:
-		unitforum.Like++
 	case 1:
-		unitforum.Dislike++
+		unitforum.Like++
 	case 2:
-		unitforum.Smile++
+		unitforum.Dislike++
 	case 3:
-		unitforum.Celebration++
+		unitforum.Smile++
 	case 4:
-		unitforum.Confused++
+		unitforum.Celebration++
 	case 5:
-		unitforum.Heart++
+		unitforum.Confused++
 	case 6:
-		unitforum.Rocket++
+		unitforum.Heart++
 	case 7:
+		unitforum.Rocket++
+	case 8:
 		unitforum.Eyes++
 	}
 	emojiRecord.Emoji = emoji
@@ -305,7 +305,7 @@ func AddEmoji(ctx *gin.Context) {
 		DBchangeEmoji(vemoji, vuid, uauthor)
 		return
 	}
-	if vemoji > 7 {
+	if vemoji > 8 && vemoji < 1 {
 		ctx.AbortWithStatus(http.StatusBadRequest) //传入的表情编号>7(不存在)
 		return
 	}
