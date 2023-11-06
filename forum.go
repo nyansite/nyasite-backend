@@ -100,7 +100,7 @@ func BrowseForumPost(ctx *gin.Context) {
 func BrowseUnitforumPost(ctx *gin.Context) {
 	session := sessions.Default(ctx)
 	author := session.Get("userid")
-	vauthor, _ := author.(int)
+	vauthor, _ := author.(int64)
 	uauthor := uint(vauthor)
 	vmid := ctx.Param("mid")
 	mid, err := strconv.Atoi(vmid)
@@ -132,8 +132,10 @@ func BrowseUnitforumPost(ctx *gin.Context) {
 		if count == 0 {
 			i.Choose = 0
 		} else {
+			println(uauthor)
+			println(i.Id)
 			db.Where("author = ? AND uid = ?", uauthor, i.Id).Get(&emojiRecord)
-			i.Choose = emojiRecord.Emoji + 1
+			i.Choose = int8(emojiRecord.Emoji)
 		}
 		i.Like--
 		i.Dislike--
@@ -175,7 +177,7 @@ func DBaddUnitforum(text string, mid int, author int) {
 	return
 }
 
-func DBaddEmoji(emoji int, uid int, author int) {
+func DBaddEmoji(emoji int8, uid int, author int) {
 	var unitforum ForumComment
 	db.ID(uid).Get(&unitforum)
 	switch emoji {
@@ -202,7 +204,7 @@ func DBaddEmoji(emoji int, uid int, author int) {
 	return
 }
 
-func DBchangeEmoji(emoji int, uid int, author int) {
+func DBchangeEmoji(emoji int8, uid int, author int) {
 	var unitforum ForumComment
 	var emojiRecord EmojiRecord
 	db.ID(uid).Get(&unitforum)
@@ -301,15 +303,15 @@ func AddEmoji(ctx *gin.Context) {
 	vuid, _ := strconv.Atoi(uid)
 	vemoji, _ := strconv.Atoi(emoji)
 	exist, _ := db.Where("author = ? and uid = ?", uauthor, uid).Count(&EmojiRecord{})
-	if exist != 0 {
-		DBchangeEmoji(vemoji, vuid, uauthor)
-		return
-	}
-	if vemoji > 8 && vemoji < 1 {
+	if vemoji > 8 || vemoji < 1 {
 		ctx.AbortWithStatus(http.StatusBadRequest) //传入的表情编号>7(不存在)
 		return
 	}
-	DBaddEmoji(vemoji, vuid, uauthor)
+	if exist != 0 {
+		DBchangeEmoji(int8(vemoji), vuid, uauthor)
+		return
+	}
+	DBaddEmoji(int8(vemoji), vuid, uauthor)
 	return
 }
 

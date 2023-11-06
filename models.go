@@ -101,7 +101,7 @@ type ForumComment struct {
 	Mid         int    `xorm:"index"` //所属论坛的id
 	Text        string `xorm:"TEXT"`
 	Author      int    `xorm:"index"`
-	Choose      int    `xorm:"-"`
+	Choose      int8   `xorm:"-"`
 	Like        int    //uint8只有255，可能不太够用
 	Dislike     int
 	Smile       int
@@ -116,7 +116,7 @@ type ForumComment struct {
 type EmojiRecord struct {
 	Author int
 	Uid    int
-	Emoji  int
+	Emoji  int8
 }
 
 // 正在转码压制中的视频
