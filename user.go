@@ -32,6 +32,7 @@ func GetSelfUserData(c *gin.Context) {
 	vuserid, _ := userid.(int64)
 	println(vuserid)
 	c.JSON(http.StatusOK, gin.H{
+		"name": user.Name,
 		"userid": userid,
 		"mail":   mail,
 		"level":  level,
@@ -75,10 +76,10 @@ func Login(c *gin.Context) {
 		c.AbortWithStatus(StatusPasswordError)
 		return
 	}
-	println(user.Level)
 	session.Set("userid", user.Id)
 	session.Set("is_login", true)
 	session.Set("level", user.Level)
+	session.Set("pwd-8", user.Passwd[:8]) //更改密码后其他已登录设备会退出
 	session.Save()
 
 	c.AbortWithStatus(http.StatusOK)
