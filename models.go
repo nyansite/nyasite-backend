@@ -55,6 +55,7 @@ type Tag struct {
 
 // 视频部分
 type Video struct { //获取视频和获取评论分开
+	VideoPath   string //视频路径,封面路径
 	CoverPath   string
 	Title       string `xorm:"default '芝士标题'"`
 	Description string `xorm:"default '简介不见惹'"`
@@ -64,59 +65,42 @@ type Video struct { //获取视频和获取评论分开
 	Model       `xorm:"extends"`
 }
 
+// 视频站评论部分
 type VideoComment struct {
-	Vid    int    `xorm:"index"` //所属页面的id
-	Text   string `xorm:"TEXT"`
-	Author int    `xorm:"index"`     //发表评论的用户
-	Likes  int    `xorm:"default 0"` //芝士点赞数量
-	Model  `xorm:"extends"`
+	Vid         int                 `xorm:"index"` //所属视频的id
+	Text        string              `xorm:"TEXT"`
+	Author      int                 `xorm:"index"`
+	Choose      int8                `xorm:"-"`
+	CRdisplay   []VideoCommentReply `xorm:"-"`
+	Like        int                 `xorm:"default 1"` //uint8只有255，可能不太够用
+	Dislike     int                 `xorm:"default 1"`
+	Smile       int                 `xorm:"default 1"`
+	Celebration int                 `xorm:"default 1"`
+	Confused    int                 `xorm:"default 1"`
+	Heart       int                 `xorm:"default 1"`
+	Rocket      int                 `xorm:"default 1"`
+	Eyes        int                 `xorm:"default 1"`
+	Model       `xorm:"extends"`
 }
 
 type VideoCommentReply struct { //楼中楼的回复.......
 	Cid    int    `xorm:"index"` //楼中楼上一层的id,自动生成
 	Text   string `xorm:"TEXT"`
 	Author int    `xorm:"index"`
-	Likes  int    `xorm:"default 0"` //芝士点赞数量
+	Likes  int    `xorm:"default 1"` //芝士点赞数量
+	Like_c bool   `xorm:"-"`         //判断是否点赞
 	Model  `xorm:"extends"`
 }
 
-type VideoLikeRecord struct {
+type VideoCommentEmojiRecord struct {
 	Author int
-	Vid    int
+	Cid    int
+	Emoji  int8 `xorm:"TINYINT"`
 }
 
-// 论坛部分
-// 不需要楼中楼,直接引用
-
-type Forum struct { //获取视频和获取评论分开
-	Title  string
-	Views  int `xorm:"default 0"` //这是浏览量
-	Author int `xorm:"index"`
-	Kind   int
-	//0:官方通知区;1:用户反馈区;2:关闭的用户反馈区;3:Thread贴;4:完结的Thread贴;5:资源贴;6:灌水区
-	Model `xorm:"extends"`
-}
-
-type ForumComment struct {
-	Mid         int    `xorm:"index"` //所属论坛的id
-	Text        string `xorm:"TEXT"`
-	Author      int    `xorm:"index"`
-	Choose      int8   `xorm:"-"`
-	Like        int    //uint8只有255，可能不太够用
-	Dislike     int
-	Smile       int
-	Celebration int
-	Confused    int
-	Heart       int
-	Rocket      int
-	Eyes        int
-	Model       `xorm:"extends"`
-}
-
-type EmojiRecord struct {
+type VideoCommentReplyLikeRecord struct {
 	Author int
-	Uid    int
-	Emoji  int8
+	Crid   int //CR = CommentReply 不是坟墓
 }
 
 // 正在转码压制中的视频
@@ -135,13 +119,6 @@ type SessionSecret struct {
 
 //搜索部分
 
-type SearchFourmReturn struct {
-	Id    int64
-	Title string
-	Text  string
-	Kind  int
-}
-
 type SearchVideoReturn struct {
 	Id        int64
 	CoverPath string
@@ -150,10 +127,9 @@ type SearchVideoReturn struct {
 }
 
 // 消息部分
-type MessageForum struct {
-	Kind      bool //0:mainfourm 1:forumcomment
-	Author    int  //被回应的用户
-	Mainfourm int  //被回应的帖子
-	Replier   int  //回应的用户
-	Replied   int  //回应的帖子
+type MessageVideoEmojiComment struct {
+	Vid     int64
+	Reciver int
+	Cliker  int
+	Kind    int8
 }

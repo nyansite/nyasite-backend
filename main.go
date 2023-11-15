@@ -32,7 +32,7 @@ func main() {
 		panic(err) //连接失败不会在这里挂
 	}
 
-	db.Sync(&User{}, &Video{}, &VideoComment{}, &Tag{}, &TagModel{}, &Forum{}, &SessionSecret{}, &ForumComment{}, &EmojiRecord{})
+	db.Sync(&User{}, &Video{}, &Tag{}, &TagModel{}, &SessionSecret{}, &VideoComment{}, &VideoCommentReply{}, &VideoCommentEmojiRecord{}, &VideoCommentReplyLikeRecord{})
 	db.SetDefaultCacher(caches.NewLRUCacher(caches.NewMemoryStore(), 10000))
 	//上面的是sql
 
@@ -46,16 +46,16 @@ func main() {
 	s1, _ := rand.Prime(rand.Reader, 256) //最多32字节,也就是256
 	s2, _ := rand.Prime(rand.Reader, 256)
 	secrets = append(secrets, s1.Bytes(), s2.Bytes())
-	db.Where("created_at < ?", time.Now().Unix()-TTL).Delete(&SessionSecret{}) //删除过期
-	err = db.Where("created_at >= ?", time.Now().Unix()-TTL).Find(&old_secrets)//没过期的取出来
+	db.Where("created_at < ?", time.Now().Unix()-TTL).Delete(&SessionSecret{})  //删除过期
+	err = db.Where("created_at >= ?", time.Now().Unix()-TTL).Find(&old_secrets) //没过期的取出来
 	if err != nil {
-		panic("我数据库呢???我那么大一个数据库呢???还我数据库!!!")//数据库连不上会在这里挂,而不是上面
+		panic("我数据库呢???我那么大一个数据库呢???还我数据库!!!") //数据库连不上会在这里挂,而不是上面
 	}
-	db.Insert(&SessionSecret{Authentication: s1.Bytes(), Encryption: s2.Bytes()})//新密钥进数据库,避免kill 9
+	db.Insert(&SessionSecret{Authentication: s1.Bytes(), Encryption: s2.Bytes()}) //新密钥进数据库,避免kill 9
 	for _, v := range old_secrets {
 		secrets = append(secrets, v.Authentication, v.Encryption)
 	}
-	store := cookie.NewStore(secrets...)//密钥成对定义以允许密钥轮换.使用新的密钥加密但是旧的仍然有效
+	store := cookie.NewStore(secrets...) //密钥成对定义以允许密钥轮换.使用新的密钥加密但是旧的仍然有效
 	store.Options(sessions.Options{
 		Secure:   true, //跟下面那条基本上可以防住csrf了,但是还是稳一点好
 		HttpOnly: true, //localhost或者https
@@ -69,12 +69,9 @@ func main() {
 		group.GET("/user_status", GetSelfUserData)
 		group.GET("/user_status/:id", GetUserData)
 		group.GET("/get_video_img/:id", GetVideoImg)
-		group.GET("/video_comment/:id/:pg", GetVideoComment)
+		group.GET("/video_comment/:id/:pg", BrowseVideoComments)
 		group.GET("/get_video_tags/:id", GetVideoTags)
 		group.GET("/coffee", PrivilegeLevel(11), coffee)
-		group.GET("/all_forum/:page", BrowseAllForumPost)
-		group.GET("/browse_forum/:board/:page", BrowseForumPost)
-		group.GET("/browse_unitforum/:mid/:page", BrowseUnitforumPost)
 		group.GET("/search/taglist", SearchTag)
 		// group.GET("/search/forum/:text", SearchFourms)
 		// group.GET("/search/video/:tags/:text", SearchVideos)
@@ -89,12 +86,9 @@ func main() {
 		//video
 		group.POST("/upload_video", UploadVideo)
 		group.POST("/add_video_comment", AddVideoComment)
+		group.POST("/add_video_comment_reply", AddVideoCommentReply)
 		group.POST("/add_video_tag", AddVideoTag)
-		//fourm
-		group.POST("/add_mainforum", PrivilegeLevel(0), AddMainforum)
-		group.POST("/add_unitforum", PrivilegeLevel(0), AddUnitforum)
-		group.POST("/add_emoji", PrivilegeLevel(0), AddEmoji)
-		group.POST("/finish_forum", PrivilegeLevel(0), FinishForum)
+
 	}
 	// _, err = db.Insert(User{Level: 255})
 	if err != nil {

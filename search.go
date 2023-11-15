@@ -21,42 +21,6 @@ func SearchTag(c *gin.Context) {
 	return
 }
 
-func SearchFourms(c *gin.Context) {
-	var fourm Forum
-	var forumsC []ForumComment
-	var fourmsTitle []Forum //这里是检索标题后的结果
-	var forumSearch SearchFourmReturn
-	var forumsS []SearchFourmReturn //返回的模板
-	ids := mapset.NewSet[uint]()
-	textCondition := c.Param("text")
-	db.Where("Text like ?", "%"+textCondition+"%").Find(&forumsC) //检索帖子内容
-	for _, i := range forumsC {
-		if !ids.Contains(uint(i.Mid)) { //排除同一主帖子下子帖子反复出现关键词
-			db.ID(i.Mid).Get(&fourm)
-			forumSearch.Id = fourm.Id
-			forumSearch.Text = i.Text
-			forumSearch.Title = fourm.Title
-			forumSearch.Kind = fourm.Kind
-			ids.Add(uint(i.Mid))
-			forumsS = append(forumsS, forumSearch)
-		}
-	}
-	db.Where("Title like ?", "%"+textCondition+"%").Find(&fourmsTitle) //检索帖子标题
-	for _, i := range fourmsTitle {
-		if !ids.Contains(uint(i.Id)) {
-			forumSearch.Id = i.Id
-			forumSearch.Title = i.Title
-			forumSearch.Kind = i.Kind
-			forumsS = append(forumsS, forumSearch)
-		}
-	}
-	c.JSON(http.StatusOK, gin.H{
-		"forum": forumsS,
-	})
-
-	return
-}
-
 func SearchVideos(c *gin.Context) {
 	var tagModel TagModel
 	var tags []Tag
