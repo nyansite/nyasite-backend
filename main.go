@@ -70,6 +70,7 @@ func main() {
 		group.GET("/user_status/:id", GetUserData)
 		group.GET("/get_video_img/:id", GetVideoImg)
 		group.GET("/video_comment/:id/:pg", BrowseVideoComments)
+		group.GET("/video_comment_reply/:id/:pg", BrowseVideoCommentReplies)
 		group.GET("/get_video_tags/:id", GetVideoTags)
 		group.GET("/coffee", PrivilegeLevel(11), coffee)
 		group.GET("/search/taglist", SearchTag)

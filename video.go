@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
+	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 
@@ -44,15 +45,81 @@ func BrowseVideoComments(ctx *gin.Context) {
 		log.Println(err)
 		return
 	}
+	userIds := mapset.NewSet[int]()
 	comments := DBgetVideoComments(vid, pg, uauthor)
+	var userDataShows []UserDataShow
+	for _, i := range comments {
+		if !userIds.Contains(i.Author) {
+			userIds.Add(i.Author)
+			userDataShows = append(userDataShows, DBGetUserDataShow(i.Author)) //from user.go
+			for _, j := range i.CRdisplay {
+				if !userIds.Contains(j.Author) {
+					userIds.Add(i.Author)
+					userDataShows = append(userDataShows, DBGetUserDataShow(j.Author))
+				}
+			}
+		}
+	}
 	ctx.JSON(http.StatusOK, gin.H{
 		"Origin":    video,
 		"Body":      comments,
+		"UserShow":  userDataShows,
 		"PageCount": math.Ceil(float64(count) / 20), //总页数
 	})
 
 }
-
+func BrowseVideoCommentReplies(ctx *gin.Context) {
+	session := sessions.Default(ctx)
+	author := session.Get("userid")
+	uauthor := int(author.(int64))
+	vcid := ctx.Param("id")
+	cid, err := strconv.Atoi(vcid)
+	vpg := ctx.Param("pg")
+	pg, err := strconv.Atoi(vpg)
+	var comment VideoComment
+	has, err := db.ID(cid).Get(&comment)
+	var emojiRecord VideoCommentEmojiRecord
+	if pg < 1 || err != nil || has == false {
+		ctx.AbortWithStatus(http.StatusBadRequest) //400
+		return
+	}
+	count, _ := db.Where("author = ? AND cid = ?", author, comment.Id).Count(&emojiRecord)
+	if count == 0 {
+		comment.Choose = 0
+	} else {
+		comment.Choose = emojiRecord.Emoji
+	}
+	comment.Like--
+	comment.Dislike--
+	comment.Smile--
+	comment.Celebration--
+	comment.Confused--
+	comment.Heart--
+	comment.Rocket--
+	comment.Eyes--
+	pg -= 1
+	count, err1 := db.In("cid", cid).Count(&VideoCommentReply{})
+	if err1 != nil {
+		ctx.AbortWithStatus(http.StatusInternalServerError) //500,正常情况下不会出现
+		log.Println(err)
+		return
+	}
+	userIds := mapset.NewSet[int]()
+	commentrReplies := DBgetVideoCommentReplies(cid, pg, uauthor)
+	var userDataShows []UserDataShow
+	for _, i := range commentrReplies {
+		if !userIds.Contains(i.Author) {
+			userIds.Add(i.Author)
+			userDataShows = append(userDataShows, DBGetUserDataShow(i.Author))
+		}
+	}
+	ctx.JSON(http.StatusOK, gin.H{
+		"Origin":    comment,
+		"Body":      commentrReplies,
+		"UserShow":  userDataShows,
+		"PageCount": math.Ceil(float64(count) / 20), //总页数
+	})
+}
 func DBgetVideoComments(vid int, page int, author int) []VideoComment {
 	var comments []VideoComment
 	var commentsReturn []VideoComment
