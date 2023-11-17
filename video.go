@@ -28,7 +28,7 @@ func BrowseVideoComments(ctx *gin.Context) {
 	session := sessions.Default(ctx)
 	author := session.Get("userid")
 	uauthor := int(author.(int64))
-	vvid := ctx.Param("vid")
+	vvid := ctx.Param("id")
 	vid, err := strconv.Atoi(vvid)
 	vpg := ctx.Param("pg")
 	pg, err := strconv.Atoi(vpg)
@@ -59,11 +59,11 @@ func DBgetVideoComments(vid int, page int, author int) []VideoComment {
 	db.In("vid", vid).Limit(20, (page-1)*20).Find(&comments)
 	for _, i := range comments {
 		var emojiRecord VideoCommentEmojiRecord
-		count, _ := db.Where("author = ? AND cid = ?", author, i.Id).Count(&VideoCommentEmojiRecord{})
+		count, _ := db.Where("author = ? AND cid = ?", author, i.Id).Count(&emojiRecord)
 		if count == 0 {
 			i.Choose = 0
 		} else {
-			db.Where("author = ? AND cid = ?", author, i.Id).Count(&emojiRecord)
+			db.Where("author = ? AND cid = ?", author, i.Id).Get(&emojiRecord)
 			i.Choose = emojiRecord.Emoji
 		}
 		i.Like--
@@ -75,23 +75,24 @@ func DBgetVideoComments(vid int, page int, author int) []VideoComment {
 		i.Rocket--
 		i.Eyes--
 		//从1开始计数，所以默认-1
-		i.CRdisplay = DBgetVideoCommentRepliesShow(int(i.Id))
+		i.CRdisplay = DBgetVideoCommentRepliesShow(int(i.Id), author)
 		commentsReturn = append(commentsReturn, i)
 	}
 	return commentsReturn
 }
 
-func DBgetVideoCommentReplies(cid int, page int) []VideoCommentReply {
+func DBgetVideoCommentReplies(cid int, page int, author int) []VideoCommentReply {
 	var commentReplies []VideoCommentReply
 	var commentRepliesReturn []VideoCommentReply
 	db.In("cid", cid).Limit(20, (page-1)*20).Find(&commentReplies)
 	for _, i := range commentReplies {
-		exist, _ := db.Where("author = ? and cid = ?", i.Author, cid).Count(&VideoCommentEmojiRecord{})
+		exist, _ := db.Where("author = ? and crid = ?", author, i.Id).Count(&VideoCommentReplyLikeRecord{})
 		if exist != 0 {
 			i.Like_c = true
 		} else {
 			i.Like_c = false
 		}
+		i.Likes--
 		commentRepliesReturn = append(commentRepliesReturn, i)
 	}
 	return commentRepliesReturn
@@ -101,17 +102,18 @@ func DBgetVideoCommentRepliesCount(cid int) int {
 	return int(math.Ceil(float64(count) / 20))
 }
 
-func DBgetVideoCommentRepliesShow(cid int) []VideoCommentReply {
+func DBgetVideoCommentRepliesShow(cid int, author int) []VideoCommentReply {
 	var commentReplies []VideoCommentReply
 	var commentRepliesReturn []VideoCommentReply
 	db.In("cid", cid).Limit(3, 0).Find(&commentReplies)
 	for _, i := range commentReplies {
-		exist, _ := db.Where("author = ? and cid = ?", i.Author, cid).Count(&VideoCommentReplyLikeRecord{})
+		exist, _ := db.Where("author = ? and crid = ?", author, i.Id).Count(&VideoCommentReplyLikeRecord{})
 		if exist != 0 {
 			i.Like_c = true
 		} else {
 			i.Like_c = false
 		}
+		i.Likes--
 		commentRepliesReturn = append(commentRepliesReturn, i)
 	}
 	return commentRepliesReturn
@@ -129,7 +131,8 @@ func AddVideoComment(ctx *gin.Context) {
 }
 
 func DBaddVideoComment(vid int, author int, text string) {
-	comment := VideoComment{Vid: vid, Text: text, Author: author}
+	comment := VideoComment{Vid: vid, Text: text, Author: author,
+		Like: 1, Dislike: 1, Smile: 1, Celebration: 1, Confused: 1, Heart: 1, Rocket: 1, Eyes: 1}
 	db.Insert(comment)
 	return
 }
@@ -145,7 +148,7 @@ func AddVideoCommentReply(ctx *gin.Context) {
 	return
 }
 func DBaddVideoCommentReply(cid int, author int, text string) {
-	commentReply := VideoCommentReply{Cid: cid, Text: text, Author: author}
+	commentReply := VideoCommentReply{Cid: cid, Text: text, Author: author, Likes: 1}
 	db.Insert(commentReply)
 	return
 }

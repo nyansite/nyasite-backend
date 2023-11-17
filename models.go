@@ -59,8 +59,8 @@ type Video struct { //获取视频和获取评论分开
 	CoverPath   string
 	Title       string `xorm:"default '芝士标题'"`
 	Description string `xorm:"default '简介不见惹'"`
-	Likes       int    `xorm:"default 0"` //芝士点赞数量
-	Views       int    `xorm:"default 0"` //这是播放量
+	Likes       int    `xorm:"default 1"` //芝士点赞数量
+	Views       int    `xorm:"default 1"` //这是播放量
 	Author      int    `xorm:"index"`     //作者/上传者
 	Model       `xorm:"extends"`
 }
@@ -71,7 +71,7 @@ type VideoComment struct {
 	Text        string              `xorm:"TEXT"`
 	Author      int                 `xorm:"index"`
 	Choose      int8                `xorm:"-"`
-	CRdisplay   []VideoCommentReply `xorm:"-"`
+	CRdisplay   []VideoCommentReply `xorm:"-"`         //CR = CommentReply
 	Like        int                 `xorm:"default 1"` //uint8只有255，可能不太够用
 	Dislike     int                 `xorm:"default 1"`
 	Smile       int                 `xorm:"default 1"`
