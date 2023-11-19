@@ -15,7 +15,7 @@ import (
 
 func GetSelfUserData(c *gin.Context) {
 	session := sessions.Default(c)
-	if session.Get("is_login") != true {
+	if session.Get("is_login") == nil {
 		c.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
@@ -56,7 +56,7 @@ func GetUserData(c *gin.Context) {
 
 func Login(c *gin.Context) {
 	session := sessions.Default(c)
-	if session.Get("is_login") == true {
+	if session.Get("is_login") != nil {
 		c.AbortWithStatus(StatusAlreadyLogin)
 		return
 	}
