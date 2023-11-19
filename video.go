@@ -247,7 +247,6 @@ func ClikckVideoEmoji(ctx *gin.Context) {
 			return
 		}
 	}
-	return
 }
 
 func DBaddVideoEmoji(cid int, emoji int8, author int) {
