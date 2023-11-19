@@ -79,20 +79,17 @@ func main() {
 
 		group.POST("/register", Register)
 		group.POST("/login", Login)
-	}
 
-	group = r.Group("/uapi")
-	{
 		group.POST("/new_tag", PrivilegeLevel(10), NewTag)
 		//video
-		group.POST("/upload_video", UploadVideo)
-		group.POST("/add_video_comment", AddVideoComment)
-		group.POST("/add_video_comment_reply", AddVideoCommentReply)
-		group.POST("click_video_emoji", ClikckVideoEmoji)
-		group.POST("click_video_like", ClickVideoLike)
-		group.POST("/add_video_tag", AddVideoTag)
-
+		group.POST("/upload_video", PrivilegeLevel(10), UploadVideo)
+		group.POST("/add_video_comment", PrivilegeLevel(10), AddVideoComment)
+		group.POST("/add_video_comment_reply", PrivilegeLevel(10), AddVideoCommentReply)
+		group.POST("click_video_emoji", PrivilegeLevel(10), ClikckVideoEmoji)
+		group.POST("click_video_like", PrivilegeLevel(10), ClickVideoLike)
+		group.POST("/add_video_tag", PrivilegeLevel(10), AddVideoTag)
 	}
+
 	// _, err = db.Insert(User{Level: 255})
 	if err != nil {
 		panic(err)
