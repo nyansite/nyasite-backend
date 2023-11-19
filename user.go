@@ -15,7 +15,7 @@ import (
 
 func GetSelfUserData(c *gin.Context) {
 	session := sessions.Default(c)
-	if session.Get("is_login") == nil {
+	if session.Get("is_login") != true {
 		c.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
@@ -56,7 +56,7 @@ func GetUserData(c *gin.Context) {
 
 func Login(c *gin.Context) {
 	session := sessions.Default(c)
-	if session.Get("is_login") != nil {
+	if session.Get("is_login") == true {
 		c.AbortWithStatus(StatusAlreadyLogin)
 		return
 	}
@@ -138,7 +138,7 @@ func check_passwd(passwd []byte, passwd2 []byte) bool {
 	for i, v := range passwd {
 		if v != safe_passwd[i] {
 			ret = false
-			//不要break防止时间攻击
+			//不要break防止时间攻击(也许不需要)
 		}
 	}
 	return ret
