@@ -27,7 +27,7 @@ const (
 
 func main() {
 	var err error
-	db, err = xorm.NewEngine("postgres", "postgresql://mainbackend:114514@localhost:5432/dbs?sslmode=disable")
+	db, err = xorm.NewEngine("postgres", "postgresql://postgres:114514@localhost:5432/dbs?sslmode=disable")
 	if err != nil {
 		panic(err) //连接失败不会在这里挂
 	}

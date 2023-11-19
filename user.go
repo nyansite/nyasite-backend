@@ -34,7 +34,7 @@ func GetSelfUserData(c *gin.Context) {
 		"userid": userid,
 		"mail":   mail,
 		"level":  level,
-		"avatar": DBGetUserDataShow(int(vuserid)).Avatar,
+		"avatar": user.Avatar,
 	})
 }
 
@@ -51,6 +51,7 @@ func GetUserData(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"name":  user.Name,
 		"level": user.Level,
+		"avatar": user.Avatar,
 	})
 }
 
