@@ -115,6 +115,10 @@ func Register(c *gin.Context) {
 	c.AbortWithStatus(http.StatusOK)
 }
 
+// func change_avatar(c *gin.Context){
+// 	username, err := c.FormFile("img")
+// }
+
 func encrypt_passwd(passwds string) []byte { //加密密码,带盐
 	salte, _ := rand.Prime(rand.Reader, 64) //普普通通的64位盐,8字节
 	salt := salte.Bytes()

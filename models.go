@@ -29,7 +29,7 @@ type User struct {
 	Name   string `xorm:"unique"`
 	Passwd []byte
 	Email  string `xorm:"unique"`
-	Avatar string `xorm:"TEXT"`
+	Avatar string 
 	Level  uint8  `xorm:"TINYINT default 0"` //4位权限4位等级,所以满级15(要不了这么多)
 	Model  `xorm:"extends"`
 }
