@@ -63,7 +63,6 @@ func main() {
 		MaxAge:   TTL,
 		SameSite: http.SameSiteStrictMode})
 	r.Use(sessions.Sessions("session", store))
-	// r.Use(static.Serve("/", static.LocalFile("cute_web/build/", false)))
 	group := r.Group("/api")
 	{
 		group.GET("/user_status", GetSelfUserData)
@@ -74,8 +73,6 @@ func main() {
 		group.GET("/get_video_tags/:id", GetVideoTags)
 		group.GET("/coffee", PrivilegeLevel(11), coffee)
 		group.GET("/search/taglist", SearchTag)
-		// group.GET("/search/forum/:text", SearchFourms)
-		// group.GET("/search/video/:tags/:text", SearchVideos)
 
 		group.POST("/register", Register)
 		group.POST("/login", Login)
@@ -90,7 +87,6 @@ func main() {
 		group.POST("/add_video_tag", PrivilegeLevel(10), AddVideoTag)
 	}
 
-	// _, err = db.Insert(User{Level: 255})
 	if err != nil {
 		panic(err)
 	}

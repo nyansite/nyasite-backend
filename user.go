@@ -37,7 +37,6 @@ func GetSelfUserData(c *gin.Context) {
 		"avatar": user.Avatar,
 	})
 }
-
 func GetUserData(c *gin.Context) {
 	id := c.Param("id")
 	nid, err := strconv.Atoi(id)
@@ -49,8 +48,8 @@ func GetUserData(c *gin.Context) {
 	db.ID(nid).Get(&user)
 
 	c.JSON(http.StatusOK, gin.H{
-		"name":  user.Name,
-		"level": user.Level,
+		"name":   user.Name,
+		"level":  user.Level,
 		"avatar": user.Avatar,
 	})
 }
@@ -71,7 +70,7 @@ func Login(c *gin.Context) {
 		c.Status(StatusUserNameNotExist)
 		return
 	}
-	if !check_passwd(user.Passwd, []byte(passwd)) {
+	if !check_passwd(user.Passwd, passwd) {
 		c.AbortWithStatus(StatusPasswordError)
 		return
 	}
@@ -84,15 +83,16 @@ func Login(c *gin.Context) {
 	c.AbortWithStatus(http.StatusOK)
 }
 
+var regCompile = regexp.MustCompile(`\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*`)
+
 func Register(c *gin.Context) {
-	username, passwd, mail, avatar := c.PostForm("username"), c.PostForm("passwd"), c.PostForm("email"), c.PostForm("avatar")
+	username, passwd, mail := c.PostForm("username"), c.PostForm("passwd"), c.PostForm("email")
 
 	if username == "" || passwd == "" || mail == "" {
 		c.AbortWithStatus(http.StatusBadRequest) //400
 		return
 	}
-
-	if reg := regexp.MustCompile(`\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*`); !reg.MatchString(mail) { //检测前端也要做一遍
+	if !regCompile.MatchString(mail) { //检测前端也要做一遍
 		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
@@ -107,7 +107,7 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	user := User{Name: username, Passwd: encrypt_passwd([]byte(passwd)), Email: mail, Avatar: avatar}
+	user := User{Name: username, Passwd: encrypt_passwd(passwd), Email: mail}
 	_, err := db.Insert(&user)
 	if err != nil {
 		fmt.Println(err)
@@ -115,10 +115,10 @@ func Register(c *gin.Context) {
 	c.AbortWithStatus(http.StatusOK)
 }
 
-func encrypt_passwd(passwd []byte) []byte { //加密密码,带盐
+func encrypt_passwd(passwds string) []byte { //加密密码,带盐
 	salte, _ := rand.Prime(rand.Reader, 64) //普普通通的64位盐,8字节
 	salt := salte.Bytes()
-
+	passwd := []byte(passwds)
 	passwd_sha := sha512.Sum512(passwd)          //密码的sha
 	saltpasswd := append(passwd_sha[:], salt...) //加盐
 	safe_passwd := sha512.Sum512_256(saltpasswd) //这一步才算加密,512/256指生成512之后截断成256,安全性一样
@@ -126,10 +126,11 @@ func encrypt_passwd(passwd []byte) []byte { //加密密码,带盐
 	return append(safe_passwd[:], salt...) //保存盐
 }
 
-func check_passwd(passwd []byte, passwd2 []byte) bool {
+func check_passwd(passwd []byte, passwd2s string) bool {
 	//获取盐
 	salt := passwd[32:]
 	passwd = passwd[:32]
+	passwd2 := []byte(passwd2s)
 
 	passwd2_sha := sha512.Sum512(passwd2)
 	saltpasswd2 := append(passwd2_sha[:], salt...)
