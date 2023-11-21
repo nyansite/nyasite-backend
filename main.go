@@ -3,16 +3,15 @@ package main
 import (
 	"context"
 	"crypto/rand"
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/cookie"
+	"github.com/gin-gonic/gin"
+	_ "github.com/lib/pq"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
-
-	"github.com/gin-contrib/sessions"
-	"github.com/gin-contrib/sessions/cookie"
-	"github.com/gin-gonic/gin"
-	_ "github.com/lib/pq"
 	"xorm.io/xorm"
 	"xorm.io/xorm/caches"
 )
@@ -36,7 +35,6 @@ func main() {
 	db.SetDefaultCacher(caches.NewLRUCacher(caches.NewMemoryStore(), 10000))
 	//上面的是sql
 
-	r := gin.Default()
 	// config := cors.DefaultConfig()
 	// config.AllowOrigins = []string{"http://google.com"}	//允许访问信息的第三方,比如说广告供应商
 	// config.AllowCredentials = true //cookie一并发给跨域请求
@@ -62,7 +60,8 @@ func main() {
 		Path:     "/",
 		MaxAge:   TTL,
 		SameSite: http.SameSiteStrictMode})
-	r.Use(sessions.Sessions("session", store))
+	r := gin.New()
+	r.Use(gin.LoggerWithFormatter(defaultLogFormatter), gin.Recovery(), sessions.Sessions("session", store))
 	group := r.Group("/api")
 	{
 		group.GET("/user_status", GetSelfUserData)
@@ -86,14 +85,21 @@ func main() {
 		group.POST("click_video_like", PrivilegeLevel(10), ClickVideoLike)
 		group.POST("/add_video_tag", PrivilegeLevel(10), AddVideoTag)
 	}
+	r2 := gin.New()
+	r2.Use(gin.LoggerWithFormatter(defaultLogFormatter), gin.Recovery())
+	r2.GET("/", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"message": "pong",
+		})
+	})
 
-	if err != nil {
-		panic(err)
-	}
 	//  https://gin-gonic.com/zh-cn/docs/examples/graceful-restart-or-stop/
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", r.ServeHTTP)
+	mux.HandleFunc("baka.localhost/", r2.ServeHTTP) //改host欸
 	srv := &http.Server{
 		Addr:    ":8000",
-		Handler: r,
+		Handler: mux,
 	}
 	go func() {
 		log.Println("服务器启动")
