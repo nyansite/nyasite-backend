@@ -88,9 +88,7 @@ func main() {
 	r2 := gin.New()
 	r2.Use(gin.LoggerWithFormatter(defaultLogFormatter), gin.Recovery())
 	r2.GET("/", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "pong",
-		})
+		c.Redirect(http.StatusMovedPermanently, "http://www.google.com/")
 	})
 
 	//  https://gin-gonic.com/zh-cn/docs/examples/graceful-restart-or-stop/
