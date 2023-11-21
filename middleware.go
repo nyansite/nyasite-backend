@@ -10,10 +10,12 @@ import (
 func PrivilegeLevel(level uint8) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		session := sessions.Default(ctx)
-		if session.Get("is_login") != true {
+		is_login, err := ctx.Cookie("is_login")
+		if is_login != "true" || err != nil {
 			ctx.AbortWithStatus(http.StatusUnauthorized) //未登录返回401
 			return
 		}
+
 		userid := session.Get("userid")
 		var user User
 		if has, _ := db.ID(userid).Get(&user); has == false { //用户不存在

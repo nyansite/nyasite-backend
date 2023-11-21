@@ -15,7 +15,8 @@ import (
 
 func GetSelfUserData(c *gin.Context) {
 	session := sessions.Default(c)
-	if session.Get("is_login") == nil {
+	is_login, err := c.Cookie("is_login")
+	if is_login != "true" || err != nil{
 		c.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
@@ -56,7 +57,8 @@ func GetUserData(c *gin.Context) {
 
 func Login(c *gin.Context) {
 	session := sessions.Default(c)
-	if session.Get("is_login") != nil {
+	is_login, err := c.Cookie("is_login")
+	if is_login == "true" || err != nil{
 		c.AbortWithStatus(StatusAlreadyLogin)
 		return
 	}
@@ -74,12 +76,12 @@ func Login(c *gin.Context) {
 		c.AbortWithStatus(StatusPasswordError)
 		return
 	}
+
 	session.Set("userid", user.Id)
-	session.Set("is_login", true)
 	session.Set("level", user.Level)
 	session.Set("pwd-8", user.Passwd[:8]) //更改密码后其他已登录设备会退出
 	session.Save()
-
+	c.SetCookie("is_login", "true", 0, "/", "", true, true)
 	c.AbortWithStatus(http.StatusOK)
 }
 

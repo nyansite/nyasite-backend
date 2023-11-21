@@ -41,19 +41,6 @@
 | 2     | Thread贴 |
 | 3     | 资源贴     |
 
-## uapi
-
-这是不安全的api,必须登录
-
-### Video
-
-#### uapi/upload_video
-
-上传视频;等级限制为;传入表单;属性是Title,Description(简介),file(视频文件),cover(封面文件)
-
-#### upi/add_video_comment
-
-提交视频评论;等级限制为;传入表单;属性是vid(评论视频的vid),Text
 
 ### Forum
 
@@ -110,7 +97,6 @@
 
 | 键        | 说明                                |
 | -------- | --------------------------------- |
-| is_login | 登录为true                           |
 | userid   |                                   |
 | level    | 虽然存储的是字符串但是请当作uint8使用awa 4b权限4b经验 |
 | pwd-8    | 密码的最后8位,校验用,别问我为什么6位密码有8位数据       |

@@ -21,9 +21,9 @@ import (
 )
 
 func NewTag(c *gin.Context) {
-	session := sessions.Default(c)
-	if session.Get("is_login") != true {
-		c.AbortWithStatus(http.StatusUnauthorized) //返回401
+	is_login, err := c.Cookie("is_login")
+	if is_login != "true" || err != nil{
+		c.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
 	tagname := c.PostForm("tagname")
