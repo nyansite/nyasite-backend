@@ -21,8 +21,8 @@ import (
 )
 
 func NewTag(c *gin.Context) {
-	is_login, err := c.Cookie("is_login")
-	if is_login != "true" || err != nil{
+	is_login, _ := c.Cookie("is_login")
+	if is_login != "true" {
 		c.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}

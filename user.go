@@ -15,8 +15,8 @@ import (
 
 func GetSelfUserData(c *gin.Context) {
 	session := sessions.Default(c)
-	is_login, err := c.Cookie("is_login")
-	if is_login != "true" || err != nil{
+	is_login, _ := c.Cookie("is_login")
+	if is_login != "true"{
 		c.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
@@ -57,8 +57,8 @@ func GetUserData(c *gin.Context) {
 
 func Login(c *gin.Context) {
 	session := sessions.Default(c)
-	is_login, err := c.Cookie("is_login")
-	if is_login == "true" || err != nil{
+	is_login, _ := c.Cookie("is_login")
+	if is_login == "true"{
 		c.AbortWithStatus(StatusAlreadyLogin)
 		return
 	}
