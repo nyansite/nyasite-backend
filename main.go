@@ -3,15 +3,16 @@ package main
 import (
 	"context"
 	"crypto/rand"
-	"github.com/gin-contrib/sessions"
-	"github.com/gin-contrib/sessions/cookie"
-	"github.com/gin-gonic/gin"
-	_ "github.com/lib/pq"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
+
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/cookie"
+	"github.com/gin-gonic/gin"
+	_ "github.com/lib/pq"
 	"xorm.io/xorm"
 	"xorm.io/xorm/caches"
 )
@@ -26,7 +27,7 @@ const (
 
 func main() {
 	var err error
-	db, err = xorm.NewEngine("postgres", "postgresql://postgres:114514@localhost:5432/dbs?sslmode=disable")
+	db, err = xorm.NewEngine("postgres", "postgresql://mbe:114514@localhost:5432/dbs?sslmode=disable")
 	if err != nil {
 		panic(err) //连接失败不会在这里挂
 	}
