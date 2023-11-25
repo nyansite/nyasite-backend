@@ -24,4 +24,5 @@ go.work
 #数据库就别上传了
 *.db
 *.sqlite3
-temporary/
+/temporary
+/temp

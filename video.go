@@ -447,7 +447,7 @@ func GetVideoTags(c *gin.Context) {
 //两步上传
 
 func UploadVideo(c *gin.Context) {
-	formData := c.MultipartForm()
+	formData, err := c.MultipartForm()
 	files := formData.File["video"]
 	if err != nil {
 		c.AbortWithStatus(http.StatusBadRequest)
@@ -458,17 +458,16 @@ func UploadVideo(c *gin.Context) {
 	var dstFile string
 	var dstFiles []string
 	os.MkdirAll(dst, os.ModePerm)
-	var err1 error
 	for i, v := range files {
-		dstFile = strings.Join([]string{dst, "/", string(i), path.Ext(v.Filename)}, "")
+		dstFile = strings.Join([]string{dst, "/", strconv.Itoa(i), path.Ext(v.Filename)}, "")
 		dstFiles = append(dstFiles, dstFile)
-		err1 = c.SaveUploadedFile(v, dstFile)
-		if err1 != nil {
+		if err1 := c.SaveUploadedFile(v, dstFile); err1 != nil {
 			os.RemoveAll(dst)
 			c.AbortWithStatus(http.StatusInternalServerError)
+			return
 		}
 	}
-	videoNeedtoCheck := VideoNeedToCheck{VideoPath: dstFile}
+	videoNeedtoCheck := VideoNeedToCheck{VideoPath: dstFiles}
 	db.Insert(&videoNeedtoCheck)
 	c.JSONP(http.StatusOK, gin.H{
 		"id": videoNeedtoCheck.Id,

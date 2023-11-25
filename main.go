@@ -32,7 +32,9 @@ func main() {
 		panic(err) //连接失败不会在这里挂
 	}
 
-	db.Sync(&User{}, &Video{}, &Tag{}, &TagModel{}, &SessionSecret{}, &VideoComment{}, &VideoCommentReply{}, &VideoCommentEmojiRecord{}, &VideoCommentReplyLikeRecord{})
+	db.Sync(&User{}, &Tag{}, &TagModel{}, &SessionSecret{},
+		&VideoNeedToCheck{}, &Video{},
+		&VideoComment{}, &VideoCommentReply{}, &VideoCommentEmojiRecord{}, &VideoCommentReplyLikeRecord{})
 	db.SetDefaultCacher(caches.NewLRUCacher(caches.NewMemoryStore(), 10000))
 	//上面的是sql
 
