@@ -29,8 +29,8 @@ type User struct {
 	Name   string `xorm:"unique"`
 	Passwd []byte
 	Email  string `xorm:"unique"`
-	Avatar string 
-	Level  uint8  `xorm:"TINYINT default 0"` //4位权限4位等级,所以满级15(要不了这么多)
+	Avatar string
+	Level  uint8 `xorm:"TINYINT default 0"` //4位权限4位等级,所以满级15(要不了这么多)
 	Model  `xorm:"extends"`
 }
 
@@ -63,6 +63,15 @@ type Video struct { //获取视频和获取评论分开
 	Views       int    `xorm:"default 1"` //这是播放量
 	Author      int    `xorm:"index"`     //作者/上传者
 	Model       `xorm:"extends"`
+}
+
+type VideoNeedToCheck struct {
+	VideoPath   []string
+	CoverPath   string
+	Title       string
+	Description string
+	Author      int `xorm:"index"`
+	Model       `xorm:"extend"`
 }
 
 // 视频站评论部分

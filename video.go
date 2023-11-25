@@ -4,12 +4,15 @@ import (
 	"log"
 	"math"
 	"net/http"
+	"os"
+	"path"
 	"strconv"
+	"strings"
 
 	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
-
+	UUID "github.com/google/uuid"
 	ffmpeg "github.com/u2takey/ffmpeg-go"
 )
 
@@ -437,6 +440,38 @@ func GetVideoTags(c *gin.Context) {
 	c.JSONP(http.StatusOK, gin.H{
 		"tagtext": tagTexts,
 		"tagid":   tagIds,
+	})
+	return
+}
+
+//两步上传
+
+func UploadVideo(c *gin.Context) {
+	formData := c.MultipartForm()
+	files := formData.File["video"]
+	if err != nil {
+		c.AbortWithStatus(http.StatusBadRequest)
+	}
+	uuid := UUID.New()
+	suuid := uuid.String()
+	dst := "./temp/" + suuid
+	var dstFile string
+	var dstFiles []string
+	os.MkdirAll(dst, os.ModePerm)
+	var err1 error
+	for i, v := range files {
+		dstFile = strings.Join([]string{dst, "/", string(i), path.Ext(v.Filename)}, "")
+		dstFiles = append(dstFiles, dstFile)
+		err1 = c.SaveUploadedFile(v, dstFile)
+		if err1 != nil {
+			os.RemoveAll(dst)
+			c.AbortWithStatus(http.StatusInternalServerError)
+		}
+	}
+	videoNeedtoCheck := VideoNeedToCheck{VideoPath: dstFile}
+	db.Insert(&videoNeedtoCheck)
+	c.JSONP(http.StatusOK, gin.H{
+		"id": videoNeedtoCheck.Id,
 	})
 	return
 }

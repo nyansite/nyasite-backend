@@ -59,13 +59,13 @@ func AdminVideoPost(ctx *gin.Context) {
 }
 
 // 不审核直接上传,测试接口
-func UploadVideo(c *gin.Context) {
+func AdminUploadVideo(c *gin.Context) {
 	session := sessions.Default(c)
 	title := c.PostForm("Title")
 	description := c.PostForm("Description") //简介
-	f, err1 := c.FormFile("file")
-	cover, err2 := c.FormFile("cover")
-	if err1 != nil || err2 != nil {
+	f, err := c.FormFile("file")
+	cover, err := c.FormFile("cover")
+	if err != nil {
 		c.AbortWithStatus(http.StatusBadRequest) //400
 		return
 	}
@@ -86,7 +86,7 @@ func UploadVideo(c *gin.Context) {
 	b := bufio.NewWriter(outfile)
 	webp.Encode(b, image, &webp.Options{Lossless: false})
 	//
-	err1 = b.Flush()
+	err1 := b.Flush()
 	if err1 != nil {
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
