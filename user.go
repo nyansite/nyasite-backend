@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"crypto/rand"
 	"crypto/sha512"
@@ -11,12 +12,30 @@ import (
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 )
+
+func reloadJWT(user User) string {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"d": jwt.MapClaims{
+			"id":       user.Id,
+			"email":    user.Email,
+			"username": user.Name,
+			"picture":  user.Avatar,
+		},
+		"exp": time.Now().Add(24 * time.Hour).Unix(),
+		"iat": time.Now().Unix(),
+	})
+	fmt.Println(token)
+	tokenString, _ := token.SignedString([]byte("nyasite"))
+	fmt.Println(tokenString)
+	return tokenString
+}
 
 func GetSelfUserData(c *gin.Context) {
 	session := sessions.Default(c)
 	is_login, _ := c.Cookie("is_login")
-	if is_login != "true"{
+	if is_login != "true" {
 		c.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
@@ -26,10 +45,8 @@ func GetSelfUserData(c *gin.Context) {
 	vuserid, _ := userid.(int64)
 	db.ID(vuserid).Get(&user)
 	mail := user.Email
-
 	session.Flashes() //重新set cookie,使得cookie生命周期重置,但是值不会重置
 	session.Save()
-	println(vuserid)
 	c.JSON(http.StatusOK, gin.H{
 		"name":   user.Name,
 		"userid": userid,
@@ -38,6 +55,7 @@ func GetSelfUserData(c *gin.Context) {
 		"avatar": user.Avatar,
 	})
 }
+
 func GetUserData(c *gin.Context) {
 	id := c.Param("id")
 	nid, err := strconv.Atoi(id)
@@ -58,7 +76,7 @@ func GetUserData(c *gin.Context) {
 func Login(c *gin.Context) {
 	session := sessions.Default(c)
 	is_login, _ := c.Cookie("is_login")
-	if is_login == "true"{
+	if is_login == "true" {
 		c.AbortWithStatus(StatusAlreadyLogin)
 		return
 	}
@@ -76,11 +94,13 @@ func Login(c *gin.Context) {
 		c.AbortWithStatus(StatusPasswordError)
 		return
 	}
-
 	session.Set("userid", user.Id)
 	session.Set("level", user.Level)
 	session.Set("pwd-8", user.Passwd[:8]) //更改密码后其他已登录设备会退出
 	session.Save()
+	//刷新jwt
+	tokenString := reloadJWT(user)
+	c.SetCookie("token", tokenString, 3600, "/", "", true, true)
 	c.SetCookie("is_login", "true", 0, "/", "", true, true)
 	c.AbortWithStatus(http.StatusOK)
 }

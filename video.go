@@ -447,6 +447,11 @@ func GetVideoTags(c *gin.Context) {
 //两步上传
 
 func UploadVideo(c *gin.Context) {
+	is_login, _ := c.Cookie("is_login")
+	if is_login != "true" {
+		c.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
 	formData, err := c.MultipartForm()
 	files := formData.File["video"]
 	if err != nil {
@@ -470,9 +475,30 @@ func UploadVideo(c *gin.Context) {
 	videoNeedtoCheck := VideoNeedToCheck{VideoPath: dstFiles}
 	db.Insert(&videoNeedtoCheck)
 	c.JSONP(http.StatusOK, gin.H{
-		"id": videoNeedtoCheck.Id,
+		"id":   videoNeedtoCheck.Id,
+		"uuid": suuid,
 	})
 	return
+}
+func PostVideo(c *gin.Context) {
+	session := sessions.Default(c)
+	author := session.Get("userid")
+	uauthor := int(author.(int64))
+	suuid := c.PostForm("uuid")
+	id := c.PostForm("id")
+	description := c.PostForm("description")
+	cover, err := c.FormFile("cover")
+	dst := "./temp/" + suuid + "/" + "cover" + path.Ext(cover.Filename)
+	c.SaveUploadedFile(cover, dst)
+	if err != nil {
+		c.AbortWithStatus(http.StatusInternalServerError)
+	}
+	var videoNeedtoCheck VideoNeedToCheck
+	db.ID(id).Get(&videoNeedtoCheck)
+	videoNeedtoCheck.Author = uauthor
+	videoNeedtoCheck.CoverPath = dst
+	videoNeedtoCheck.Description = description
+	db.ID(id).Update(&videoNeedtoCheck)
 }
 
 // TODO 先摸了
