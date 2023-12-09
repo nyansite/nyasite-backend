@@ -17,14 +17,11 @@ import (
 
 func reloadJWT(user User) string {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"d": jwt.MapClaims{
-			"id":       user.Id,
-			"email":    user.Email,
-			"username": user.Name,
-			"picture":  user.Avatar,
-		},
-		"exp": time.Now().Add(24 * time.Hour).Unix(),
-		"iat": time.Now().Unix(),
+		"id":       user.Id,
+		"email":    user.Email,
+		"username": user.Name,
+		"picture":  user.Avatar,
+		"exp":      time.Now().Add(24 * time.Hour).Unix(),
 	})
 	fmt.Println(token)
 	tokenString, _ := token.SignedString([]byte("nyasite"))
