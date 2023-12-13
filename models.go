@@ -55,7 +55,7 @@ type Tag struct {
 
 // 视频部分
 type Video struct { //获取视频和获取评论分开
-	VideoPath   string //视频路径,封面路径
+	VideoUid    []string //视频路径,封面路径
 	CoverPath   string
 	Title       string `xorm:"default '芝士标题'"`
 	Description string `xorm:"default '简介不见惹'"`

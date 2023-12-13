@@ -4,6 +4,7 @@ import (
 	"log"
 	"math"
 	"net/http"
+	"net/url"
 	"os"
 	"path"
 	"strconv"
@@ -15,6 +16,43 @@ import (
 	UUID "github.com/google/uuid"
 	ffmpeg "github.com/u2takey/ffmpeg-go"
 )
+
+//视频返回
+
+func GetVideo(c *gin.Context) {
+	strVid := c.Param("id")
+	vVid, _ := strconv.Atoi(strVid)
+	var video Video
+	exist, err := db.ID(int(vVid)).Get(&video)
+	if !exist || err != nil {
+		c.AbortWithStatus(http.StatusNotFound)
+	}
+	var videoOriginPaths []string
+	var videoPaths []string
+	//获取路径
+	//test data
+	videoOriginPaths = append(videoOriginPaths, "https://customer-m033z5x00ks6nunl.cloudflarestream.com/b236bde30eb07b9d01318940e5fc3eda/watch")
+	//-----
+	//解析cloudflare stream
+	for _, i := range videoOriginPaths {
+		u, err := url.Parse(i)
+		if err != nil {
+			c.AbortWithError(http.StatusInternalServerError, err)
+		}
+		oPathSplit := strings.Split(u.Path, "/")
+		path := strings.Join([]string{oPathSplit[0], "manifest/video.m3u8"}, "")
+		newUrlString := strings.Join([]string{"https://", u.Host, "/", path}, "")
+		videoPaths = append(videoPaths, newUrlString)
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"videoPath":   videoPaths,
+		"author":      video.Author,
+		"creatTime":   video.CreatedAt,
+		"description": video.Description,
+		"views":       video.Views,
+		"Likes":       video.Likes,
+	})
+}
 
 func AddVideoTag(c *gin.Context) {
 	strVid := c.PostForm("vid")
@@ -474,10 +512,6 @@ func UploadVideo(c *gin.Context) {
 	}
 	videoNeedtoCheck := VideoNeedToCheck{VideoPath: dstFiles}
 	db.Insert(&videoNeedtoCheck)
-	c.JSONP(http.StatusOK, gin.H{
-		"id":   videoNeedtoCheck.Id,
-		"uuid": suuid,
-	})
 	return
 }
 func PostVideo(c *gin.Context) {

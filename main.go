@@ -81,12 +81,13 @@ func main() {
 
 		group.POST("/new_tag", PrivilegeLevel(10), NewTag)
 		//video
+		group.GET("/get_video/:id", GetVideo)
 		group.POST("/upload_video", UploadVideo)
 		group.POST("/admin_upload_video", PrivilegeLevel(10), AdminUploadVideo)
 		group.POST("/add_video_comment", AddVideoComment)
 		group.POST("/add_video_comment_reply", AddVideoCommentReply)
-		group.POST("click_video_emoji", ClikckVideoEmoji)
-		group.POST("click_video_like", ClickVideoLike)
+		group.POST("/click_video_emoji", ClikckVideoEmoji)
+		group.POST("/click_video_like", ClickVideoLike)
 		group.POST("/add_video_tag", PrivilegeLevel(10), AddVideoTag)
 	}
 	r2 := gin.New()
