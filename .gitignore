@@ -26,3 +26,6 @@ go.work
 *.sqlite3
 /temporary
 /temp
+
+#token
+token.go

@@ -1,3 +1,4 @@
+// remember creat token.go !!!!!
 package main
 
 import (
@@ -89,6 +90,8 @@ func main() {
 		group.POST("/click_video_emoji", ClikckVideoEmoji)
 		group.POST("/click_video_like", ClickVideoLike)
 		group.POST("/add_video_tag", PrivilegeLevel(10), AddVideoTag)
+		//token
+		group.GET("/get_PICUI_token", PrivilegeLevel(0), GetPICUItoken)
 	}
 	r2 := gin.New()
 	r2.Use(gin.LoggerWithFormatter(defaultLogFormatter), gin.Recovery())
