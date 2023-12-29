@@ -10,6 +10,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func EnireTag(c *gin.Context) {
+	var tagMs []TagModel
+	db.Find(&tagMs)
+	c.JSON(http.StatusOK, gin.H{"results": tagMs})
+}
+
 func SearchTag(c *gin.Context) {
 	var tagMs []TagModel
 	var tagList []string

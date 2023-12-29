@@ -43,6 +43,7 @@ type UserDataShow struct {
 // 标签部分
 type TagModel struct {
 	Id    int64  //xorm自动主键
+	Kind  uint8  `xorm:"SMALLINT"`
 	Text  string `xorm:"unique"`
 	Times int
 }
@@ -55,7 +56,7 @@ type Tag struct {
 
 // 视频部分
 type Video struct { //获取视频和获取评论分开
-	VideoUid    []string //视频路径,封面路径
+	VideoUid    string //视频路径,封面路径
 	CoverPath   string
 	Title       string `xorm:"default '芝士标题'"`
 	Description string `xorm:"default '简介不见惹'"`
@@ -70,6 +71,7 @@ type VideoNeedToCheck struct {
 	CoverPath   string
 	Title       string
 	Description string
+	Tags        []uint8
 	Author      int `xorm:"index"`
 	Model       `xorm:"extend"`
 }

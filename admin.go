@@ -1,23 +1,14 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"image"
-	_ "image/gif"
-	_ "image/jpeg"
-	_ "image/png"
 
 	"math"
 	"net/http"
-	"os"
-	"path"
 	"strconv"
 
-	"github.com/chai2010/webp"
-	"github.com/gin-contrib/sessions"
+	//"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
-	UUID "github.com/google/uuid"
 )
 
 func NewTag(c *gin.Context) {
@@ -59,40 +50,6 @@ func AdminVideoPost(ctx *gin.Context) {
 }
 
 // 不审核直接上传,测试接口
-func AdminUploadVideo(c *gin.Context) {
-	session := sessions.Default(c)
-	title := c.PostForm("Title")
-	description := c.PostForm("Description") //简介
-	f, err := c.FormFile("file")
-	cover, err := c.FormFile("cover")
-	if err != nil {
-		c.AbortWithStatus(http.StatusBadRequest) //400
-		return
-	}
-	author := session.Get("userid")
-	vauthor := author.(int64)
-	uauthor := int(vauthor)
-	uuid := UUID.New()
-	sid := uuid.String()
-	fpath := "./temporary/" + sid + path.Ext(f.Filename)
-	cpath := "./temporary/" + sid + path.Ext(cover.Filename)
-	c.SaveUploadedFile(f, fpath)
-	c.SaveUploadedFile(cover, cpath)
-	//transform cover into webp image
-	fCover, _ := os.Open(cpath)
-	image, _, _ := image.Decode(fCover)
-	cpath = "./temporary/" + sid + ".webp"
-	outfile, _ := os.Create(cpath)
-	b := bufio.NewWriter(outfile)
-	webp.Encode(b, image, &webp.Options{Lossless: false})
-	//
-	err1 := b.Flush()
-	if err1 != nil {
-		c.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-	go SaveVideo(uauthor, fpath, cpath, title, description, sid)
-}
 
 func GetSessionSecret() [][]byte {
 

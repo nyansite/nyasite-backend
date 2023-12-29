@@ -5,16 +5,12 @@ import (
 	"math"
 	"net/http"
 	"net/url"
-	"os"
-	"path"
 	"strconv"
 	"strings"
 
 	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
-	UUID "github.com/google/uuid"
-	ffmpeg "github.com/u2takey/ffmpeg-go"
 )
 
 //视频返回
@@ -61,7 +57,9 @@ func AddVideoTag(c *gin.Context) {
 	strTagId := c.PostForm("tagid")
 	vTagId, _ := strconv.Atoi(strTagId)
 	uTagId := int(vTagId)
-	DBaddVideoTag(uVid, uTagId)
+	tag := Tag{Tid: uTagId, Pid: uVid}
+	db.Insert(tag)
+	return
 }
 
 // 视频评论部分
@@ -482,83 +480,21 @@ func GetVideoTags(c *gin.Context) {
 	return
 }
 
-//两步上传
+//上传视频
 
-func UploadVideo(c *gin.Context) {
-	is_login, _ := c.Cookie("is_login")
-	if is_login != "true" {
-		c.AbortWithStatus(http.StatusUnauthorized)
-		return
-	}
-	formData, err := c.MultipartForm()
-	files := formData.File["video"]
-	if err != nil {
-		c.AbortWithStatus(http.StatusBadRequest)
-	}
-	uuid := UUID.New()
-	suuid := uuid.String()
-	dst := "./temp/" + suuid
-	var dstFile string
-	var dstFiles []string
-	os.MkdirAll(dst, os.ModePerm)
-	for i, v := range files {
-		dstFile = strings.Join([]string{dst, "/", strconv.Itoa(i), path.Ext(v.Filename)}, "")
-		dstFiles = append(dstFiles, dstFile)
-		if err1 := c.SaveUploadedFile(v, dstFile); err1 != nil {
-			os.RemoveAll(dst)
-			c.AbortWithStatus(http.StatusInternalServerError)
-			return
-		}
-	}
-	videoNeedtoCheck := VideoNeedToCheck{VideoPath: dstFiles}
-	db.Insert(&videoNeedtoCheck)
-	return
-}
 func PostVideo(c *gin.Context) {
-	session := sessions.Default(c)
-	author := session.Get("userid")
-	uauthor := int(author.(int64))
-	suuid := c.PostForm("uuid")
-	id := c.PostForm("id")
+	title := c.PostForm("title")
 	description := c.PostForm("description")
-	cover, err := c.FormFile("cover")
-	dst := "./temp/" + suuid + "/" + "cover" + path.Ext(cover.Filename)
-	c.SaveUploadedFile(cover, dst)
-	if err != nil {
-		c.AbortWithStatus(http.StatusInternalServerError)
+	cover := c.PostForm("cover")
+	tags := c.PostFormArray("tags")
+	var err error
+	var tagsUint8 []uint8
+	var unitTag int
+	for _, i := range tags {
+		unitTag, err = strconv.Atoi(i)
+		if err != nil {
+			c.AbortWithError(http.StatusBadRequest, err)
+		}
+		tagsUint8 = append(tagsUint8, uint8(unitTag))
 	}
-	var videoNeedtoCheck VideoNeedToCheck
-	db.ID(id).Get(&videoNeedtoCheck)
-	videoNeedtoCheck.Author = uauthor
-	videoNeedtoCheck.CoverPath = dst
-	videoNeedtoCheck.Description = description
-	db.ID(id).Update(&videoNeedtoCheck)
-}
-
-// TODO 先摸了
-
-func SaveVideo(author int, src string, cscr string, title string, description string, uuid string) {
-	var video Video
-	video.Author = author
-	video.Title = title
-	video.Description = description
-	video.Views = 0
-	video.CoverPath = cscr
-	//the error ffmpeg part
-	err := ffmpeg.Input(src).Output(src+".mp4", ffmpeg.KwArgs{
-		// "c:v": "libsvtav1",
-	}).OverWriteOutput().ErrorToStdOut().Run()
-	if err != nil {
-		panic(err)
-	}
-	//
-	// video.IpfsHash = Upload(src + ".mp4")
-	db.Insert(&video)
-	return
-}
-
-func DBaddVideoTag(vid int, tagid int) {
-	tag := Tag{Tid: tagid, Pid: vid}
-	db.Insert(tag)
-	return
 }
