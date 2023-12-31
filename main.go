@@ -84,7 +84,7 @@ func main() {
 		group.POST("/new_tag", PrivilegeLevel(10), NewTag)
 		//video
 		group.GET("/get_video/:id", GetVideo)
-		//group.POST("/upload_video", UploadVideo)
+		group.POST("/upload_video", PostVideo)
 		//group.POST("/admin_upload_video", PrivilegeLevel(10), AdminUploadVideo)
 		group.POST("/add_video_comment", AddVideoComment)
 		group.POST("/add_video_comment_reply", AddVideoCommentReply)

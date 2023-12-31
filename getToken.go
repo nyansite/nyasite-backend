@@ -37,6 +37,9 @@ func GetPICUItoken(c *gin.Context) {
 		return
 	}
 	defer resp.Body.Close()
+	if resp.StatusCode != 200 {
+		c.AbortWithStatus(http.StatusBadGateway)
+	}
 	var tokenJson map[string]interface{}
 	b, err := ioutil.ReadAll(resp.Body)
 	println(string(b))

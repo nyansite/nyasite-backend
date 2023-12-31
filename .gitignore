@@ -20,6 +20,10 @@
 # Go workspace file
 go.work
 
+#debug
+debug.log
+#.hintrc Vscode Setting file
+.hintrc
 
 #数据库就别上传了
 *.db

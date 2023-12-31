@@ -483,6 +483,9 @@ func GetVideoTags(c *gin.Context) {
 //上传视频
 
 func PostVideo(c *gin.Context) {
+	session := sessions.Default(c)
+	author := session.Get("userid")
+	uauthor := int(author.(int64))
 	title := c.PostForm("title")
 	description := c.PostForm("description")
 	cover := c.PostForm("cover")
@@ -497,4 +500,10 @@ func PostVideo(c *gin.Context) {
 		}
 		tagsUint8 = append(tagsUint8, uint8(unitTag))
 	}
+	newVideo := VideoNeedToCheck{Author: uauthor, Title: title, Description: description, CoverPath: cover, Tags: tagsUint8}
+	_, err1 := db.InsertOne(&newVideo)
+	if err1 != nil {
+		c.AbortWithError(http.StatusInternalServerError, err1)
+	}
+	return
 }

@@ -58,8 +58,8 @@ type Tag struct {
 type Video struct { //获取视频和获取评论分开
 	VideoUid    string //视频路径,封面路径
 	CoverPath   string
-	Title       string `xorm:"default '芝士标题'"`
-	Description string `xorm:"default '简介不见惹'"`
+	Title       string
+	Description string `xorm:"TEXT"`
 	Likes       int    `xorm:"default 1"` //芝士点赞数量
 	Views       int    `xorm:"default 1"` //这是播放量
 	Author      int    `xorm:"index"`     //作者/上传者
@@ -67,13 +67,13 @@ type Video struct { //获取视频和获取评论分开
 }
 
 type VideoNeedToCheck struct {
-	VideoPath   []string
+	VideoUid    string
 	CoverPath   string
 	Title       string
-	Description string
+	Description string `xorm:"TEXT"`
 	Tags        []uint8
 	Author      int `xorm:"index"`
-	Model       `xorm:"extend"`
+	Model       `xorm:"extends"`
 }
 
 // 视频站评论部分
@@ -111,7 +111,7 @@ type VideoCommentEmojiRecord struct {
 
 type VideoCommentReplyLikeRecord struct {
 	Author int
-	Crid   int //CR = CommentReply 不是坟墓
+	Crid   int //CR = CommentReply
 }
 
 // 正在转码压制中的视频
