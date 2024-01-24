@@ -2,28 +2,29 @@ package main
 
 import (
 	"fmt"
-	"github.com/gin-contrib/sessions"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"time"
+
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-gonic/gin"
 )
 
 func PrivilegeLevel(level uint8) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		session := sessions.Default(ctx)
 		is_login, _ := ctx.Cookie("is_login")
-		if is_login != "true"{
+		if is_login != "true" {
 			ctx.AbortWithStatus(http.StatusUnauthorized) //未登录返回401
 			return
 		}
 
 		userid := session.Get("userid")
 		var user User
-		if has, _ := db.ID(userid).Get(&user); has == false { //用户不存在
+		if has, _ := db.ID(int(userid.(int64))).Get(&user); has == false { //用户不存在
 			ctx.Status(http.StatusBadRequest)
 			return
 		}
-		if session.Get("pwd-8") != string(user.Passwd[:8]) {
+		if string(session.Get("pwd-8").([]byte)) != string(user.Passwd[:8]) {
 			ctx.Status(http.StatusBadRequest)
 			return
 		}

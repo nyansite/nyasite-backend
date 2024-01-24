@@ -35,7 +35,8 @@ func main() {
 
 	db.Sync(&User{}, &Tag{}, &TagModel{}, &SessionSecret{},
 		&VideoNeedToCheck{}, &Video{},
-		&VideoComment{}, &VideoCommentReply{}, &VideoCommentEmojiRecord{}, &VideoCommentReplyLikeRecord{})
+		&VideoComment{}, &VideoCommentReply{}, &VideoCommentEmojiRecord{}, &VideoCommentReplyLikeRecord{},
+		&VideoBullet{})
 	db.SetDefaultCacher(caches.NewLRUCacher(caches.NewMemoryStore(), 10000))
 	//上面的是sql
 
@@ -71,8 +72,6 @@ func main() {
 		group.GET("/user_status", GetSelfUserData)
 		group.GET("/user_status/:id", GetUserData)
 		group.GET("/get_video_img/:id", GetVideoImg)
-		group.GET("/video_comment/:id/:pg", BrowseVideoComments)
-		group.GET("/video_comment_reply/:id/:pg", BrowseVideoCommentReplies)
 		group.GET("/get_video_tags/:id", GetVideoTags)
 		group.GET("/coffee", PrivilegeLevel(11), coffee)
 		group.GET("/search/taglist", SearchTag)
@@ -84,13 +83,19 @@ func main() {
 		group.POST("/new_tag", PrivilegeLevel(10), NewTag)
 		//video
 		group.GET("/get_video/:id", GetVideo)
-		group.POST("/upload_video", PostVideo)
+		group.POST("/upload_video", PrivilegeLevel(0), PostVideo)
 		//group.POST("/admin_upload_video", PrivilegeLevel(10), AdminUploadVideo)
-		group.POST("/add_video_comment", AddVideoComment)
-		group.POST("/add_video_comment_reply", AddVideoCommentReply)
+		//comment
+		group.GET("/video_comment/:id/:pg", BrowseVideoComments)
+		group.GET("/video_comment_reply/:id/:pg", BrowseVideoCommentReplies)
+		group.POST("/add_video_comment", PrivilegeLevel(0), AddVideoComment)
+		group.POST("/add_video_comment_reply", PrivilegeLevel(0), AddVideoCommentReply)
 		group.POST("/click_video_emoji", ClikckVideoEmoji)
 		group.POST("/click_video_like", ClickVideoLike)
 		group.POST("/add_video_tag", PrivilegeLevel(10), AddVideoTag)
+		//danmaku
+		group.GET("/get_bullets/:id", BrowseBullets)
+		group.POST("/add_video_bullet", PrivilegeLevel(0), AddBullet)
 		//token
 		group.GET("/get_PICUI_token", PrivilegeLevel(0), GetPICUItoken)
 	}

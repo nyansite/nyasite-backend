@@ -34,6 +34,16 @@ type User struct {
 	Model  `xorm:"extends"`
 }
 
+// 创作者
+type Creator struct {
+	Uid        []uint8
+	Name       string `xorm:"unique"`
+	Avatar     string
+	Descrption string `xorm:"TEXT"`
+	Kind       []uint8
+	Model      `xorm:"extends"`
+}
+
 type UserDataShow struct {
 	Name   string
 	Avatar string
@@ -112,6 +122,19 @@ type VideoCommentEmojiRecord struct {
 type VideoCommentReplyLikeRecord struct {
 	Author int
 	Crid   int //CR = CommentReply
+}
+
+// 弹幕部分
+type VideoBullet struct {
+	Author int
+	Vid    int
+	Text   string
+	Time   float64
+	Color  string
+	Top    bool
+	Bottom bool
+	Force  bool
+	Model  `xorm:"extends"`
 }
 
 // 正在转码压制中的视频
