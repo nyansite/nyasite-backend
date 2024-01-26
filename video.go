@@ -2,9 +2,7 @@ package main
 
 import (
 	"net/http"
-	"net/url"
 	"strconv"
-	"strings"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
@@ -22,16 +20,7 @@ func GetVideo(c *gin.Context) {
 	}
 	//获取路径
 	//test data
-	videoOriginPath := "https://customer-m033z5x00ks6nunl.cloudflarestream.com/b236bde30eb07b9d01318940e5fc3eda/watch"
-	//-----
-	//解析cloudflare stream
-	u, err := url.Parse(videoOriginPath)
-	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
-	}
-	oPathSplit := strings.Split(u.Path, "/")
-	path := strings.Join([]string{oPathSplit[0], "manifest/video.m3u8"}, "")
-	videoPath := strings.Join([]string{"https://", u.Host, "/", path}, "")
+	videoPath := "https://customer-m033z5x00ks6nunl.cloudflarestream.com/ea95132c15732412d22c1476fa83f27a/manifest/video.m3u8"
 	c.JSON(http.StatusOK, gin.H{
 		"title":       video.Title,
 		"videoPath":   videoPath,
@@ -144,7 +133,7 @@ func BrowseBullets(c *gin.Context) {
 			})
 	}
 	c.JSONP(http.StatusOK, gin.H{
-		"results": bulletsOutput,
+		"items": bulletsOutput,
 	})
 	return
 }
