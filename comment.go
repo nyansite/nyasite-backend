@@ -12,9 +12,7 @@ import (
 )
 
 func BrowseVideoComments(ctx *gin.Context) {
-	session := sessions.Default(ctx)
-	author := session.Get("userid")
-	uauthor := int(author.(int64))
+	author := SessionGetAuthorId(ctx)
 	vvid := ctx.Param("id")
 	vid, err := strconv.Atoi(vvid)
 	vpg := ctx.Param("pg")
@@ -32,7 +30,7 @@ func BrowseVideoComments(ctx *gin.Context) {
 		return
 	}
 	userIds := mapset.NewSet[int]()
-	comments := DBgetVideoComments(vid, pg, uauthor)
+	comments := DBgetVideoComments(vid, pg, author)
 	var userDataShows []UserDataShow
 	for _, i := range comments {
 		if !userIds.Contains(i.Author) {
@@ -55,9 +53,7 @@ func BrowseVideoComments(ctx *gin.Context) {
 
 }
 func BrowseVideoCommentReplies(ctx *gin.Context) {
-	session := sessions.Default(ctx)
-	author := session.Get("userid")
-	uauthor := int(author.(int64))
+	author := SessionGetAuthorId(ctx)
 	vcid := ctx.Param("id")
 	cid, err := strconv.Atoi(vcid)
 	vpg := ctx.Param("pg")
@@ -91,7 +87,7 @@ func BrowseVideoCommentReplies(ctx *gin.Context) {
 		return
 	}
 	userIds := mapset.NewSet[int]()
-	commentrReplies := DBgetVideoCommentReplies(cid, pg, uauthor)
+	commentrReplies := DBgetVideoCommentReplies(cid, pg, author)
 	var userDataShows []UserDataShow
 	for _, i := range commentrReplies {
 		if !userIds.Contains(i.Author) {

@@ -20,7 +20,7 @@ func GetVideo(c *gin.Context) {
 	}
 	//获取路径
 	//test data
-	videoPath := "https://customer-m033z5x00ks6nunl.cloudflarestream.com/ea95132c15732412d22c1476fa83f27a/manifest/video.m3u8"
+	videoPath := "https://customer-f33zs165nr7gyfy4.cloudflarestream.com/6b9e68b07dfee8cc2d116e4c51d6a957/manifest/video.m3u8"
 	c.JSON(http.StatusOK, gin.H{
 		"title":       video.Title,
 		"videoPath":   videoPath,
@@ -41,100 +41,6 @@ func AddVideoTag(c *gin.Context) {
 	uTagId := int(vTagId)
 	tag := Tag{Tid: uTagId, Pid: uVid}
 	db.Insert(tag)
-	return
-}
-
-//视频弹幕部分
-
-func AddBullet(c *gin.Context) {
-	session := sessions.Default(c)
-	author := session.Get("userid")
-	uauthor := int(author.(int64))
-	vid := c.PostForm("vid")
-	uvid, err := strconv.Atoi(vid)
-	if err != nil {
-		c.AbortWithError(http.StatusBadRequest, err) //返回400
-		return
-	}
-	text := c.PostForm("text")
-	time := c.PostForm("time")
-	timeFloat, err := strconv.ParseFloat(time, 64)
-	if err != nil {
-		c.AbortWithError(http.StatusBadRequest, err) //返回400
-		return
-	}
-	color := c.PostForm("color")
-	position := c.PostForm("type")
-	bullet := VideoBullet{Author: uauthor, Vid: uvid, Text: text, Time: timeFloat, Color: color, Force: false}
-	switch position {
-	case "scroll":
-		bullet.Top = false
-		bullet.Bottom = false
-	case "top":
-		bullet.Top = true
-		bullet.Bottom = false
-	case "bottom":
-		bullet.Top = false
-		bullet.Bottom = true
-	default:
-		c.AbortWithError(http.StatusBadRequest, err)
-	}
-	_, err1 := db.InsertOne(bullet)
-	if err1 != nil {
-		c.AbortWithError(http.StatusInternalServerError, err1)
-	}
-	return
-}
-
-func BrowseBullets(c *gin.Context) {
-	session := sessions.Default(c)
-	author := session.Get("userid")
-	uauthor := int(author.(int64))
-	vid := c.Param("id")
-	var bullets []VideoBullet
-	uvid, err := strconv.Atoi(vid)
-	if err != nil {
-		c.AbortWithError(http.StatusBadRequest, err)
-	}
-	has, _ := db.In("vid", uvid).Count(&VideoBullet{})
-	if has == 0 {
-		println(uvid)
-		c.AbortWithStatus(http.StatusNotFound)
-		return
-	}
-	db.In("vid", uvid).Asc("time").Find(&bullets)
-	var bulletsOutput []gin.H
-	//弹幕所处位置的格式
-	for _, i := range bullets {
-		var positionStr string
-		if i.Top == true {
-			positionStr = "top"
-		} else if i.Bottom == true {
-			positionStr = "bottom"
-		} else {
-			positionStr = "scroll"
-		}
-		//判断弹幕是否为自己发送
-		var isMe bool
-		if i.Author == uauthor {
-			isMe = true
-		} else {
-			isMe = false
-		}
-
-		bulletsOutput = append(bulletsOutput,
-			gin.H{
-				"color": i.Color,
-				"text":  i.Text,
-				"time":  i.Time,
-				"type":  positionStr,
-				"isMe":  isMe,
-				"force": i.Force,
-			})
-	}
-	c.JSONP(http.StatusOK, gin.H{
-		"items": bulletsOutput,
-	})
 	return
 }
 

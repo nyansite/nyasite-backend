@@ -165,6 +165,18 @@ func check_passwd(passwd []byte, passwd2s string) bool {
 	return ret
 }
 
+func SessionGetAuthorId(c *gin.Context) int {
+	is_login, _ := c.Cookie("is_login")
+
+	if is_login == "true" {
+		session := sessions.Default(c)
+		author := session.Get("userid")
+		return int(author.(int64))
+	} else {
+		return -1
+	}
+}
+
 func DBGetUserDataShow(userid int) UserDataShow {
 	var userDataShow UserDataShow
 	var user User
