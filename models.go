@@ -35,13 +35,18 @@ type User struct {
 }
 
 // 创作者
-type Creator struct {
-	Uid        []uint8
+type Circle struct {
 	Name       string `xorm:"unique"`
 	Avatar     string
 	Descrption string `xorm:"TEXT"`
 	Kind       []uint8
 	Model      `xorm:"extends"`
+}
+
+type AuhtorOfCircle struct {
+	Uid       int //User.Id
+	Cid       int //Circle.Id
+	privilege []uint8
 }
 
 type UserDataShow struct {
