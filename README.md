@@ -6,66 +6,70 @@
 
 芝士api
 
-### api/user_status
+#### api/user_status
 
-获取已登录用户自身的信息
+获取已登录用户自身的信息，同时刷新cookie
 
-### api/user_status/:id
+无提交
+
+返回：
+
+| Key    | Explain    |
+| ------ | ---------- |
+| name   | 用户名称       |
+| userid | 用户id       |
+| mail   | 用户邮箱       |
+| level  | 用户等级（详见等级） |
+| avatar | 用户头像链接     |
+
+#### api/user_status/:id
 
 根据id获取其他用户信息
 
-### api/register
+以伪静态链接形式传入查询用户的id（:id)
 
-注册;传入表单;属性是username/passwd/email
+返回：
 
-### api/login
+| Key    | Explain |
+| ------ | ------- |
+| name   | 用户名称    |
+| level  | 用户等级    |
+| avatar | 用户头像链接  |
 
-登录;传入表单;属性是username/passwd,用户名也有可能是邮箱
+#### api/register
 
-### api/all_forum/:page
+注册;传入表单 
 
-查看所有帖子;传入伪静态链接;属性是page,20个帖子一page,page决定查看论坛的区间
+提交：
 
-### api/browse_unitforum/:mid/:page
+| Key      | Explain |
+| -------- | ------- |
+| username | 用户名     |
+| passwd   | 密码      |
+| email    | 电子邮件地址  |
 
-查看单个帖子下跟帖;传入伪静态链接;属性是mid,page,20个跟帖一page,page决定查看论坛的区间
+无返回
 
-### api/browse_forum/:board/:page
+#### api/login
 
-根据分区查看帖子;传入伪静态链接;属性是board,page,board决定板块,20个跟帖一page,page决定查看论坛的区间
+登录;传入表单
 
-| board | 含意      |
-| ----- | ------- |
-| 0     | 官方通知区   |
-| 1     | 用户反馈区   |
-| 2     | Thread贴 |
-| 3     | 资源贴     |
+提交：
 
+| Key      | Explain |
+| -------- | ------- |
+| username | 用户名或者邮箱 |
+| passwd   | 密码      |
 
-### Forum
+## video
 
-#### uapi/add_mainforum
+#### api/get_video/:id
 
-发帖;无等级限制;传入表单;属性是title,text,type(决定发送分区)
+获取视频信息
 
-| type | 含意        |
-| ---- | --------- |
-| 0    | 用户反馈区     |
-| 1    | 创作Thread区 |
-| 2    | 资源站       |
-| 3    | 灌水区       |
+以伪静态链接形式传入查询视频的id（:id)
 
-#### uapi/add_unitforum
-
-跟帖;无等级限制;传入表单;属性是uid(被跟的帖子的id),text
-
-#### uapi/add_emoji
-
-添加表情评论;无等级限制;传入表单;属性是uid(被跟的帖子的id),emoji(添加表情的编号)(详见表情符号)
-
-#### uapi/finish_forum
-
-完结帖子;需要作者本人;传入表单;属性是mid(完结的帖子)
+返回：
 
 ## 自定义的状态码
 
@@ -82,7 +86,7 @@
 
 成功返回标准的200
 
-## 权限
+## 等级
 
 0-15
 
@@ -95,11 +99,11 @@
 
 ## session
 
-| 键        | 说明                                |
-| -------- | --------------------------------- |
-| userid   |                                   |
-| level    | 虽然存储的是字符串但是请当作uint8使用awa 4b权限4b经验 |
-| pwd-8    | 密码的最后8位,校验用,别问我为什么6位密码有8位数据       |
+| 键      | 说明                          |
+| ------ | --------------------------- |
+| userid |                             |
+| level  | 4bite权限4bite经验              |
+| pwd-8  | 密码的最后8位,校验用,别问我为什么6位密码有8位数据 |
 
 ## 帖子类型（forum.kind)
 

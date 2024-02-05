@@ -23,9 +23,7 @@ func reloadJWT(user User) string {
 		"picture":  user.Avatar,
 		"exp":      time.Now().Add(30 * 24 * time.Hour).Unix(),
 	})
-	fmt.Println(token)
 	tokenString, _ := token.SignedString([]byte("nyasite"))
-	fmt.Println(tokenString)
 	return tokenString
 }
 
@@ -38,17 +36,26 @@ func GetSelfUserData(c *gin.Context) {
 	}
 	var user User
 	userid := session.Get("userid")
-	level := session.Get("level")
+
 	vuserid, _ := userid.(int64)
 	db.ID(vuserid).Get(&user)
 	mail := user.Email
+	if (int((int(time.Now().Unix())+user.Timezone)/86400) - int((user.LTC+user.Timezone)/86400)) >= 1 {
+		user.Level = user.Level + 1
+		user.LTC = int(time.Now().Unix())
+		db.ID(vuserid).Update(&user)
+	}
 	session.Flashes() //重新set cookie,使得cookie生命周期重置,但是值不会重置
 	session.Save()
+	//刷新jwt
+	tokenString := reloadJWT(user)
+	c.SetCookie("token", tokenString, 1200000, "/", "", true, true)
+	c.SetCookie("is_login", "true", 1200000, "/", "", true, true)
 	c.JSON(http.StatusOK, gin.H{
 		"name":   user.Name,
 		"userid": userid,
 		"mail":   mail,
-		"level":  level,
+		"level":  user.Level,
 		"avatar": user.Avatar,
 	})
 }
@@ -92,13 +99,12 @@ func Login(c *gin.Context) {
 		return
 	}
 	session.Set("userid", user.Id)
-	session.Set("level", user.Level)
 	session.Set("pwd-8", user.Passwd[:8]) //更改密码后其他已登录设备会退出
 	session.Save()
 	//刷新jwt
 	tokenString := reloadJWT(user)
-	c.SetCookie("token", tokenString, 3600, "/", "", true, true)
-	c.SetCookie("is_login", "true", 0, "/", "", true, true)
+	c.SetCookie("token", tokenString, 1200000, "/", "", true, true)
+	c.SetCookie("is_login", "true", 1200000, "/", "", true, true)
 	c.AbortWithStatus(http.StatusOK)
 }
 
@@ -125,8 +131,10 @@ func Register(c *gin.Context) {
 		c.AbortWithStatus(StatusRepeatEmail)
 		return
 	}
-
-	user := User{Name: username, Passwd: encrypt_passwd(passwd), Email: mail}
+	timezone := c.PostForm("timezone")
+	timezoneOffSet, _ := strconv.Atoi(timezone)
+	user := User{Name: username, Passwd: encrypt_passwd(passwd), Email: mail,
+		Timezone: timezoneOffSet, Avatar: ("https://ui-avatars.com/api/?background=b3c6d7&name=" + username)}
 	_, err := db.Insert(&user)
 	if err != nil {
 		fmt.Println(err)
@@ -165,7 +173,9 @@ func check_passwd(passwd []byte, passwd2s string) bool {
 	return ret
 }
 
-func SessionGetAuthorId(c *gin.Context) int {
+//获取用户id
+
+func GetUserIdWithCheck(c *gin.Context) int {
 	is_login, _ := c.Cookie("is_login")
 
 	if is_login == "true" {
@@ -177,12 +187,44 @@ func SessionGetAuthorId(c *gin.Context) int {
 	}
 }
 
+func GetUserIdWithoutCheck(c *gin.Context) int {
+	session := sessions.Default(c)
+	author := session.Get("userid")
+	return int(author.(int64))
+}
+
+//获取用户信息(程序内)
+
 func DBGetUserDataShow(userid int) UserDataShow {
-	var userDataShow UserDataShow
 	var user User
 	db.ID(userid).Get(&user)
-	userDataShow.Name = user.Name
-	userDataShow.Avatar = user.Avatar
-	userDataShow.Id = user.Id
+	userDataShow := UserDataShow{
+		Id:     user.Id,
+		Name:   user.Name,
+		Avatar: user.Avatar,
+	}
 	return userDataShow
+}
+
+//更改用户信息
+
+func ChangeAvatar(c *gin.Context) {
+	uauthor := GetUserIdWithoutCheck(c)
+	avatar := c.PostForm("avatar")
+	var user User
+	db.ID(uauthor).Get(&user)
+	user.Avatar = avatar
+	db.ID(uauthor).Update(&user)
+	return
+}
+
+func ChangeName(c *gin.Context) {
+	uauthor := GetUserIdWithoutCheck(c)
+	name := c.PostForm("name")
+	var user User
+	db.ID(uauthor).Get(&user)
+	user.Name = name
+	user.Level = user.Level - 8
+	db.ID(uauthor).Update(&user)
+	return
 }

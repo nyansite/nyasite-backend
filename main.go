@@ -36,7 +36,8 @@ func main() {
 	db.Sync(&User{}, &Tag{}, &TagModel{}, &SessionSecret{},
 		&VideoNeedToCheck{}, &Video{},
 		&VideoComment{}, &VideoCommentReply{}, &VideoCommentEmojiRecord{}, &VideoCommentReplyLikeRecord{},
-		&VideoBullet{})
+		&VideoBullet{},
+		&Circle{}, &MemberOfCircle{})
 	db.SetDefaultCacher(caches.NewLRUCacher(caches.NewMemoryStore(), 10000))
 	//上面的是sql
 
@@ -71,33 +72,38 @@ func main() {
 	{
 		group.GET("/user_status", GetSelfUserData)
 		group.GET("/user_status/:id", GetUserData)
-		group.GET("/get_video_img/:id", GetVideoImg)
 		group.GET("/get_video_tags/:id", GetVideoTags)
-		group.GET("/coffee", PrivilegeLevel(11), coffee)
+		group.GET("/coffee", CheckPrivilege(11), coffee)
 		group.GET("/search/taglist", SearchTag)
 		group.GET("/taglist", EnireTag)
 
 		group.POST("/register", Register)
 		group.POST("/login", Login)
 
-		group.POST("/new_tag", PrivilegeLevel(10), NewTag)
+		group.POST("/new_tag", CheckPrivilege(10), NewTag)
 		//video
 		group.GET("/get_video/:id", GetVideo)
-		group.POST("/upload_video", PrivilegeLevel(0), PostVideo)
+		group.POST("/upload_video", CheckPrivilege(0), PostVideo)
+		group.GET("/get_all_videos", GetAllVideos)
 		//group.POST("/admin_upload_video", PrivilegeLevel(10), AdminUploadVideo)
 		//comment
 		group.GET("/video_comment/:id/:pg", BrowseVideoComments)
-		group.GET("/video_comment_reply/:id/:pg", BrowseVideoCommentReplies)
-		group.POST("/add_video_comment", PrivilegeLevel(0), AddVideoComment)
-		group.POST("/add_video_comment_reply", PrivilegeLevel(0), AddVideoCommentReply)
-		group.POST("/click_video_emoji", ClikckVideoEmoji)
+		group.GET("/video_comment_reply/:id", BrowseVideoCommentReplies)
+		group.POST("/add_video_comment", CheckPrivilege(0), AddVideoComment)
+		group.POST("/add_video_comment_reply", CheckPrivilege(0), AddVideoCommentReply)
+		group.POST("/click_comment_emoji", ClikckCommentEmoji)
 		group.POST("/click_video_like", ClickVideoLike)
-		group.POST("/add_video_tag", PrivilegeLevel(10), AddVideoTag)
+		group.POST("/add_video_tag", CheckPrivilege(10), AddVideoTag)
 		//danmaku
 		group.GET("/get_bullets/:id", BrowseBullets)
-		group.POST("/add_video_bullet", PrivilegeLevel(0), AddBullet)
+		group.POST("/add_video_bullet", CheckPrivilege(0), AddBullet)
+		//change user information
+		group.POST("/change_avatar", CheckPrivilege(0), ChangeAvatar)
+		group.POST("/change_name", CheckPrivilege(1), ChangeName)
 		//token
-		group.GET("/get_PICUI_token", PrivilegeLevel(0), GetPICUItoken)
+		group.GET("/get_PICUI_token", CheckPrivilege(0), GetPICUItoken)
+		//check
+		group.POST("/")
 	}
 	r2 := gin.New()
 	r2.Use(gin.LoggerWithFormatter(defaultLogFormatter), gin.Recovery())

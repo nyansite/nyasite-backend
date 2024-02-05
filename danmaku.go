@@ -50,7 +50,7 @@ func AddBullet(c *gin.Context) {
 
 func BrowseBullets(c *gin.Context) {
 	is_login, _ := c.Cookie("is_login")
-	author := SessionGetAuthorId(c)
+	author := GetUserIdWithCheck(c)
 	vid := c.Param("id")
 	var bullets []VideoBullet
 	uvid, err := strconv.Atoi(vid)

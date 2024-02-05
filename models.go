@@ -26,27 +26,15 @@ type Model struct {
 
 // 用户部分
 type User struct {
-	Name   string `xorm:"unique"`
-	Passwd []byte
-	Email  string `xorm:"unique"`
-	Avatar string
-	Level  uint8 `xorm:"TINYINT default 0"` //4位权限4位等级,所以满级15(要不了这么多)
-	Model  `xorm:"extends"`
-}
-
-// 创作者
-type Circle struct {
-	Name       string `xorm:"unique"`
-	Avatar     string
-	Descrption string `xorm:"TEXT"`
-	Kind       []uint8
-	Model      `xorm:"extends"`
-}
-
-type AuhtorOfCircle struct {
-	Uid       int //User.Id
-	Cid       int //Circle.Id
-	privilege []uint8
+	Name     string `xorm:"unique"`
+	Passwd   []byte
+	Email    string `xorm:"unique"`
+	Avatar   string
+	Level    uint8 `xorm:"TINYINT default 0"` //4位权限4位等级,所以满级15(要不了这么多)
+	LTCM     int   //LastTimeCheckMessage
+	LTC      int   //LastTimeClockIn
+	Timezone int
+	Model    `xorm:"extends"`
 }
 
 type UserDataShow struct {
@@ -55,12 +43,43 @@ type UserDataShow struct {
 	Id     int64
 }
 
+// 创作者
+type ApplyCircleVote struct {
+	IsAgree bool
+	Acid    int
+	Author  int
+}
+
+type ApplyCircle struct {
+	Name        string `xorm:"unique"`
+	Avatar      string
+	Descrption  string `xorm:"TEXT"`
+	Application string `xorm:"TEXT"` //markdown
+	Stauts      bool   //false:审核中 true:驳回
+	Model       `xorm:"extends`
+}
+
+type Circle struct {
+	Name       string `xorm:"unique"`
+	Avatar     string
+	Descrption string  `xorm:"TEXT"`
+	Kinds      []uint8 //0:video,1:image,2:music
+	Model      `xorm:"extends"`
+}
+
+type MemberOfCircle struct {
+	Uid        int   //User.Id
+	Cid        int   //Circle.Id
+	Permission uint8 `xorm:"TINYINT"` //0:Owner,1:Maintainer,2:Creatot,3:Staff,4:Subscribe
+}
+
 // 标签部分
 type TagModel struct {
-	Id    int64  //xorm自动主键
-	Kind  uint8  `xorm:"SMALLINT"`
-	Text  string `xorm:"unique"`
-	Times int
+	Id       int64 //xorm自动主键
+	FatherId int
+	Kind     uint8  `xorm:"SMALLINT"`
+	Text     string `xorm:"unique"`
+	Times    int
 }
 
 type Tag struct {
@@ -78,6 +97,8 @@ type Video struct { //获取视频和获取评论分开
 	Likes       int    `xorm:"default 1"` //芝士点赞数量
 	Views       int    `xorm:"default 1"` //这是播放量
 	Author      int    `xorm:"index"`     //作者/上传者
+	Upid        int    //上传用户
+	Caution     int
 	Model       `xorm:"extends"`
 }
 
@@ -86,8 +107,9 @@ type VideoNeedToCheck struct {
 	CoverPath   string
 	Title       string
 	Description string `xorm:"TEXT"`
-	Tags        []uint8
+	Tags        []int
 	Author      int `xorm:"index"`
+	Upid        int //上传用户
 	Model       `xorm:"extends"`
 }
 
@@ -166,9 +188,3 @@ type SearchVideoReturn struct {
 }
 
 // 消息部分
-type MessageVideoEmojiComment struct {
-	Vid     int64
-	Reciver int
-	Cliker  int
-	Kind    int8
-}
