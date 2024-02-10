@@ -52,11 +52,12 @@ func GetSelfUserData(c *gin.Context) {
 	c.SetCookie("token", tokenString, 1200000, "/", "", true, true)
 	c.SetCookie("is_login", "true", 1200000, "/", "", true, true)
 	c.JSON(http.StatusOK, gin.H{
-		"name":   user.Name,
-		"userid": userid,
-		"mail":   mail,
-		"level":  user.Level,
-		"avatar": user.Avatar,
+		"name":     user.Name,
+		"userid":   userid,
+		"mail":     mail,
+		"level":    user.Level,
+		"avatar":   user.Avatar,
+		"timezone": user.Timezone,
 	})
 }
 
@@ -225,6 +226,17 @@ func ChangeName(c *gin.Context) {
 	db.ID(uauthor).Get(&user)
 	user.Name = name
 	user.Level = user.Level - 8
+	db.ID(uauthor).Update(&user)
+	return
+}
+
+func ChangeTimeZone(c *gin.Context) {
+	uauthor := GetUserIdWithoutCheck(c)
+	timezone := c.PostForm("timezone")
+	timezoneOffSet, _ := strconv.Atoi(timezone)
+	var user User
+	db.ID(uauthor).Get(&user)
+	user.Timezone = timezoneOffSet
 	db.ID(uauthor).Update(&user)
 	return
 }

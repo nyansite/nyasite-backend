@@ -37,7 +37,7 @@ func main() {
 		&VideoNeedToCheck{}, &Video{},
 		&VideoComment{}, &VideoCommentReply{}, &VideoCommentEmojiRecord{}, &VideoCommentReplyLikeRecord{},
 		&VideoBullet{},
-		&Circle{}, &MemberOfCircle{})
+		&Circle{}, &MemberOfCircle{}, &ApplyCircle{}, &VoteOfApplyCircle{})
 	db.SetDefaultCacher(caches.NewLRUCacher(caches.NewMemoryStore(), 10000))
 	//上面的是sql
 
@@ -85,7 +85,6 @@ func main() {
 		group.GET("/get_video/:id", GetVideo)
 		group.POST("/upload_video", CheckPrivilege(0), PostVideo)
 		group.GET("/get_all_videos", GetAllVideos)
-		//group.POST("/admin_upload_video", PrivilegeLevel(10), AdminUploadVideo)
 		//comment
 		group.GET("/video_comment/:id/:pg", BrowseVideoComments)
 		group.GET("/video_comment_reply/:id", BrowseVideoCommentReplies)
@@ -100,10 +99,18 @@ func main() {
 		//change user information
 		group.POST("/change_avatar", CheckPrivilege(0), ChangeAvatar)
 		group.POST("/change_name", CheckPrivilege(1), ChangeName)
+		group.POST("/change_timezone", CheckPrivilege(0), ChangeTimeZone)
+		//circle
+		group.POST("/apply_circle", CheckPrivilege(0), PostCircleApplication)
+		group.GET("/get_available_circle/:type", CheckPrivilege(0), CheckAvailableCircle)
 		//token
 		group.GET("/get_PICUI_token", CheckPrivilege(0), GetPICUItoken)
 		//check
-		group.POST("/")
+		group.GET("/get_all_circles_needtocheck", CheckPrivilege(10), GetAllCirclesNeedtoCheck)
+		group.POST("/vote_for_circles_needtocheck", CheckPrivilege(10), VoteForCirclesNeedtoCheck)
+		group.GET("/get_all_videos_needtocheck", CheckPrivilege(10), GetAllVideoNeedToChenck)
+		group.POST("/pass_video", CheckPrivilege(10), PassVideo)
+		group.POST("/reject_video", CheckPrivilege(10), RejectVideo)
 	}
 	r2 := gin.New()
 	r2.Use(gin.LoggerWithFormatter(defaultLogFormatter), gin.Recovery())

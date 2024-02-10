@@ -156,7 +156,7 @@ func DBgetVideoCommentRepliesShow(cid int, author int) []VideoCommentReply {
 	var commentRepliesReturn []VideoCommentReply
 	db.In("cid", cid).Desc("id").Limit(3, 0).Find(&commentReplies)
 	for _, i := range commentReplies {
-		exist, _ := db.Where("author = ? and crid = ?", author, i.Id).Count(&VideoCommentReplyLikeRecord{})
+		exist, _ := db.Where("author = ? AND crid = ?", author, i.Id).Count(&VideoCommentReplyLikeRecord{})
 		if exist != 0 {
 			i.Like_c = true
 		} else {
@@ -212,18 +212,15 @@ func ClikckCommentEmoji(ctx *gin.Context) {
 		return
 	}
 	if exist == 0 {
-		println(1)
 		DBaddVideoEmoji(vcid, uemoji, uauthor)
 		return
 	} else {
 		var existedEmojiRecord VideoCommentEmojiRecord
 		db.Where("author = ? and cid = ?", uauthor, cid).Get(&existedEmojiRecord)
 		if existedEmojiRecord.Emoji == uemoji {
-			println(2)
 			DBdeleteVideoEmoji(vcid, uemoji, uauthor)
 			return
 		} else {
-			println(3)
 			DBchangeVideoEmoji(vcid, uemoji, existedEmojiRecord)
 			return
 		}

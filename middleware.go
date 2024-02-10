@@ -21,10 +21,16 @@ func CheckPrivilege(level uint8) gin.HandlerFunc {
 		userid := session.Get("userid")
 		var user User
 		if has, _ := db.ID(int(userid.(int64))).Get(&user); has == false { //用户不存在
+			//如果用户不存在就删除cookie
+			ctx.SetCookie("token", "", -1, "/", "", true, true)
+			ctx.SetCookie("is_login", "true", -1, "/", "", true, true)
 			ctx.Status(http.StatusBadRequest)
 			return
 		}
 		if string(session.Get("pwd-8").([]byte)) != string(user.Passwd[:8]) {
+			//如果密码不对就删除cookie
+			ctx.SetCookie("token", "", -1, "/", "", true, true)
+			ctx.SetCookie("is_login", "true", -1, "/", "", true, true)
 			ctx.Status(http.StatusBadRequest)
 			return
 		}

@@ -65,7 +65,7 @@ func PostVideo(c *gin.Context) {
 		}
 		tags = append(tags, tag)
 	}
-	newVideo := VideoNeedToCheck{Author: uauthor, Title: title, Description: description, CoverPath: cover, Tags: tags}
+	newVideo := VideoNeedToCheck{Author: uauthor, Title: title, Description: description, CoverPath: cover, Tags: tags, Stauts: false}
 	_, err1 := db.InsertOne(newVideo)
 	if err1 != nil {
 		c.AbortWithError(http.StatusInternalServerError, err1)

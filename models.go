@@ -51,19 +51,27 @@ type ApplyCircleVote struct {
 }
 
 type ApplyCircle struct {
-	Name        string `xorm:"unique"`
-	Avatar      string
-	Descrption  string `xorm:"TEXT"`
-	Application string `xorm:"TEXT"` //markdown
-	Stauts      bool   //false:审核中 true:驳回
-	Model       `xorm:"extends`
+	Name       string `xorm:"unique"`
+	Avatar     string
+	Descrption string `xorm:"TEXT"` //markdown
+	ApplyText  string `xorm:"TEXT"`
+	Stauts     bool   //false:审核中 true:驳回
+	Kinds      int16  `xorm:"SMALLINT"` //*2:video,*3:image,*5:music,judge by the remainder
+	Applicant  int
+	Model      `xorm:"extends"`
+}
+
+type VoteOfApplyCircle struct {
+	Reviewer int
+	Agree    bool
+	Acid     int
 }
 
 type Circle struct {
 	Name       string `xorm:"unique"`
 	Avatar     string
-	Descrption string  `xorm:"TEXT"`
-	Kinds      []uint8 //0:video,1:image,2:music
+	Descrption string `xorm:"TEXT"`
+	Kinds      int16  `xorm:"SMALLINT"` //*2:video,*3:image,*5:music,judge by the remainder
 	Model      `xorm:"extends"`
 }
 
@@ -110,7 +118,13 @@ type VideoNeedToCheck struct {
 	Tags        []int
 	Author      int `xorm:"index"`
 	Upid        int //上传用户
+	Stauts      bool
 	Model       `xorm:"extends"`
+}
+
+type VideoLikeRecord struct {
+	Author int
+	Vid    int
 }
 
 // 视频站评论部分
