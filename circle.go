@@ -87,3 +87,14 @@ func PostCircleApplication(c *gin.Context) {
 	}
 	return
 }
+
+func DBGetCircleDataShow(cid int) CircleDataShow {
+	var circle Circle
+	db.ID(cid).Get(&circle)
+	circleDisplay := CircleDataShow{
+		Id:     circle.Id,
+		Name:   circle.Name,
+		Avatar: circle.Avatar,
+	}
+	return circleDisplay
+}

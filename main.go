@@ -78,6 +78,7 @@ func main() {
 		group.GET("/taglist", EnireTag)
 
 		group.POST("/register", Register)
+		group.POST("/logout", CheckPrivilege(0), QuitLogin)
 		group.POST("/login", Login)
 
 		group.POST("/new_tag", CheckPrivilege(10), NewTag)
@@ -91,7 +92,7 @@ func main() {
 		group.POST("/add_video_comment", CheckPrivilege(0), AddVideoComment)
 		group.POST("/add_video_comment_reply", CheckPrivilege(0), AddVideoCommentReply)
 		group.POST("/click_comment_emoji", ClikckCommentEmoji)
-		group.POST("/click_video_like", ClickVideoLike)
+		group.POST("/click_commentreply_like", ClickCommentReplyLike)
 		group.POST("/add_video_tag", CheckPrivilege(10), AddVideoTag)
 		//danmaku
 		group.GET("/get_bullets/:id", BrowseBullets)
@@ -103,6 +104,8 @@ func main() {
 		//circle
 		group.POST("/apply_circle", CheckPrivilege(0), PostCircleApplication)
 		group.GET("/get_available_circle/:type", CheckPrivilege(0), CheckAvailableCircle)
+		//search
+		group.POST("/search_video", SearchVideos)
 		//token
 		group.GET("/get_PICUI_token", CheckPrivilege(0), GetPICUItoken)
 		//check

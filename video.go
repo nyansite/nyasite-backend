@@ -21,7 +21,7 @@ func GetVideo(c *gin.Context) {
 	//test data
 	videoPath := "https://customer-f33zs165nr7gyfy4.cloudflarestream.com/6b9e68b07dfee8cc2d116e4c51d6a957/manifest/video.m3u8"
 	//获取作者
-	author := DBGetUserDataShow(video.Author)
+	author := DBGetCircleDataShow(int(video.Id))
 	c.JSON(http.StatusOK, gin.H{
 		"title":       video.Title,
 		"videoPath":   videoPath,

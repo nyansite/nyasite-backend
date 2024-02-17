@@ -43,7 +43,7 @@ type UserDataShow struct {
 	Id     int64
 }
 
-// 创作者
+// 社团
 type ApplyCircleVote struct {
 	IsAgree bool
 	Acid    int
@@ -79,6 +79,12 @@ type MemberOfCircle struct {
 	Uid        int   //User.Id
 	Cid        int   //Circle.Id
 	Permission uint8 `xorm:"TINYINT"` //0:Owner,1:Maintainer,2:Creatot,3:Staff,4:Subscribe
+}
+
+type CircleDataShow struct {
+	Name   string
+	Avatar string
+	Id     int64
 }
 
 // 标签部分
@@ -198,7 +204,14 @@ type SearchVideoReturn struct {
 	Id        int64
 	CoverPath string
 	Title     string
+	Author    SearchCircleReturn
 	Views     int
+	Likes     int
+}
+
+type SearchCircleReturn struct {
+	Id   int64
+	Name string
 }
 
 // 消息部分

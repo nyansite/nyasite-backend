@@ -1,7 +1,7 @@
 package main
 
 import (
-	"log"
+	//"log"
 	"math"
 	"net/http"
 	"strconv"
@@ -62,8 +62,12 @@ func BrowseVideoCommentReplies(ctx *gin.Context) {
 	var comment VideoComment
 	has, err := db.ID(cid).Get(&comment)
 	var emojiRecord VideoCommentEmojiRecord
-	if err != nil || has == false {
-		ctx.AbortWithStatus(http.StatusBadRequest) //400
+	if err != nil {
+		ctx.AbortWithError(http.StatusBadRequest, err) //400
+		return
+	}
+	if has == false {
+		ctx.AbortWithStatus(http.StatusNotFound)
 		return
 	}
 	count, _ := db.Where("author = ? AND cid = ?", author, comment.Id).Count(&emojiRecord)
@@ -72,23 +76,11 @@ func BrowseVideoCommentReplies(ctx *gin.Context) {
 	} else {
 		comment.Choose = emojiRecord.Emoji
 	}
-	comment.Like--
-	comment.Dislike--
-	comment.Smile--
-	comment.Celebration--
-	comment.Confused--
-	comment.Heart--
-	comment.Rocket--
-	comment.Eyes--
-	count, err1 := db.In("cid", cid).Count(&VideoCommentReply{})
-	if err1 != nil {
-		ctx.AbortWithStatus(http.StatusInternalServerError) //500,正常情况下不会出现
-		log.Println(err)
-		return
-	}
 	userIds := mapset.NewSet[int]()
 	commentrReplies := DBgetVideoCommentReplies(cid, author)
 	var userDataShows []UserDataShow
+	userIds.Add(comment.Author)
+	userDataShows = append(userDataShows, DBGetUserDataShow(comment.Author))
 	for _, i := range commentrReplies {
 		if !userIds.Contains(i.Author) {
 			userIds.Add(i.Author)
@@ -96,10 +88,9 @@ func BrowseVideoCommentReplies(ctx *gin.Context) {
 		}
 	}
 	ctx.JSON(http.StatusOK, gin.H{
-		"Origin":    comment,
-		"Body":      commentrReplies,
-		"UserShow":  userDataShows,
-		"PageCount": math.Ceil(float64(count) / 20), //总页数
+		"Origin":   comment,
+		"Body":     commentrReplies,
+		"UserShow": userDataShows,
 	})
 }
 func DBgetVideoComments(vid int, page int, author int) []VideoComment {
@@ -115,14 +106,6 @@ func DBgetVideoComments(vid int, page int, author int) []VideoComment {
 			db.Where("author = ? AND cid = ?", author, i.Id).Get(&emojiRecord)
 			i.Choose = emojiRecord.Emoji
 		}
-		i.Like--
-		i.Dislike--
-		i.Smile--
-		i.Celebration--
-		i.Confused--
-		i.Heart--
-		i.Rocket--
-		i.Eyes--
 		//从1开始计数，所以默认-1
 		i.CRdisplay = DBgetVideoCommentRepliesShow(int(i.Id), author)
 		commentsReturn = append(commentsReturn, i)
@@ -190,14 +173,15 @@ func AddVideoCommentReply(ctx *gin.Context) {
 	cid, text := ctx.PostForm("cid"), ctx.PostForm("text")
 	vcid, _ := strconv.Atoi(cid)
 	ucid := int(vcid)
-	DBaddVideoCommentReply(ucid, uauthor, text)
+	crid := DBaddVideoCommentReply(ucid, uauthor, text)
+	ctx.String(http.StatusOK, "%v", crid)
 	return
 }
 
-func DBaddVideoCommentReply(cid int, author int, text string) {
+func DBaddVideoCommentReply(cid int, author int, text string) int {
 	commentReply := VideoCommentReply{Cid: cid, Text: text, Author: author, Likes: 1}
-	db.Insert(commentReply)
-	return
+	db.Insert(&commentReply)
+	return int(commentReply.Id)
 }
 
 func ClikckCommentEmoji(ctx *gin.Context) {
@@ -212,22 +196,22 @@ func ClikckCommentEmoji(ctx *gin.Context) {
 		return
 	}
 	if exist == 0 {
-		DBaddVideoEmoji(vcid, uemoji, uauthor)
+		DBaddCommentEmoji(vcid, uemoji, uauthor)
 		return
 	} else {
 		var existedEmojiRecord VideoCommentEmojiRecord
 		db.Where("author = ? and cid = ?", uauthor, cid).Get(&existedEmojiRecord)
 		if existedEmojiRecord.Emoji == uemoji {
-			DBdeleteVideoEmoji(vcid, uemoji, uauthor)
+			DBdeleteCommentEmoji(vcid, uemoji, uauthor)
 			return
 		} else {
-			DBchangeVideoEmoji(vcid, uemoji, existedEmojiRecord)
+			DBchangeCommentEmoji(vcid, uemoji, existedEmojiRecord)
 			return
 		}
 	}
 }
 
-func DBaddVideoEmoji(cid int, emoji int8, author int) {
+func DBaddCommentEmoji(cid int, emoji int8, author int) {
 	var comment VideoComment
 	db.ID(cid).Get(&comment)
 	switch emoji {
@@ -253,7 +237,7 @@ func DBaddVideoEmoji(cid int, emoji int8, author int) {
 	db.ID(cid).Update(&comment)
 }
 
-func DBchangeVideoEmoji(cid int, emoji int8, emojiRecord VideoCommentEmojiRecord) {
+func DBchangeCommentEmoji(cid int, emoji int8, emojiRecord VideoCommentEmojiRecord) {
 	//直接导入查询到的表情记录，避免重复查询
 	var comment VideoComment
 	db.ID(cid).Get(&comment)
@@ -300,7 +284,7 @@ func DBchangeVideoEmoji(cid int, emoji int8, emojiRecord VideoCommentEmojiRecord
 	return
 }
 
-func DBdeleteVideoEmoji(cid int, emoji int8, author int) {
+func DBdeleteCommentEmoji(cid int, emoji int8, author int) {
 	var comment VideoComment
 	db.ID(cid).Get(&comment)
 	switch emoji {
@@ -324,21 +308,22 @@ func DBdeleteVideoEmoji(cid int, emoji int8, author int) {
 	return
 }
 
-func ClickVideoLike(ctx *gin.Context) {
+func ClickCommentReplyLike(ctx *gin.Context) {
 	uauthor := GetUserIdWithoutCheck(ctx)
 	crid := ctx.PostForm("crid")
 	vcrid, _ := strconv.Atoi(crid)
 	count, _ := db.Where("author = ? and crid = ?", uauthor, crid).Count(&VideoCommentReplyLikeRecord{})
 	if count == 0 {
-		DBaddVideoLike(uauthor, vcrid)
+		DBaddCommentReplyLike(uauthor, vcrid)
 	} else {
-		DBdeleteVideoLike(uauthor, vcrid)
+		DBdeleteCommentReplyLike(uauthor, vcrid)
 	}
 	return
 }
-func DBaddVideoLike(author int, crid int) {
+func DBaddCommentReplyLike(author int, crid int) {
 	var commentReply VideoCommentReply
 	db.ID(crid).Get(&commentReply)
+	println(commentReply.Likes)
 	commentReply.Likes++
 	commentReplyLikeRecord := VideoCommentReplyLikeRecord{Author: author, Crid: crid}
 	db.Insert(&commentReplyLikeRecord)
@@ -346,11 +331,12 @@ func DBaddVideoLike(author int, crid int) {
 	return
 }
 
-func DBdeleteVideoLike(author int, crid int) {
+func DBdeleteCommentReplyLike(author int, crid int) {
 	var commentReply VideoCommentReply
 	db.ID(crid).Get(&commentReply)
+	println(commentReply.Likes)
 	commentReply.Likes--
-	db.Where("auhtor = ? and crid = ?", author, crid).Delete(&VideoCommentReplyLikeRecord{})
+	db.Where("author = ? and crid = ?", author, crid).Delete(&VideoCommentReplyLikeRecord{})
 	db.ID(crid).Update(&commentReply)
 	return
 }

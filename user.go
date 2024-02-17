@@ -27,6 +27,11 @@ func reloadJWT(user User) string {
 	return tokenString
 }
 
+func QuitLogin(c *gin.Context) {
+	c.SetCookie("token", "", -1, "/", "", true, true)
+	c.SetCookie("is_login", "false", -1, "/", "", true, true)
+}
+
 func GetSelfUserData(c *gin.Context) {
 	session := sessions.Default(c)
 	is_login, _ := c.Cookie("is_login")
@@ -199,12 +204,12 @@ func GetUserIdWithoutCheck(c *gin.Context) int {
 func DBGetUserDataShow(userid int) UserDataShow {
 	var user User
 	db.ID(userid).Get(&user)
-	userDataShow := UserDataShow{
+	userDisplay := UserDataShow{
 		Id:     user.Id,
 		Name:   user.Name,
 		Avatar: user.Avatar,
 	}
-	return userDataShow
+	return userDisplay
 }
 
 //更改用户信息
