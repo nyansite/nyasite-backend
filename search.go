@@ -56,7 +56,9 @@ func SearchVideos(c *gin.Context) {
 	vidsCount := make(map[uint]uint)
 	vids := mapset.NewSet[uint]()
 	tagCondition := c.PostForm("tags")
+	println(tagCondition)
 	textCondition := c.PostForm("text")
+	println(textCondition)
 	page := c.PostForm("page")
 	kind := c.PostForm("kind")
 	vPage, _ := strconv.Atoi(page)
@@ -80,7 +82,7 @@ func SearchVideos(c *gin.Context) {
 			var video Video
 			var videoReturn SearchVideoReturn
 			db.ID(i).Get(&video)
-			if strings.Contains(video.Title, textCondition) || strings.Contains(video.Description, textCondition) || tagCondition == "" {
+			if strings.Contains(video.Title, textCondition) || strings.Contains(video.Description, textCondition) || textCondition == "" {
 				//判断是否又对应text部分,如果没有text部分，就忽略text部分
 				db.ID(video.Author).Get(&author)
 				videoReturn.Id = video.Id
@@ -90,6 +92,7 @@ func SearchVideos(c *gin.Context) {
 				videoReturn.Likes = video.Likes
 				videoReturn.Author.Id = author.Id
 				videoReturn.Author.Name = author.Name
+				videoReturn.CreatedAt = video.CreatedAt
 				videosReturn = append(videosReturn, videoReturn)
 			}
 		}
@@ -112,12 +115,16 @@ func SearchVideos(c *gin.Context) {
 	}
 	var upper int
 	if (vPage*20 - 1) <= len(videosReturn) {
-		upper = (vPage*20 - 1)
+		upper = (vPage * 20)
 	} else {
 		upper = len(videosReturn)
 	}
-	videosReturn = videosReturn[(vPage-1)*20 : upper]
 	count := len(videosReturn)
+	videosReturn = videosReturn[(vPage-1)*20 : upper]
+	if count == 0 {
+		c.AbortWithStatus(http.StatusNotFound)
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{
 		"videos": videosReturn,
 		"count":  count,

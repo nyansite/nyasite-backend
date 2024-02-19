@@ -207,6 +207,7 @@ type SearchVideoReturn struct {
 	Author    SearchCircleReturn
 	Views     int
 	Likes     int
+	CreatedAt int
 }
 
 type SearchCircleReturn struct {
