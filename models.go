@@ -71,7 +71,7 @@ type Circle struct {
 	Name       string `xorm:"unique"`
 	Avatar     string
 	Descrption string `xorm:"TEXT"`
-	Kinds      int16  `xorm:"SMALLINT"` //*2:video,*3:image,*5:music,judge by the remainder
+	Kinds      int16  `xorm:"SMALLINT"` //1:video 2:music 4:image
 	Model      `xorm:"extends"`
 }
 
@@ -131,6 +131,16 @@ type VideoNeedToCheck struct {
 type VideoLikeRecord struct {
 	Author int
 	Vid    int
+}
+
+type VideoReturn struct {
+	Id        int64
+	CoverPath string
+	Title     string
+	Author    SearchCircleReturn
+	Views     int
+	Likes     int
+	CreatedAt int
 }
 
 // 视频站评论部分
@@ -199,16 +209,6 @@ type SessionSecret struct {
 }
 
 //搜索部分
-
-type SearchVideoReturn struct {
-	Id        int64
-	CoverPath string
-	Title     string
-	Author    SearchCircleReturn
-	Views     int
-	Likes     int
-	CreatedAt int
-}
 
 type SearchCircleReturn struct {
 	Id   int64

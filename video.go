@@ -13,7 +13,7 @@ func GetVideo(c *gin.Context) {
 	strVid := c.Param("id")
 	vVid, _ := strconv.Atoi(strVid)
 	var video Video
-	exist, _ := db.ID(int(vVid)).Get(&video)
+	exist, _ := db.ID(vVid).Get(&video)
 	if exist == false {
 		c.AbortWithStatus(http.StatusNotFound)
 	}
@@ -22,7 +22,7 @@ func GetVideo(c *gin.Context) {
 	videoPath := "https://customer-f33zs165nr7gyfy4.cloudflarestream.com/6b9e68b07dfee8cc2d116e4c51d6a957/manifest/video.m3u8"
 	//获取作者
 	author := DBGetCircleDataShow(int(video.Id))
-	c.JSON(http.StatusOK, gin.H{
+	c.JSONP(http.StatusOK, gin.H{
 		"title":       video.Title,
 		"videoPath":   videoPath,
 		"author":      author,

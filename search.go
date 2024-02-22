@@ -29,11 +29,11 @@ func SearchTag(c *gin.Context) {
 }
 
 type VideoWrapper struct {
-	videos []SearchVideoReturn
-	by     func(p, q *SearchVideoReturn) bool
+	videos []VideoReturn
+	by     func(p, q *VideoReturn) bool
 }
 
-type SortBy func(p, q *SearchVideoReturn) bool
+type SortBy func(p, q *VideoReturn) bool
 
 func (vw VideoWrapper) Len() int {
 	return len(vw.videos)
@@ -47,18 +47,16 @@ func (vw VideoWrapper) Less(i, j int) bool {
 	return vw.by(&vw.videos[i], &vw.videos[j])
 }
 
-func SortVideo(videos []SearchVideoReturn, by SortBy) {
+func SortVideo(videos []VideoReturn, by SortBy) {
 	sort.Sort(VideoWrapper{videos, by})
 }
 
 func SearchVideos(c *gin.Context) {
-	var videosReturn []SearchVideoReturn
+	var videosReturn []VideoReturn
 	vidsCount := make(map[uint]uint)
 	vids := mapset.NewSet[uint]()
 	tagCondition := c.PostForm("tags")
-	println(tagCondition)
 	textCondition := c.PostForm("text")
-	println(textCondition)
 	page := c.PostForm("page")
 	kind := c.PostForm("kind")
 	vPage, _ := strconv.Atoi(page)
@@ -80,7 +78,7 @@ func SearchVideos(c *gin.Context) {
 	for i := range vids.Iter() {
 		if vidsCount[i] == nTags { //如果视频出现在每一种tag中，vidsCount对应项与tag种类总数相等
 			var video Video
-			var videoReturn SearchVideoReturn
+			var videoReturn VideoReturn
 			db.ID(i).Get(&video)
 			if strings.Contains(video.Title, textCondition) || strings.Contains(video.Description, textCondition) || textCondition == "" {
 				//判断是否又对应text部分,如果没有text部分，就忽略text部分
@@ -99,15 +97,15 @@ func SearchVideos(c *gin.Context) {
 	}
 	switch kind {
 	case "0":
-		SortVideo(videosReturn, func(p, q *SearchVideoReturn) bool {
+		SortVideo(videosReturn, func(p, q *VideoReturn) bool {
 			return p.Id > q.Id
 		})
 	case "1":
-		SortVideo(videosReturn, func(p, q *SearchVideoReturn) bool {
+		SortVideo(videosReturn, func(p, q *VideoReturn) bool {
 			return p.Likes > q.Likes
 		})
 	case "2":
-		SortVideo(videosReturn, func(p, q *SearchVideoReturn) bool {
+		SortVideo(videosReturn, func(p, q *VideoReturn) bool {
 			return p.Views > q.Views
 		})
 	default:

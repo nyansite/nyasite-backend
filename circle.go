@@ -98,3 +98,41 @@ func DBGetCircleDataShow(cid int) CircleDataShow {
 	}
 	return circleDisplay
 }
+
+func GetCircle(c *gin.Context) {
+	strCid := c.Param("id")
+	vCid, _ := strconv.Atoi(strCid)
+	var circle Circle
+	exist, _ := db.ID(vCid).Get(&circle)
+	if exist == false {
+		c.AbortWithStatus(http.StatusNotFound)
+	}
+	var members []MemberOfCircle
+	var membersDisplay []UserDataShow
+	db.In("cid", vCid).Find(&members)
+	for _, i := range members {
+		memberDisplay := DBGetUserDataShow(i.Uid)
+		membersDisplay = append(membersDisplay, memberDisplay)
+	}
+	var videos []Video
+	var videosDisplay []VideoReturn
+	db.In("author", vCid).Limit(20, 0).Desc("id").Find(&videos)
+	for _, i := range videos {
+		var videoReturn VideoReturn
+		videoReturn.CoverPath = i.CoverPath
+		videoReturn.CreatedAt = i.CreatedAt
+		videoReturn.Id = i.Id
+		videoReturn.Title = i.Title
+		videoReturn.Views = i.Views
+		videosDisplay = append(videosDisplay, videoReturn)
+	}
+	c.JSONP(http.StatusOK, gin.H{
+		"name":       circle.Name,
+		"avatar":     circle.Avatar,
+		"descrption": circle.Descrption,
+		"kinds":      circle.Kinds,
+		"members":    membersDisplay,
+		"videos":     videosDisplay,
+		"createdAt":  circle.CreatedAt,
+	})
+}

@@ -104,6 +104,7 @@ func main() {
 		//circle
 		group.POST("/apply_circle", CheckPrivilege(0), PostCircleApplication)
 		group.GET("/get_available_circle/:type", CheckPrivilege(0), CheckAvailableCircle)
+		group.GET("/get_circle/:id", GetCircle)
 		//search
 		group.POST("/search_video", SearchVideos)
 		//token
