@@ -78,13 +78,14 @@ type Circle struct {
 type MemberOfCircle struct {
 	Uid        int   //User.Id
 	Cid        int   //Circle.Id
-	Permission uint8 `xorm:"TINYINT"` //0:Owner,1:Maintainer,2:Creatot,3:Staff,4:Subscribe
+	Permission uint8 `xorm:"TINYINT"` //0:Subscribe,1:Staff,2:Creatot,3:Maintainer,4:Owner
 }
 
 type CircleDataShow struct {
-	Name   string
-	Avatar string
-	Id     int64
+	Name     string
+	Avatar   string
+	Relation int8
+	Id       int64
 }
 
 // 标签部分

@@ -72,13 +72,14 @@ func main() {
 	{
 		group.GET("/user_status", GetSelfUserData)
 		group.GET("/user_status/:id", GetUserData)
+		group.GET("/refresh", Refresh)
 		group.GET("/get_video_tags/:id", GetVideoTags)
 		group.GET("/coffee", CheckPrivilege(11), coffee)
 		group.GET("/search/taglist", SearchTag)
 		group.GET("/taglist", EnireTag)
 
 		group.POST("/register", Register)
-		group.POST("/logout", CheckPrivilege(0), QuitLogin)
+		group.POST("/logout", QuitLogin)
 		group.POST("/login", Login)
 
 		group.POST("/new_tag", CheckPrivilege(10), NewTag)
@@ -105,6 +106,8 @@ func main() {
 		group.POST("/apply_circle", CheckPrivilege(0), PostCircleApplication)
 		group.GET("/get_available_circle/:type", CheckPrivilege(0), CheckAvailableCircle)
 		group.GET("/get_circle/:id", GetCircle)
+		group.GET("/get_circle_joined", CheckPrivilege(0), GetCircleJoined)
+		group.POST("/subscribe", CheckPrivilege(0), SubscribeCircle)
 		//search
 		group.POST("/search_video", SearchVideos)
 		//token

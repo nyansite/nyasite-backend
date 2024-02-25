@@ -1,3 +1,0 @@
-[submodule "cirno_web"]
-	path = cirno_web
-	url = git@github.com:nyansite/cirno_web.git

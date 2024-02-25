@@ -56,7 +56,7 @@ func VoteForCirclesNeedtoCheck(c *gin.Context) {
 		memberOfCircle := MemberOfCircle{
 			Uid:        uauthor,
 			Cid:        int(circle.Id),
-			Permission: 0,
+			Permission: 4,
 		}
 		_, err2 := db.Insert(&memberOfCircle)
 		if err2 != nil {

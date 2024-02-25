@@ -41,21 +41,13 @@ func GetSelfUserData(c *gin.Context) {
 	}
 	var user User
 	userid := session.Get("userid")
-
-	vuserid, _ := userid.(int64)
-	db.ID(vuserid).Get(&user)
+	db.ID(int(userid.(int64))).Get(&user)
 	mail := user.Email
 	if (int((int(time.Now().Unix())+user.Timezone)/86400) - int((user.LTC+user.Timezone)/86400)) >= 1 {
 		user.Level = user.Level + 1
 		user.LTC = int(time.Now().Unix())
-		db.ID(vuserid).Update(&user)
+		db.ID(int(userid.(int64))).Update(&user)
 	}
-	session.Flashes() //重新set cookie,使得cookie生命周期重置,但是值不会重置
-	session.Save()
-	//刷新jwt
-	tokenString := reloadJWT(user)
-	c.SetCookie("token", tokenString, 1200000, "/", "", true, true)
-	c.SetCookie("is_login", "true", 1200000, "/", "", true, true)
 	c.JSON(http.StatusOK, gin.H{
 		"name":     user.Name,
 		"userid":   userid,
@@ -146,6 +138,36 @@ func Register(c *gin.Context) {
 		fmt.Println(err)
 	}
 	c.AbortWithStatus(http.StatusOK)
+}
+
+func Refresh(c *gin.Context) {
+	session := sessions.Default(c)
+	userid := session.Get("userid")
+	is_login, _ := c.Cookie("is_login")
+	if is_login != "true" {
+		c.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+	var user User
+	if has, _ := db.ID(int(userid.(int64))).Get(&user); has == false { //用户不存在
+		c.SetCookie("token", "", -1, "/", "", true, true)
+		c.SetCookie("is_login", "false", -1, "/", "", true, true)
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+	if string(session.Get("pwd-8").([]byte)) != string(user.Passwd[:8]) {
+		c.SetCookie("token", "", -1, "/", "", true, true)
+		c.SetCookie("is_login", "false", -1, "/", "", true, true)
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+	session.Flashes() //重新set cookie,使得cookie生命周期重置,但是值不会重置
+	session.Save()
+	//刷新jwt
+	tokenString := reloadJWT(user)
+	c.SetCookie("token", tokenString, 1200000, "/", "", true, true)
+	c.SetCookie("is_login", "true", 1200000, "/", "", true, true)
+	return
 }
 
 func encrypt_passwd(passwds string) []byte { //加密密码,带盐
