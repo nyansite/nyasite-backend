@@ -134,7 +134,7 @@ func GetCircle(c *gin.Context) {
 	}
 	var members []MemberOfCircle
 	var membersDisplay []UserDataShow
-	db.In("cid", vCid).Find(&members)
+	db.Where("permission > 0 and cid = ?", circle.Id).Find(&members)
 	for _, i := range members {
 		memberDisplay := DBGetUserDataShow(i.Uid)
 		membersDisplay = append(membersDisplay, memberDisplay)
