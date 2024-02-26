@@ -17,17 +17,6 @@ func EnireTag(c *gin.Context) {
 	c.JSONP(http.StatusOK, gin.H{"results": tagMs})
 }
 
-func SearchTag(c *gin.Context) {
-	var tagMs []TagModel
-	var tagList []string
-	db.Find(&tagMs)
-	for _, i := range tagMs {
-		tagList = append(tagList, i.Text)
-	}
-	c.JSONP(http.StatusOK, gin.H{"results": tagList})
-	return
-}
-
 type VideoWrapper struct {
 	videos []VideoReturn
 	by     func(p, q *VideoReturn) bool

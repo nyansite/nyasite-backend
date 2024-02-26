@@ -75,7 +75,6 @@ func main() {
 		group.GET("/refresh", Refresh)
 		group.GET("/get_video_tags/:id", GetVideoTags)
 		group.GET("/coffee", CheckPrivilege(11), coffee)
-		group.GET("/search/taglist", SearchTag)
 		group.GET("/taglist", EnireTag)
 
 		group.POST("/register", Register)
