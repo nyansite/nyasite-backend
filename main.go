@@ -1,4 +1,4 @@
-// remember creat token.go !!!!!
+// remember to creat token.go !!!!!
 package main
 
 import (
@@ -72,20 +72,25 @@ func main() {
 	{
 		group.GET("/user_status", GetSelfUserData)
 		group.GET("/user_status/:id", GetUserData)
-		group.GET("/refresh", Refresh)
-		group.GET("/get_video_tags/:id", GetVideoTags)
+
 		group.GET("/coffee", CheckPrivilege(11), coffee)
 		group.GET("/taglist", EnireTag)
+
+		group.GET("/search_users/:name", CheckPrivilege(0), SearchUsers)
 
 		group.POST("/register", Register)
 		group.POST("/logout", QuitLogin)
 		group.POST("/login", Login)
+		group.GET("/refresh", Refresh)
+
+		group.GET("/check_premission/:cid", CheckPrivilege(0), CheckPremissionOfCircle)
 
 		group.POST("/new_tag", CheckPrivilege(10), NewTag)
 		//video
 		group.GET("/get_video/:id", GetVideo)
 		group.POST("/upload_video", CheckPrivilege(0), PostVideo)
 		group.GET("/get_all_videos", GetAllVideos)
+		group.GET("/get_video_tags/:id", GetVideoTags)
 		//comment
 		group.GET("/video_comment/:id/:pg", BrowseVideoComments)
 		group.GET("/video_comment_reply/:id", BrowseVideoCommentReplies)
@@ -106,7 +111,10 @@ func main() {
 		group.GET("/get_available_circle/:type", CheckPrivilege(0), CheckAvailableCircle)
 		group.GET("/get_circle/:id", GetCircle)
 		group.GET("/get_circle_joined", CheckPrivilege(0), GetCircleJoined)
+		group.GET("/get_circle_subscribed", CheckPrivilege(0), GetCirclesSubscribed)
 		group.POST("/subscribe", CheckPrivilege(0), SubscribeCircle)
+		//circle manage
+		group.GET("/get_circle_members/:cid", CheckPrivilege(0), GetAllMembersOfCircle)
 		//search
 		group.POST("/search_video", SearchVideos)
 		//token
@@ -117,6 +125,9 @@ func main() {
 		group.GET("/get_all_videos_needtocheck", CheckPrivilege(10), GetAllVideoNeedToChenck)
 		group.POST("/pass_video", CheckPrivilege(10), PassVideo)
 		group.POST("/reject_video", CheckPrivilege(10), RejectVideo)
+		//message
+		group.GET("/get_video_subscribed", CheckPrivilege(0), GetVideoSubscribe)
+
 	}
 	r2 := gin.New()
 	r2.Use(gin.LoggerWithFormatter(defaultLogFormatter), gin.Recovery())

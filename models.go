@@ -24,6 +24,11 @@ type Model struct {
 	DeletedAt int   `xorm:"deleted"` //用模型本身的id
 }
 
+type ModelLight struct {
+	Id        int64 //xorm自动主键
+	UpdatedAt int   `xorm:"updated"`
+}
+
 // 用户部分
 type User struct {
 	Name     string `xorm:"unique"`
@@ -56,7 +61,7 @@ type ApplyCircle struct {
 	Descrption string `xorm:"TEXT"` //markdown
 	ApplyText  string `xorm:"TEXT"`
 	Stauts     bool   //false:审核中 true:驳回
-	Kinds      int16  `xorm:"SMALLINT"` //*2:video,*3:image,*5:music,judge by the remainder
+	Kinds      int16  `xorm:"SMALLINT"` //1st bite: video,2nd bite: image,3rd bite: music.
 	Applicant  int
 	Model      `xorm:"extends"`
 }
@@ -78,7 +83,8 @@ type Circle struct {
 type MemberOfCircle struct {
 	Uid        int   //User.Id
 	Cid        int   //Circle.Id
-	Permission uint8 `xorm:"TINYINT"` //0:Subscribe,1:Staff,2:Creatot,3:Maintainer,4:Owner
+	Permission uint8 `xorm:"TINYINT"` //0:Subscribe,1:Staff,2:Creator,3:Maintainer,4:Owner
+	CreatedAt  int   `xorm:"created"`
 }
 
 type CircleDataShow struct {
@@ -118,6 +124,7 @@ type Video struct { //获取视频和获取评论分开
 }
 
 type VideoNeedToCheck struct {
+	OriginalId  int
 	VideoUid    string
 	CoverPath   string
 	Title       string
@@ -126,7 +133,7 @@ type VideoNeedToCheck struct {
 	Author      int `xorm:"index"`
 	Upid        int //上传用户
 	Stauts      bool
-	Model       `xorm:"extends"`
+	ModelLight  `xorm:"extends"`
 }
 
 type VideoLikeRecord struct {
@@ -217,3 +224,22 @@ type SearchCircleReturn struct {
 }
 
 // 消息部分
+
+type Invitation struct {
+	Inviter int
+	Invitee int
+	Circle  int
+	Kind    uint8
+	stauts  bool
+}
+
+type KickOut struct {
+}
+
+type CircleAffairMessage struct {
+	Kind        uint8
+	SenderId    int
+	SenderName  string
+	ReciverId   int
+	ReciverName string
+}

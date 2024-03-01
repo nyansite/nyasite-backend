@@ -7,23 +7,42 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// 用于用户界面(获取已经加入的社团)
-func GetCircleJoined(c *gin.Context) {
-	uauthor := GetUserIdWithoutCheck(c)
+// 用于用户界面
+// 获取已经关注的社团
+func GetCirclesSubscribed(c *gin.Context) {
+	userid := GetUserIdWithoutCheck(c)
 	var membersOfCircle []MemberOfCircle
-	var circles []Circle
-	has, _ := db.Where("permission > 0 and uid = ?", uauthor).Count(&MemberOfCircle{})
+	var circles []CircleDataShow
+	has, _ := db.Where("permission = 0 and uid = ?", userid).Count(&MemberOfCircle{})
 	if has == 0 {
 		c.AbortWithStatus(http.StatusNotFound)
 		return
 	}
-	db.Where("permission > 0 and uid = ?", uauthor).Find(&membersOfCircle)
+	db.Where("permission = 0 and uid = ?", userid).Find(&membersOfCircle)
 	for _, i := range membersOfCircle {
-		var circle Circle
-		db.ID(i.Cid).Get(&circle)
+		circles = append(circles, DBGetCircleDataShow(i.Cid))
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"circles": circles,
+	})
+}
+
+// 获取已经加入的社团
+func GetCircleJoined(c *gin.Context) {
+	userid := GetUserIdWithoutCheck(c)
+	var membersOfCircle []MemberOfCircle
+	var circles []CircleDataShow
+	has, _ := db.Where("permission > 0 and uid = ?", userid).Count(&MemberOfCircle{})
+	if has == 0 {
+		c.AbortWithStatus(http.StatusNotFound)
+		return
+	}
+	db.Where("permission > 0 and uid = ?", userid).Find(&membersOfCircle)
+	for _, i := range membersOfCircle {
+		circle := DBGetCircleDataShow(i.Cid)
 		circles = append(circles, circle)
 	}
-	c.JSONP(http.StatusOK, gin.H{
+	c.JSON(http.StatusOK, gin.H{
 		"circles": circles,
 	})
 }
@@ -35,23 +54,23 @@ func CheckAvailableCircle(c *gin.Context) {
 	if err != nil {
 		c.AbortWithError(http.StatusBadRequest, err)
 	}
-	if kind > 3 {
+	if kind >= 3 {
 		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
-	uauthor := GetUserIdWithoutCheck(c)
+	userid := GetUserIdWithoutCheck(c)
 	var authorOfCircle []MemberOfCircle
 	var circles []gin.H
-	has, _ := db.In("uid", uauthor).Count(&MemberOfCircle{})
+	has, _ := db.In("uid", userid).Count(&MemberOfCircle{})
 	if has == 0 {
 		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
-	db.In("uid", uauthor).Asc("permission").Find(&authorOfCircle)
+	db.Where("uid = ? and permission >= 2", userid).Find(&authorOfCircle)
 	var circle Circle
 	for _, i := range authorOfCircle {
 		db.ID(i.Cid).Get(&circle)
-		if i.Permission >= 2 && ((circle.Kinds & int16(1<<kind)) > 0) { //压位
+		if (circle.Kinds & int16(1<<kind)) > 0 { //压位
 			circles = append(circles, gin.H{
 				"name": circle.Name,
 				"id":   i.Cid,
@@ -61,7 +80,7 @@ func CheckAvailableCircle(c *gin.Context) {
 	if len(circles) == 0 {
 		c.AbortWithStatus(http.StatusNotFound)
 	} else {
-		c.JSONP(http.StatusOK, gin.H{
+		c.JSON(http.StatusOK, gin.H{
 			"circles": circles,
 		})
 	}
@@ -99,7 +118,7 @@ func PostCircleApplication(c *gin.Context) {
 		Kinds:      kinds,
 		Applicant:  author,
 	}
-	_, err := db.Insert(&circleApplication)
+	_, err := db.InsertOne(&circleApplication)
 	if err != nil {
 		c.AbortWithError(http.StatusInsufficientStorage, err)
 		return
@@ -113,7 +132,7 @@ func SubscribeCircle(c *gin.Context) {
 	uid := GetUserIdWithoutCheck(c)
 	has, _ := db.Where("cid = ? and uid = ?", vCid, uid).Count(&MemberOfCircle{})
 	if has != 0 {
-		db.Where("cid = ? and uid = ?", vCid, uid).Delete(&MemberOfCircle{})
+		db.Where("cid = ? and uid = ?", vCid, uid).Unscoped().Delete(&MemberOfCircle{})
 		return
 	}
 	memberOfCircle := MemberOfCircle{
@@ -121,7 +140,7 @@ func SubscribeCircle(c *gin.Context) {
 		Uid:        uid,
 		Permission: 0,
 	}
-	db.Insert(&memberOfCircle)
+	db.InsertOne(&memberOfCircle)
 }
 
 func GetCircle(c *gin.Context) {
@@ -131,13 +150,6 @@ func GetCircle(c *gin.Context) {
 	exist, _ := db.ID(vCid).Get(&circle)
 	if exist == false {
 		c.AbortWithStatus(http.StatusNotFound)
-	}
-	var members []MemberOfCircle
-	var membersDisplay []UserDataShow
-	db.Where("permission > 0 and cid = ?", circle.Id).Find(&members)
-	for _, i := range members {
-		memberDisplay := DBGetUserDataShow(i.Uid)
-		membersDisplay = append(membersDisplay, memberDisplay)
 	}
 	var videos []Video
 	var videosDisplay []VideoReturn
@@ -151,20 +163,41 @@ func GetCircle(c *gin.Context) {
 		videoReturn.Views = i.Views
 		videosDisplay = append(videosDisplay, videoReturn)
 	}
-	c.JSONP(http.StatusOK, gin.H{
+	c.JSON(http.StatusOK, gin.H{
 		"id":         circle.Id,
 		"name":       circle.Name,
 		"avatar":     circle.Avatar,
 		"descrption": circle.Descrption,
 		"kinds":      circle.Kinds,
-		"members":    membersDisplay,
-		"relation":   DBgetRelationWithCircle(int(circle.Id), c),
+		"members":    DBGetMembersOfCircle(int(circle.Id)),
+		"relation":   DBgetRelationToCircle(int(circle.Id), c),
 		"videos":     videosDisplay,
 		"createdAt":  circle.CreatedAt,
 	})
 }
 
-func DBgetRelationWithCircle(cid int, c *gin.Context) int8 {
+func DBGetMembersOfCircle(cid int) []UserDataShow {
+	var members []MemberOfCircle
+	var membersDisplay []UserDataShow
+	db.Where("permission > 0 and cid = ?", cid).Find(&members)
+	for _, i := range members {
+		memberDisplay := DBGetUserDataShow(i.Uid)
+		membersDisplay = append(membersDisplay, memberDisplay)
+	}
+	return membersDisplay
+}
+
+func DBgetCirclesRelatedTo(uid int) []int {
+	var circlesId []int
+	var membersOfCircle []MemberOfCircle
+	db.Where("permission > 0 and uid = ?", uid).Find(&membersOfCircle)
+	for _, i := range membersOfCircle {
+		circlesId = append(circlesId, i.Uid)
+	}
+	return circlesId
+}
+
+func DBgetRelationToCircle(cid int, c *gin.Context) int8 {
 	uid := GetUserIdWithCheck(c)
 	if uid == -1 {
 		return -2

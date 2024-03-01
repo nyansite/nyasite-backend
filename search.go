@@ -2,7 +2,6 @@ package main
 
 import (
 	"net/http"
-	"sort"
 
 	"strconv"
 	"strings"
@@ -15,29 +14,6 @@ func EnireTag(c *gin.Context) {
 	var tagMs []TagModel
 	db.Find(&tagMs)
 	c.JSONP(http.StatusOK, gin.H{"results": tagMs})
-}
-
-type VideoWrapper struct {
-	videos []VideoReturn
-	by     func(p, q *VideoReturn) bool
-}
-
-type SortBy func(p, q *VideoReturn) bool
-
-func (vw VideoWrapper) Len() int {
-	return len(vw.videos)
-}
-
-func (vw VideoWrapper) Swap(i, j int) {
-	vw.videos[i], vw.videos[j] = vw.videos[j], vw.videos[i]
-}
-
-func (vw VideoWrapper) Less(i, j int) bool {
-	return vw.by(&vw.videos[i], &vw.videos[j])
-}
-
-func SortVideo(videos []VideoReturn, by SortBy) {
-	sort.Sort(VideoWrapper{videos, by})
 }
 
 func SearchVideos(c *gin.Context) {
@@ -63,7 +39,6 @@ func SearchVideos(c *gin.Context) {
 		}
 	}
 	//bucket sort
-	var author Circle
 	for i := range vids.Iter() {
 		if vidsCount[i] == nTags { //如果视频出现在每一种tag中，vidsCount对应项与tag种类总数相等
 			var video Video
@@ -71,7 +46,7 @@ func SearchVideos(c *gin.Context) {
 			db.ID(i).Get(&video)
 			if strings.Contains(video.Title, textCondition) || strings.Contains(video.Description, textCondition) || textCondition == "" {
 				//判断是否又对应text部分,如果没有text部分，就忽略text部分
-				db.ID(video.Author).Get(&author)
+				author := DBGetCircleDataShow(video.Author)
 				videoReturn.Id = video.Id
 				videoReturn.Title = video.Title
 				videoReturn.CoverPath = video.CoverPath

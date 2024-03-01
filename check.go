@@ -21,7 +21,7 @@ func GetAllCirclesNeedtoCheck(c *gin.Context) {
 			circlesNeedtoCheckDisplay = append(circlesNeedtoCheckDisplay, i)
 		}
 	}
-	c.JSONP(http.StatusOK, gin.H{"results": circlesNeedtoCheckDisplay})
+	c.JSON(http.StatusOK, gin.H{"results": circlesNeedtoCheckDisplay})
 }
 
 func VoteForCirclesNeedtoCheck(c *gin.Context) {
