@@ -45,3 +45,28 @@ func GetVideoSubscribe(c *gin.Context) {
 	db.ID(userid).Cols("l_t_c_m").Update(&user)
 	return
 }
+
+func GetCircleAffairs(c *gin.Context) {
+	userid := GetUserIdWithoutCheck(c)
+	var invitations []Invitation
+	var messages []CircleAffairMessage
+	db.Where("invitee = ? and created_at > ?", userid, time.Now().Unix()-31556952).Find(&invitations)
+	for _, i := range invitations {
+		var message CircleAffairMessage
+		inviter := DBGetUserDataShow(i.Inviter)
+		message.SenderId = i.Inviter
+		message.SenderName = inviter.Name
+		invitee := DBGetUserDataShow(i.Invitee)
+		message.ReciverId = i.Invitee
+		message.ReciverName = invitee.Name
+		circle := DBGetCircleDataShow(i.Circle)
+		message.CircleId = i.Circle
+		message.CircleName = circle.Name
+		message.Time = i.CreatedAt
+		message.Kind = i.Kind + 2
+		messages = append(messages, message)
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"messages": messages,
+	})
+}

@@ -37,7 +37,8 @@ func main() {
 		&VideoNeedToCheck{}, &Video{},
 		&VideoComment{}, &VideoCommentReply{}, &VideoCommentEmojiRecord{}, &VideoCommentReplyLikeRecord{},
 		&VideoBullet{},
-		&Circle{}, &MemberOfCircle{}, &ApplyCircle{}, &VoteOfApplyCircle{})
+		&Circle{}, &MemberOfCircle{}, &ApplyCircle{}, &VoteOfApplyCircle{},
+		&Invitation{})
 	db.SetDefaultCacher(caches.NewLRUCacher(caches.NewMemoryStore(), 10000))
 	//上面的是sql
 
@@ -115,6 +116,7 @@ func main() {
 		group.POST("/subscribe", CheckPrivilege(0), SubscribeCircle)
 		//circle manage
 		group.GET("/get_circle_members/:cid", CheckPrivilege(0), GetAllMembersOfCircle)
+		group.POST("/invite_new_member", CheckPrivilege(0), InviteMember)
 		//search
 		group.POST("/search_video", SearchVideos)
 		//token
@@ -127,6 +129,7 @@ func main() {
 		group.POST("/reject_video", CheckPrivilege(10), RejectVideo)
 		//message
 		group.GET("/get_video_subscribed", CheckPrivilege(0), GetVideoSubscribe)
+		group.GET("/get_new_circle_affairs", CheckPrivilege(0), GetCircleAffairs)
 
 	}
 	r2 := gin.New()

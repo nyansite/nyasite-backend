@@ -226,20 +226,28 @@ type SearchCircleReturn struct {
 // 消息部分
 
 type Invitation struct {
-	Inviter int
-	Invitee int
-	Circle  int
-	Kind    uint8
-	stauts  bool
+	Inviter   int
+	Invitee   int
+	Circle    int
+	Kind      uint8
+	stauts    bool
+	CreatedAt int `xorm:"created"` //使用时间戳而非time.time(字符串)
+
 }
 
-type KickOut struct {
+type Discharge struct {
+	WhoDischarge     int
+	WhoBeDischargeed int
+	Circle           int
 }
 
 type CircleAffairMessage struct {
-	Kind        uint8
+	Kind        uint8 // 0:join 1.discharge 2.quit 3.invite staff 4.invite creator 5.invite maintianer 6.change kind
 	SenderId    int
 	SenderName  string
 	ReciverId   int
 	ReciverName string
+	CircleId    int
+	CircleName  string
+	Time        int
 }

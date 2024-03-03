@@ -49,16 +49,44 @@ func GetAllMembersOfCircle(c *gin.Context) {
 
 func InviteMember(c *gin.Context) {
 	inviteeIdStr := c.PostForm("eid")
-	inviterIdStr := c.PostForm("rid")
 	circleIdStr := c.PostForm("cid")
+	kindStr := c.PostForm("kind")
 	inviteeId, _ := strconv.Atoi(inviteeIdStr)
-	inviterId, _ := strconv.Atoi(inviterIdStr)
+	inviterId := GetUserIdWithoutCheck(c)
 	circleId, _ := strconv.Atoi(circleIdStr)
-	invitation := Invitation{
-		Inviter: inviterId,
-		Invitee: inviteeId,
-		Circle:  circleId,
-		stauts:  false,
+	kind, _ := strconv.Atoi(kindStr)
+	privilege := DBgetRelationToCircle(circleId, c)
+	switch privilege {
+	case 3:
+		if (kind == 1) || (kind == 2) {
+			invitation := Invitation{
+				Inviter: inviterId,
+				Invitee: inviteeId,
+				Circle:  circleId,
+				Kind:    uint8(kind),
+				stauts:  false,
+			}
+			db.InsertOne(&invitation)
+		} else {
+			c.AbortWithStatus(http.StatusBadRequest)
+		}
+		return
+	case 4:
+		if (kind >= 1) && (kind <= 3) {
+			invitation := Invitation{
+				Inviter: inviterId,
+				Invitee: inviteeId,
+				Circle:  circleId,
+				Kind:    uint8(kind),
+				stauts:  false,
+			}
+			db.InsertOne(&invitation)
+		} else {
+			c.AbortWithStatus(http.StatusBadRequest)
+		}
+		return
+	default:
+		c.AbortWithStatus(http.StatusForbidden)
+		return
 	}
-	db.InsertOne(&invitation)
 }
