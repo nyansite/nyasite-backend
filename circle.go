@@ -192,7 +192,7 @@ func DBgetCirclesRelatedTo(uid int) []int {
 	var membersOfCircle []MemberOfCircle
 	db.Where("permission > 0 and uid = ?", uid).Find(&membersOfCircle)
 	for _, i := range membersOfCircle {
-		circlesId = append(circlesId, i.Uid)
+		circlesId = append(circlesId, i.Cid)
 	}
 	return circlesId
 }

@@ -18,14 +18,12 @@ func GetPICUItoken(c *gin.Context) {
 	}
 	formDataBytes, _ := json.Marshal(formDataMap)
 	formDataBytesReader := bytes.NewReader(formDataBytes)
-	println(string(formDataBytes))
 	client := &http.Client{}
 	req, err := http.NewRequest("POST", url, formDataBytesReader)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	println("Bearer " + PICUItoken)
 	//PICUItoken from token.go
 	req.Header.Set("Authorization", "Bearer "+PICUItoken)
 	req.Header.Set("Content-Type", "application/json")

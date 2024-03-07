@@ -140,29 +140,6 @@ func Register(c *gin.Context) {
 	c.AbortWithStatus(http.StatusOK)
 }
 
-func SearchUsers(c *gin.Context) {
-	userid := GetUserIdWithoutCheck(c)
-	clipOfName := c.Param("name")
-	var users []User
-	var usersDisplay []gin.H
-	db.Where("name LIKE ?", "%"+clipOfName+"%").Find(&users)
-	for _, i := range users {
-		if int(i.Id) != userid {
-			usersDisplay = append(usersDisplay, gin.H{
-				"id":     i.Id,
-				"avatar": i.Avatar,
-				"name":   i.Name,
-			})
-		}
-	}
-	if len(usersDisplay) > 5 {
-		usersDisplay = usersDisplay[:5]
-	}
-	c.JSON(http.StatusOK, gin.H{
-		"users": usersDisplay,
-	})
-}
-
 func Refresh(c *gin.Context) {
 	session := sessions.Default(c)
 	userid := session.Get("userid")

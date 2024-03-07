@@ -146,7 +146,6 @@ func RejectVideo(c *gin.Context) {
 		c.AbortWithError(http.StatusInternalServerError, err)
 	}
 	videoNeedToCheck.Stauts = true
-	println(videoNeedToCheck.Stauts)
 	_, err1 := db.ID(vcidNumber).Cols("stauts").Update(&videoNeedToCheck)
 	if err1 != nil {
 		c.AbortWithError(http.StatusInternalServerError, err1)

@@ -38,7 +38,7 @@ func main() {
 		&VideoComment{}, &VideoCommentReply{}, &VideoCommentEmojiRecord{}, &VideoCommentReplyLikeRecord{},
 		&VideoBullet{},
 		&Circle{}, &MemberOfCircle{}, &ApplyCircle{}, &VoteOfApplyCircle{},
-		&Invitation{})
+		&Invitation{}, &Discharge{})
 	db.SetDefaultCacher(caches.NewLRUCacher(caches.NewMemoryStore(), 10000))
 	//上面的是sql
 
@@ -130,7 +130,8 @@ func main() {
 		//message
 		group.GET("/get_video_subscribed", CheckPrivilege(0), GetVideoSubscribe)
 		group.GET("/get_new_circle_affairs", CheckPrivilege(0), GetCircleAffairs)
-
+		group.POST("/reply_invitation", CheckPrivilege(0), ReplyInvitation)
+		group.GET("/get_check_messages", CheckPrivilege(0), GetCheckMessage)
 	}
 	r2 := gin.New()
 	r2.Use(gin.LoggerWithFormatter(defaultLogFormatter), gin.Recovery())

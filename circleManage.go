@@ -7,6 +7,29 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func SearchUsers(c *gin.Context) {
+	userid := GetUserIdWithoutCheck(c)
+	clipOfName := c.Param("name")
+	var users []User
+	var usersDisplay []gin.H
+	db.Where("name LIKE ?", "%"+clipOfName+"%").Find(&users)
+	for _, i := range users {
+		if int(i.Id) != userid {
+			usersDisplay = append(usersDisplay, gin.H{
+				"id":     i.Id,
+				"avatar": i.Avatar,
+				"name":   i.Name,
+			})
+		}
+	}
+	if len(usersDisplay) > 5 {
+		usersDisplay = usersDisplay[:5]
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"users": usersDisplay,
+	})
+}
+
 func CheckPremissionOfCircle(c *gin.Context) { //for manage page
 	cidStr := c.Param("cid")
 	cid, _ := strconv.Atoi(cidStr)
@@ -29,7 +52,7 @@ func GetAllMembersOfCircle(c *gin.Context) {
 	cidStr := c.Param("cid")
 	cid, _ := strconv.Atoi(cidStr)
 	var members []MemberOfCircle
-	var membersDisplay []UserDataShow
+	var membersDisplay []UserDataShowWithPermission
 	permission := DBgetRelationToCircle(cid, c)
 	if permission < 1 {
 		c.AbortWithStatus(http.StatusForbidden)
@@ -37,7 +60,12 @@ func GetAllMembersOfCircle(c *gin.Context) {
 	}
 	db.Where("permission > 0 and cid = ? and uid <> ?", cid, userid).Find(&members)
 	for _, i := range members {
-		memberDisplay := DBGetUserDataShow(i.Uid)
+		var memberDisplay UserDataShowWithPermission
+		memberData := DBGetUserDataShow(i.Uid)
+		memberDisplay.Avatar = memberData.Avatar
+		memberDisplay.Name = memberData.Name
+		memberDisplay.Id = memberData.Id
+		memberDisplay.Permission = i.Permission
 		membersDisplay = append(membersDisplay, memberDisplay)
 	}
 	self := DBGetUserDataShow(userid)
@@ -64,7 +92,7 @@ func InviteMember(c *gin.Context) {
 				Invitee: inviteeId,
 				Circle:  circleId,
 				Kind:    uint8(kind),
-				stauts:  false,
+				Stauts:  false,
 			}
 			db.InsertOne(&invitation)
 		} else {
@@ -78,7 +106,7 @@ func InviteMember(c *gin.Context) {
 				Invitee: inviteeId,
 				Circle:  circleId,
 				Kind:    uint8(kind),
-				stauts:  false,
+				Stauts:  false,
 			}
 			db.InsertOne(&invitation)
 		} else {

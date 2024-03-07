@@ -63,7 +63,7 @@ type ApplyCircle struct {
 	Stauts     bool   //false:审核中 true:驳回
 	Kinds      int16  `xorm:"SMALLINT"` //1st bite: video,2nd bite: image,3rd bite: music.
 	Applicant  int
-	Model      `xorm:"extends"`
+	ModelLight `xorm:"extends"`
 }
 
 type VoteOfApplyCircle struct {
@@ -84,7 +84,7 @@ type MemberOfCircle struct {
 	Uid        int   //User.Id
 	Cid        int   //Circle.Id
 	Permission uint8 `xorm:"TINYINT"` //0:Subscribe,1:Staff,2:Creator,3:Maintainer,4:Owner
-	CreatedAt  int   `xorm:"created"`
+	UpdatedAt  int   `xorm:"updated"`
 }
 
 type CircleDataShow struct {
@@ -92,6 +92,13 @@ type CircleDataShow struct {
 	Avatar   string
 	Relation int8
 	Id       int64
+}
+
+type UserDataShowWithPermission struct {
+	Name       string
+	Avatar     string
+	Permission uint8
+	Id         int64
 }
 
 // 标签部分
@@ -230,19 +237,22 @@ type Invitation struct {
 	Invitee   int
 	Circle    int
 	Kind      uint8
-	stauts    bool
-	CreatedAt int `xorm:"created"` //使用时间戳而非time.time(字符串)
-
+	Stauts    bool
+	CreatedAt int `xorm:"created"`
 }
 
 type Discharge struct {
 	WhoDischarge     int
 	WhoBeDischargeed int
 	Circle           int
+	CreatedAt        int `xorm:"created"`
 }
 
 type CircleAffairMessage struct {
-	Kind        uint8 // 0:join 1.discharge 2.quit 3.invite staff 4.invite creator 5.invite maintianer 6.change kind
+	Kind uint8
+	// 0:join 1.discharge 2.quit
+	//(3.invite staff 4.invite creator 5.invite maintianer) self 6.invite staff 7.invite creator 8.invite maintianer
+	//9.reject circle
 	SenderId    int
 	SenderName  string
 	ReciverId   int
@@ -250,4 +260,14 @@ type CircleAffairMessage struct {
 	CircleId    int
 	CircleName  string
 	Time        int
+	Id          int
+}
+
+type CheckMessage struct {
+	Kind uint8
+	//0:pass video 1.reject video 3.pass circle 4.reject circle
+	Name  string
+	Image string
+	Time  int
+	Id    int
 }
