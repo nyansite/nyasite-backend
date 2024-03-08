@@ -31,15 +31,14 @@ type ModelLight struct {
 
 // 用户部分
 type User struct {
-	Name     string `xorm:"unique"`
-	Passwd   []byte
-	Email    string `xorm:"unique"`
-	Avatar   string
-	Level    uint8 `xorm:"TINYINT default 0"` //4位权限4位等级,所以满级15(要不了这么多)
-	LTCM     int   //LastTimeCheckMessage
-	LTC      int   //LastTimeClockIn
-	Timezone int
-	Model    `xorm:"extends"`
+	Name   string `xorm:"unique"`
+	Passwd []byte
+	Email  string `xorm:"unique"`
+	Avatar string
+	Level  uint8 `xorm:"TINYINT default 0"` //4位权限4位等级,所以满级15(要不了这么多)
+	LTCM   int   //LastTimeCheckMessage
+	LTC    int   //LastTimeClockIn
+	Model  `xorm:"extends"`
 }
 
 type UserDataShow struct {

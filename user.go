@@ -43,18 +43,12 @@ func GetSelfUserData(c *gin.Context) {
 	userid := session.Get("userid")
 	db.ID(int(userid.(int64))).Get(&user)
 	mail := user.Email
-	if (int((int(time.Now().Unix())+user.Timezone)/86400) - int((user.LTC+user.Timezone)/86400)) >= 1 {
-		user.Level = user.Level + 1
-		user.LTC = int(time.Now().Unix())
-		db.ID(int(userid.(int64))).Update(&user)
-	}
 	c.JSON(http.StatusOK, gin.H{
-		"name":     user.Name,
-		"userid":   userid,
-		"mail":     mail,
-		"level":    user.Level,
-		"avatar":   user.Avatar,
-		"timezone": user.Timezone,
+		"name":   user.Name,
+		"userid": userid,
+		"mail":   mail,
+		"level":  user.Level,
+		"avatar": user.Avatar,
 	})
 }
 
@@ -129,10 +123,8 @@ func Register(c *gin.Context) {
 		c.AbortWithStatus(StatusRepeatEmail)
 		return
 	}
-	timezone := c.PostForm("timezone")
-	timezoneOffSet, _ := strconv.Atoi(timezone)
 	user := User{Name: username, Passwd: encrypt_passwd(passwd), Email: mail,
-		Timezone: timezoneOffSet, Avatar: ("https://ui-avatars.com/api/?background=b3c6d7&name=" + username)}
+		Avatar: ("https://ui-avatars.com/api/?background=b3c6d7&name=" + username)}
 	_, err := db.Insert(&user)
 	if err != nil {
 		fmt.Println(err)
@@ -168,6 +160,20 @@ func Refresh(c *gin.Context) {
 	c.SetCookie("token", tokenString, 1200000, "/", "", true, true)
 	c.SetCookie("is_login", "true", 1200000, "/", "", true, true)
 	return
+}
+
+func ClockIn(c *gin.Context) {
+	userid := GetUserIdWithoutCheck(c)
+	timezoneStr := c.PostForm("timezone")
+	timezone, _ := strconv.Atoi(timezoneStr)
+	var user User
+	db.ID(userid).Get(&user)
+	//不在同一天不是一个整数
+	if (int((int(time.Now().Unix())+timezone)/86400) - int((user.LTC+timezone)/86400)) >= 1 {
+		user.Level = user.Level + 1
+		user.LTC = int(time.Now().Unix())
+		db.ID(userid).Update(&user)
+	}
 }
 
 func encrypt_passwd(passwds string) []byte { //加密密码,带盐
@@ -253,17 +259,6 @@ func ChangeName(c *gin.Context) {
 	db.ID(uauthor).Get(&user)
 	user.Name = name
 	user.Level = user.Level - 8
-	db.ID(uauthor).Update(&user)
-	return
-}
-
-func ChangeTimeZone(c *gin.Context) {
-	uauthor := GetUserIdWithoutCheck(c)
-	timezone := c.PostForm("timezone")
-	timezoneOffSet, _ := strconv.Atoi(timezone)
-	var user User
-	db.ID(uauthor).Get(&user)
-	user.Timezone = timezoneOffSet
 	db.ID(uauthor).Update(&user)
 	return
 }

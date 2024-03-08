@@ -83,6 +83,7 @@ func main() {
 		group.POST("/logout", QuitLogin)
 		group.POST("/login", Login)
 		group.GET("/refresh", Refresh)
+		group.POST("/clockin", ClockIn)
 
 		group.GET("/check_premission/:cid", CheckPrivilege(0), CheckPremissionOfCircle)
 
@@ -106,7 +107,6 @@ func main() {
 		//change user information
 		group.POST("/change_avatar", CheckPrivilege(0), ChangeAvatar)
 		group.POST("/change_name", CheckPrivilege(1), ChangeName)
-		group.POST("/change_timezone", CheckPrivilege(0), ChangeTimeZone)
 		//circle
 		group.POST("/apply_circle", CheckPrivilege(0), PostCircleApplication)
 		group.GET("/get_available_circle/:type", CheckPrivilege(0), CheckAvailableCircle)
