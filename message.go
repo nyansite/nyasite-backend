@@ -167,9 +167,8 @@ func GetCheckMessage(c *gin.Context) {
 	timeLimit := time.Now().Unix() - 31556952
 	var messages []CheckMessage
 	for _, i := range circlesId {
-		println(i)
 		var videosPast []Video
-		db.In("author", i).Find(&videosPast)
+		db.Where("author = ? and updated_at > ?", i, timeLimit).Find(&videosPast)
 		for _, j1 := range videosPast {
 			var message CheckMessage
 			message.Image = j1.CoverPath
@@ -179,7 +178,7 @@ func GetCheckMessage(c *gin.Context) {
 			messages = append(messages, message)
 		}
 		var videosRejected []VideoNeedToCheck
-		db.Where("author = ? and stauts = true and and created_at > ?", i, timeLimit).Find(&videosRejected)
+		db.Where("author = ? and stauts = true and updated_at > ?", i, timeLimit).Find(&videosRejected)
 		for _, j2 := range videosRejected {
 			var message CheckMessage
 			message.Image = j2.CoverPath
@@ -191,7 +190,7 @@ func GetCheckMessage(c *gin.Context) {
 
 	}
 	var asOwnerOfCircle []MemberOfCircle
-	db.Where("uid = ? and permission = 4 and created_at > ?", userid, timeLimit).Find(&asOwnerOfCircle)
+	db.Where("uid = ? and permission = 4 and updated_at > ?", userid, timeLimit).Find(&asOwnerOfCircle)
 	for _, j3 := range asOwnerOfCircle {
 		var circlePast Circle
 		db.ID(j3.Cid).Get(&circlePast)
@@ -203,7 +202,7 @@ func GetCheckMessage(c *gin.Context) {
 		messages = append(messages, message)
 	}
 	var CircleRejected []ApplyCircle
-	db.Where("applicant = ? and stauts = true and created_at > ?", userid, timeLimit).Find(&CircleRejected)
+	db.Where("applicant = ? and stauts = true and updated_at > ?", userid, timeLimit).Find(&CircleRejected)
 	for _, j4 := range CircleRejected {
 		var message CheckMessage
 		message.Image = j4.Avatar

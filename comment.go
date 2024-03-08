@@ -70,8 +70,8 @@ func BrowseVideoCommentReplies(ctx *gin.Context) {
 		ctx.AbortWithStatus(http.StatusNotFound)
 		return
 	}
-	count, _ := db.Where("author = ? AND cid = ?", author, comment.Id).Count(&emojiRecord)
-	if count == 0 {
+	has1, _ := db.Where("author = ? AND cid = ?", author, comment.Id).Get(&emojiRecord)
+	if !has1 {
 		comment.Choose = 0
 	} else {
 		comment.Choose = emojiRecord.Emoji
@@ -99,11 +99,10 @@ func DBgetVideoComments(vid int, page int, author int) []VideoComment {
 	db.In("vid", vid).Desc("id").Limit(20, (page-1)*20).Find(&comments)
 	for _, i := range comments {
 		var emojiRecord VideoCommentEmojiRecord
-		count, _ := db.Where("author = ? AND cid = ?", author, i.Id).Count(&emojiRecord)
-		if count == 0 {
+		has, _ := db.Where("author = ? AND cid = ?", author, i.Id).Get(&emojiRecord)
+		if !has {
 			i.Choose = 0
 		} else {
-			db.Where("author = ? AND cid = ?", author, i.Id).Get(&emojiRecord)
 			i.Choose = emojiRecord.Emoji
 		}
 		//从1开始计数，所以默认-1

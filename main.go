@@ -34,7 +34,7 @@ func main() {
 	}
 
 	db.Sync(&User{}, &Tag{}, &TagModel{}, &SessionSecret{},
-		&VideoNeedToCheck{}, &Video{},
+		&VideoNeedToCheck{}, &Video{}, &VideoPlayedRecord{},
 		&VideoComment{}, &VideoCommentReply{}, &VideoCommentEmojiRecord{}, &VideoCommentReplyLikeRecord{},
 		&VideoBullet{},
 		&Circle{}, &MemberOfCircle{}, &ApplyCircle{}, &VoteOfApplyCircle{},

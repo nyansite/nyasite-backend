@@ -147,6 +147,12 @@ type VideoLikeRecord struct {
 	Vid    int
 }
 
+type VideoPlayedRecord struct {
+	Uid      int
+	Vid      int
+	LastPlay int
+}
+
 type VideoReturn struct {
 	Id        int64
 	CoverPath string

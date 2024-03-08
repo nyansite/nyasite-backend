@@ -3,6 +3,7 @@ package main
 import (
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -10,6 +11,7 @@ import (
 //视频返回
 
 func GetVideo(c *gin.Context) {
+	userid := GetUserIdWithoutCheck(c)
 	strVid := c.Param("id")
 	vVid, _ := strconv.Atoi(strVid)
 	var video Video
@@ -23,6 +25,8 @@ func GetVideo(c *gin.Context) {
 	//获取作者
 	author := DBGetCircleDataShow(int(video.Id))
 	author.Relation = DBgetRelationToCircle(int(author.Id), c)
+	//刷新历史记录
+	RecordVideoPlay(vVid, userid)
 	c.JSON(http.StatusOK, gin.H{
 		"title":       video.Title,
 		"videoPath":   videoPath,
@@ -32,6 +36,28 @@ func GetVideo(c *gin.Context) {
 		"views":       video.Views,
 		"likes":       video.Likes,
 	})
+}
+
+//记录视频播放
+
+func RecordVideoPlay(vid int, uid int) {
+	var videoPlayedRecord VideoPlayedRecord
+	has, _ := db.Where("vid = ? and uid = ?", vid, uid).Get(&videoPlayedRecord)
+	var video Video
+	db.ID(vid).Get(&video)
+	if has {
+		if (int(time.Now().Unix()) - videoPlayedRecord.LastPlay) >= 43200 {
+			videoPlayedRecord.LastPlay = int(time.Now().Unix())
+			video.Views++
+			db.Where("vid = ? and uid = ?", vid, uid).Cols("last_time").Update(&videoPlayedRecord)
+			db.ID(video.Id).Cols("views").Update(&video)
+		}
+	} else {
+		videoPlayedRecord := VideoPlayedRecord{Uid: uid, Vid: vid, LastPlay: int(time.Now().Unix())}
+		db.InsertOne(&videoPlayedRecord)
+		video.Views++
+		db.ID(video.Id).Cols("views").Update(&video)
+	}
 }
 
 //添加视频标签
@@ -51,7 +77,8 @@ func AddVideoTag(c *gin.Context) {
 //上传视频
 
 func PostVideo(c *gin.Context) {
-	uauthor := GetUserIdWithoutCheck(c)
+	author := c.PostForm("author")
+	uauthor, _ := strconv.Atoi(author)
 	title := c.PostForm("title")
 	description := c.PostForm("description")
 	cover := c.PostForm("cover")

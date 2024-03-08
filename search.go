@@ -34,6 +34,7 @@ func SearchVideos(c *gin.Context) {
 		db.In("text", i).Get(&tagModel)
 		db.In("tid", &tagModel.Id).Find(&tags)
 		for _, j := range tags {
+			println(vidsCount[uint(j.Pid)])
 			vids.Add(uint(j.Pid))
 			vidsCount[uint(j.Pid)]++ //如果视频在tags出现一次就+1
 		}
