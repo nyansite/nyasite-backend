@@ -103,7 +103,7 @@ type UserDataShowWithPermission struct {
 // 标签部分
 type TagModel struct {
 	Id       int64 //xorm自动主键
-	FatherId int
+	ParentId int
 	Kind     uint8  `xorm:"SMALLINT"`
 	Text     string `xorm:"unique"`
 	Times    int
