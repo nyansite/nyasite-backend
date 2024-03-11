@@ -22,15 +22,12 @@ func GetVideo(c *gin.Context) {
 	//获取路径
 	//test data
 	videoPath := "https://customer-f33zs165nr7gyfy4.cloudflarestream.com/6b9e68b07dfee8cc2d116e4c51d6a957/manifest/video.m3u8"
-	//获取作者
-	author := DBGetCircleDataShow(int(video.Id))
-	author.Relation = DBgetRelationToCircle(int(author.Id), c)
+
 	//刷新历史记录
 	RecordVideoPlay(vVid, userid)
 	c.JSON(http.StatusOK, gin.H{
 		"title":       video.Title,
 		"videoPath":   videoPath,
-		"author":      author,
 		"creatTime":   video.CreatedAt,
 		"description": video.Description,
 		"views":       video.Views,
@@ -71,7 +68,6 @@ func AddVideoTag(c *gin.Context) {
 	uTagId := int(vTagId)
 	tag := Tag{Tid: uTagId, Pid: uVid}
 	db.Insert(tag)
-	return
 }
 
 //上传视频
@@ -98,7 +94,6 @@ func PostVideo(c *gin.Context) {
 	if err1 != nil {
 		c.AbortWithError(http.StatusInternalServerError, err1)
 	}
-	return
 }
 
 //获取标签
@@ -135,7 +130,6 @@ func GetVideoTags(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"tags": tagsDisplay,
 	})
-	return
 }
 
 //获取所有视频

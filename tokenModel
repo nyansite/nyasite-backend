@@ -1,5 +1,0 @@
-package main
-
-const PICUItoken = ""
-
-//copy and rename token.go ,the enter your token here

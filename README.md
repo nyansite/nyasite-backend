@@ -6,7 +6,7 @@
 
 芝士api
 
-#### api/user_status
+### api/user_status
 
 获取已登录用户自身的信息，同时刷新cookie
 
@@ -22,11 +22,11 @@
 | level  | 用户等级（详见等级） |
 | avatar | 用户头像链接     |
 
-#### api/user_status/:id
+### api/user_status/:id
 
 根据id获取其他用户信息
 
-以伪静态链接形式传入查询用户的id（:id)
+以伪静态链接形式传入查询用户的id
 
 返回：
 
@@ -36,9 +36,9 @@
 | level  | 用户等级    |
 | avatar | 用户头像链接  |
 
-#### api/register
+### api/register
 
-注册;传入表单 
+注册;传入表单
 
 提交：
 
@@ -50,7 +50,7 @@
 
 无返回
 
-#### api/login
+### api/login
 
 登录;传入表单
 
@@ -63,7 +63,7 @@
 
 ## video
 
-#### api/get_video/:id
+### api/get_video/:id
 
 获取视频信息
 
@@ -105,7 +105,7 @@
 | level  | 4bite权限4bite经验              |
 | pwd-8  | 密码的最后8位,校验用,别问我为什么6位密码有8位数据 |
 
-## 帖子类型（forum.kind)
+## 帖子类型(forum.kind)
 
 | value | 含意         |
 | ----- | ---------- |

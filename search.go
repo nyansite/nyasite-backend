@@ -47,14 +47,11 @@ func SearchVideos(c *gin.Context) {
 			db.ID(i).Get(&video)
 			if strings.Contains(video.Title, textCondition) || strings.Contains(video.Description, textCondition) || textCondition == "" {
 				//判断是否又对应text部分,如果没有text部分，就忽略text部分
-				author := DBGetCircleDataShow(video.Author)
 				videoReturn.Id = video.Id
 				videoReturn.Title = video.Title
 				videoReturn.CoverPath = video.CoverPath
 				videoReturn.Views = video.Views
 				videoReturn.Likes = video.Likes
-				videoReturn.Author.Id = author.Id
-				videoReturn.Author.Name = author.Name
 				videoReturn.CreatedAt = video.CreatedAt
 				videosReturn = append(videosReturn, videoReturn)
 			}

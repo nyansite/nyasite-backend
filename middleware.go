@@ -19,11 +19,11 @@ func CheckPrivilege(level uint8) gin.HandlerFunc {
 		}
 		userid := session.Get("userid")
 		var user User
-		if has, _ := db.ID(int(userid.(int64))).Get(&user); has == false { //用户不存在
+		if has, _ := db.ID(userid).Get(&user); !has{ //用户不存在
 			ctx.AbortWithStatus(http.StatusBadRequest)
 			return
 		}
-		if string(session.Get("pwd-8").([]byte)) != string(user.Passwd[:8]) {
+		if session.Get("pwd-8") != string(user.Passwd[:8]) {
 			ctx.AbortWithStatus(http.StatusBadRequest)
 			return
 		}

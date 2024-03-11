@@ -45,7 +45,6 @@ func AddBullet(c *gin.Context) {
 	if err1 != nil {
 		c.AbortWithError(http.StatusInternalServerError, err1)
 	}
-	return
 }
 
 func BrowseBullets(c *gin.Context) {
@@ -69,9 +68,9 @@ func BrowseBullets(c *gin.Context) {
 	//弹幕所处位置的格式
 	for _, i := range bullets {
 		var positionStr string
-		if i.Top == true {
+		if i.Top {
 			positionStr = "top"
-		} else if i.Bottom == true {
+		} else if i.Bottom{
 			positionStr = "bottom"
 		} else {
 			positionStr = "scroll"
@@ -98,5 +97,4 @@ func BrowseBullets(c *gin.Context) {
 		"items":      bulletsOutput,
 		"autoInsert": is_login == "true",
 	})
-	return
 }

@@ -47,52 +47,6 @@ type UserDataShow struct {
 	Id     int64
 }
 
-// 社团
-type ApplyCircleVote struct {
-	IsAgree bool
-	Acid    int
-	Author  int
-}
-
-type ApplyCircle struct {
-	Name       string `xorm:"unique"`
-	Avatar     string
-	Descrption string `xorm:"TEXT"` //markdown
-	ApplyText  string `xorm:"TEXT"`
-	Stauts     bool   //false:审核中 true:驳回
-	Kinds      int16  `xorm:"SMALLINT"` //1st bite: video,2nd bite: image,3rd bite: music.
-	Applicant  int
-	ModelLight `xorm:"extends"`
-}
-
-type VoteOfApplyCircle struct {
-	Reviewer int
-	Agree    bool
-	Acid     int
-}
-
-type Circle struct {
-	Name       string `xorm:"unique"`
-	Avatar     string
-	Descrption string `xorm:"TEXT"`
-	Kinds      int16  `xorm:"SMALLINT"` //1:video 2:music 4:image
-	Model      `xorm:"extends"`
-}
-
-type MemberOfCircle struct {
-	Uid        int   //User.Id
-	Cid        int   //Circle.Id
-	Permission uint8 `xorm:"TINYINT"` //0:Subscribe,1:Staff,2:Creator,3:Maintainer,4:Owner
-	UpdatedAt  int   `xorm:"updated"`
-}
-
-type CircleDataShow struct {
-	Name     string
-	Avatar   string
-	Relation int8
-	Id       int64
-}
-
 type UserDataShowWithPermission struct {
 	Name       string
 	Avatar     string

@@ -28,7 +28,7 @@ const (
 
 func main() {
 	var err error
-	db, err = xorm.NewEngine("postgres", "postgresql://mbe:114514@localhost:5432/dbs?sslmode=disable")
+	db, err = xorm.NewEngine("postgres", "postgresql://postgres:114514@localhost:5432/dbs?sslmode=disable")
 	if err != nil {
 		panic(err) //连接失败不会在这里挂
 	}
@@ -37,7 +37,6 @@ func main() {
 		&VideoNeedToCheck{}, &Video{}, &VideoPlayedRecord{},
 		&VideoComment{}, &VideoCommentReply{}, &VideoCommentEmojiRecord{}, &VideoCommentReplyLikeRecord{},
 		&VideoBullet{},
-		&Circle{}, &MemberOfCircle{}, &ApplyCircle{}, &VoteOfApplyCircle{},
 		&Invitation{}, &Discharge{})
 	db.SetDefaultCacher(caches.NewLRUCacher(caches.NewMemoryStore(), 10000))
 	//上面的是sql
@@ -77,15 +76,11 @@ func main() {
 		group.GET("/coffee", CheckPrivilege(11), coffee)
 		group.GET("/taglist", EnireTag)
 
-		group.GET("/search_users/:name", CheckPrivilege(0), SearchUsers)
-
 		group.POST("/register", Register)
 		group.POST("/logout", QuitLogin)
 		group.POST("/login", Login)
 		group.GET("/refresh", Refresh)
 		group.POST("/clockin", ClockIn)
-
-		group.GET("/check_premission/:cid", CheckPrivilege(0), CheckPremissionOfCircle)
 
 		group.POST("/new_tag", CheckPrivilege(10), NewTag)
 		//video
@@ -107,32 +102,15 @@ func main() {
 		//change user information
 		group.POST("/change_avatar", CheckPrivilege(0), ChangeAvatar)
 		group.POST("/change_name", CheckPrivilege(1), ChangeName)
-		//circle
-		group.POST("/apply_circle", CheckPrivilege(0), PostCircleApplication)
-		group.GET("/get_available_circle/:type", CheckPrivilege(0), CheckAvailableCircle)
-		group.GET("/get_circle/:id", GetCircle)
-		group.GET("/get_circle_joined", CheckPrivilege(0), GetCircleJoined)
-		group.GET("/get_circle_subscribed", CheckPrivilege(0), GetCirclesSubscribed)
-		group.POST("/subscribe", CheckPrivilege(0), SubscribeCircle)
-		//circle manage
-		group.GET("/get_circle_members/:cid", CheckPrivilege(0), GetAllMembersOfCircle)
-		group.POST("/invite_new_member", CheckPrivilege(0), InviteMember)
 		//search
 		group.POST("/search_video", SearchVideos)
-		//token
-		group.GET("/get_PICUI_token", CheckPrivilege(0), GetPICUItoken)
-		//check
-		group.GET("/get_all_circles_needtocheck", CheckPrivilege(10), GetAllCirclesNeedtoCheck)
-		group.POST("/vote_for_circles_needtocheck", CheckPrivilege(10), VoteForCirclesNeedtoCheck)
+
 		group.GET("/get_all_videos_needtocheck", CheckPrivilege(10), GetAllVideoNeedToChenck)
 		group.POST("/pass_video", CheckPrivilege(10), PassVideo)
 		group.POST("/reject_video", CheckPrivilege(10), RejectVideo)
-		//message
-		group.GET("/get_video_subscribed", CheckPrivilege(0), GetVideoSubscribe)
-		group.GET("/get_new_circle_affairs", CheckPrivilege(0), GetCircleAffairs)
-		group.POST("/reply_invitation", CheckPrivilege(0), ReplyInvitation)
-		group.GET("/get_check_messages", CheckPrivilege(0), GetCheckMessage)
+
 	}
+	
 	r2 := gin.New()
 	r2.Use(gin.LoggerWithFormatter(defaultLogFormatter), gin.Recovery())
 	r2.GET("/", func(c *gin.Context) {
@@ -153,7 +131,8 @@ func main() {
 			log.Fatalf("listen: %s\n", err)
 		}
 	}()
-	quit := make(chan os.Signal)
+
+	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt)
 	<-quit //等待信号,阻塞
 
