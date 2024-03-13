@@ -70,23 +70,21 @@ func main() {
 	r.Use(gin.LoggerWithFormatter(defaultLogFormatter), gin.Recovery(), sessions.Sessions("session", store))
 	group := r.Group("/api")
 	{
+		group.GET("/coffee", CheckPrivilege(11), coffee)
 		group.GET("/user_status", GetSelfUserData)
 		group.GET("/user_status/:id", GetUserData)
-
-		group.GET("/coffee", CheckPrivilege(11), coffee)
-		group.GET("/taglist", EnireTag)
 
 		group.POST("/register", Register)
 		group.POST("/logout", QuitLogin)
 		group.POST("/login", Login)
-		group.GET("/refresh", Refresh)
-		group.POST("/clockin", ClockIn)
 
+		group.POST("/upload_img", PostImg)
+
+		group.GET("/taglist", EnireTag)
 		group.POST("/new_tag", CheckPrivilege(10), NewTag)
 		//video
 		group.GET("/get_video/:id", GetVideo)
 		group.POST("/upload_video", CheckPrivilege(0), PostVideo)
-		group.GET("/get_all_videos", GetAllVideos)
 		group.GET("/get_video_tags/:id", GetVideoTags)
 		//comment
 		group.GET("/video_comment/:id/:pg", BrowseVideoComments)
@@ -110,12 +108,14 @@ func main() {
 		group.POST("/reject_video", CheckPrivilege(10), RejectVideo)
 
 	}
-	
+
 	r2 := gin.New()
 	r2.Use(gin.LoggerWithFormatter(defaultLogFormatter), gin.Recovery())
 	r2.GET("/", func(c *gin.Context) {
 		c.Redirect(http.StatusMovedPermanently, "http://www.google.com/")
 	})
+
+	test()
 
 	//  https://gin-gonic.com/zh-cn/docs/examples/graceful-restart-or-stop/
 	mux := http.NewServeMux()
@@ -144,6 +144,7 @@ func main() {
 		log.Fatal("服务器关闭错误(不用管):", err)
 	}
 	log.Println("服务器关闭")
+
 }
 
 func coffee(c *gin.Context) { //没有人能拒绝愚人节彩蛋

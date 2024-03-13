@@ -25,11 +25,4 @@ debug.log
 #.hintrc Vscode Setting file
 .hintrc
 
-#数据库就别上传了
-*.db
-*.sqlite3
-/temporary
-/temp
-
-#token
-token.go
+/img

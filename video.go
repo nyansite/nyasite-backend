@@ -16,7 +16,7 @@ func GetVideo(c *gin.Context) {
 	vVid, _ := strconv.Atoi(strVid)
 	var video Video
 	exist, _ := db.ID(vVid).Get(&video)
-	if exist == false {
+	if !exist{
 		c.AbortWithStatus(http.StatusNotFound)
 	}
 	//获取路径
@@ -130,25 +130,4 @@ func GetVideoTags(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"tags": tagsDisplay,
 	})
-}
-
-//获取所有视频
-
-func GetAllVideos(c *gin.Context) {
-	var videos []Video
-	var videosDisplay []gin.H
-	err := db.Desc("id").Find(&videos)
-	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-	var author UserDataShow
-	for _, i := range videos {
-		author = DBGetUserDataShow(i.Author)
-		videosDisplay = append(videosDisplay, gin.H{
-			"id":     i.Id,
-			"author": author,
-			"cover":  i.CoverPath,
-		})
-	}
 }

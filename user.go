@@ -82,7 +82,7 @@ func Login(c *gin.Context) {
 		return
 	}
 	var user User
-	if has, _ := db.Where("Name = ? OR Email = ?", username, username).Get(&user); has == false { //用户不存在
+	if has, _ := db.Where("Name = ? OR Email = ?", username, username).Get(&user); !has{ //用户不存在
 		c.Status(StatusUserNameNotExist)
 		return
 	}
@@ -115,11 +115,11 @@ func Register(c *gin.Context) {
 	}
 	//上面判断输入是否合法,下面判断用户是否已经存在
 
-	if has, _ := db.Exist(&User{Name: username}); has == true {
+	if has, _ := db.Exist(&User{Name: username}); has{
 		c.AbortWithStatus(StatusRepeatUserName)
 		return
 	}
-	if has, _ := db.Exist(&User{Email: mail}); has == true {
+	if has, _ := db.Exist(&User{Email: mail}); has{
 		c.AbortWithStatus(StatusRepeatEmail)
 		return
 	}
@@ -132,49 +132,6 @@ func Register(c *gin.Context) {
 	c.AbortWithStatus(http.StatusOK)
 }
 
-func Refresh(c *gin.Context) {
-	session := sessions.Default(c)
-	userid := session.Get("userid")
-	is_login, _ := c.Cookie("is_login")
-	if is_login != "true" {
-		c.AbortWithStatus(http.StatusUnauthorized)
-		return
-	}
-	var user User
-	if has, _ := db.ID(int(userid.(int64))).Get(&user); has == false { //用户不存在
-		c.SetCookie("token", "", -1, "/", "", true, true)
-		c.SetCookie("is_login", "false", -1, "/", "", true, true)
-		c.AbortWithStatus(http.StatusBadRequest)
-		return
-	}
-	if string(session.Get("pwd-8").([]byte)) != string(user.Passwd[:8]) {
-		c.SetCookie("token", "", -1, "/", "", true, true)
-		c.SetCookie("is_login", "false", -1, "/", "", true, true)
-		c.AbortWithStatus(http.StatusBadRequest)
-		return
-	}
-	session.Flashes() //重新set cookie,使得cookie生命周期重置,但是值不会重置
-	session.Save()
-	//刷新jwt
-	tokenString := reloadJWT(user)
-	c.SetCookie("token", tokenString, 1200000, "/", "", true, true)
-	c.SetCookie("is_login", "true", 1200000, "/", "", true, true)
-	return
-}
-
-func ClockIn(c *gin.Context) {
-	userid := GetUserIdWithoutCheck(c)
-	timezoneStr := c.PostForm("timezone")
-	timezone, _ := strconv.Atoi(timezoneStr)
-	var user User
-	db.ID(userid).Get(&user)
-	//不在同一天不是一个整数
-	if (int((int(time.Now().Unix())+timezone)/86400) - int((user.LTC+timezone)/86400)) >= 1 {
-		user.Level = user.Level + 1
-		user.LTC = int(time.Now().Unix())
-		db.ID(userid).Update(&user)
-	}
-}
 
 func encrypt_passwd(passwds string) []byte { //加密密码,带盐
 	salte, _ := rand.Prime(rand.Reader, 64) //普普通通的64位盐,8字节
@@ -249,7 +206,6 @@ func ChangeAvatar(c *gin.Context) {
 	db.ID(uauthor).Get(&user)
 	user.Avatar = avatar
 	db.ID(uauthor).Update(&user)
-	return
 }
 
 func ChangeName(c *gin.Context) {
@@ -260,5 +216,4 @@ func ChangeName(c *gin.Context) {
 	user.Name = name
 	user.Level = user.Level - 8
 	db.ID(uauthor).Update(&user)
-	return
 }
