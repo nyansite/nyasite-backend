@@ -139,6 +139,7 @@ func PassVideo(c *gin.Context) {
 
 func RejectVideo(c *gin.Context) {
 	videoNeedToCheckId := c.PostForm("vcid")
+	reason := c.PostForm("reason")
 	vcidNumber, _ := strconv.Atoi(videoNeedToCheckId)
 	var videoNeedToCheck VideoNeedToCheck
 	_, err := db.ID(vcidNumber).Get(&videoNeedToCheck)
@@ -146,7 +147,8 @@ func RejectVideo(c *gin.Context) {
 		c.AbortWithError(http.StatusInternalServerError, err)
 	}
 	videoNeedToCheck.Stauts = true
-	_, err1 := db.ID(vcidNumber).Cols("stauts").Update(&videoNeedToCheck)
+	videoNeedToCheck.Reason = reason
+	_, err1 := db.ID(vcidNumber).Cols("stauts").Cols("reason").Update(&videoNeedToCheck)
 	if err1 != nil {
 		c.AbortWithError(http.StatusInternalServerError, err1)
 	}

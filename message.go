@@ -185,6 +185,8 @@ func GetCheckMessage(c *gin.Context) {
 			message.Name = j2.Title
 			message.Kind = 1
 			message.Time = j2.UpdatedAt
+			message.Reason = j2.Reason
+			message.DBId = int(j2.Id)
 			messages = append(messages, message)
 		}
 
@@ -218,4 +220,10 @@ func GetCheckMessage(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"messages": messages,
 	})
+}
+
+func DeleteVideoNeedToCheck(c *gin.Context) {
+	vcid := c.PostForm("id")
+	db.ID(vcid).Delete(&VideoNeedToCheck{})
+	return
 }

@@ -139,6 +139,7 @@ type VideoNeedToCheck struct {
 	Author      int `xorm:"index"`
 	Upid        int //上传用户
 	Stauts      bool
+	Reason      string
 	ModelLight  `xorm:"extends"`
 }
 
@@ -271,8 +272,10 @@ type CircleAffairMessage struct {
 type CheckMessage struct {
 	Kind uint8
 	//0:pass video 1.reject video 3.pass circle 4.reject circle
-	Name  string
-	Image string
-	Time  int
-	Id    int
+	Name   string
+	Reason string
+	DBId   int //Actual id in database
+	Image  string
+	Time   int
+	Id     int //Key for rendering list
 }

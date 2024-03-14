@@ -132,6 +132,7 @@ func main() {
 		group.GET("/get_new_circle_affairs", CheckPrivilege(0), GetCircleAffairs)
 		group.POST("/reply_invitation", CheckPrivilege(0), ReplyInvitation)
 		group.GET("/get_check_messages", CheckPrivilege(0), GetCheckMessage)
+		group.POST("/delete_video_need_to_check", CheckPrivilege(0), DeleteVideoNeedToCheck)
 	}
 	r2 := gin.New()
 	r2.Use(gin.LoggerWithFormatter(defaultLogFormatter), gin.Recovery())
