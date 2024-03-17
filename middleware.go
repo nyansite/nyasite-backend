@@ -2,11 +2,11 @@ package main
 
 import (
 	"fmt"
-	"net/http"
-	"time"
-
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"log"
+	"net/http"
+	"time"
 )
 
 func CheckPrivilege(level uint8) gin.HandlerFunc {
@@ -19,7 +19,7 @@ func CheckPrivilege(level uint8) gin.HandlerFunc {
 		}
 		userid := session.Get("userid")
 		var user User
-		if has, _ := db.ID(userid).Get(&user); !has{ //用户不存在
+		if has, _ := db.ID(userid).Get(&user); !has { //用户不存在
 			ctx.AbortWithStatus(http.StatusBadRequest)
 			return
 		}
@@ -32,6 +32,7 @@ func CheckPrivilege(level uint8) gin.HandlerFunc {
 			ctx.AbortWithStatus(http.StatusForbidden) //403
 			return
 		}
+		ctx.Next()
 	}
 }
 
@@ -56,4 +57,18 @@ var defaultLogFormatter = func(param gin.LogFormatterParams) string {
 		param.Request.Host+param.Path, //加上了host
 		param.ErrorMessage,
 	)
+}
+
+// 限制请求大小(不是文件大小),能够节约cpu,似乎并不能节约网络
+func LimitRequestBody(maxSize int64) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, maxSize) //创建reader并不会立即读取,读取是 reader.Read() 或其他
+		err := c.Request.ParseMultipartForm(maxSize)//尝试读取Request.Body
+		if err != nil {
+			log.Println(err)
+			c.AbortWithStatus(http.StatusRequestEntityTooLarge)
+			return
+		}
+		c.Next()
+	}
 }

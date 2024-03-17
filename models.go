@@ -178,7 +178,7 @@ type VideoTranscode struct {
 // Session的密钥
 type SessionSecret struct {
 	CreatedAt      int64 `xorm:"created unique pk"` //没错芝士主键
-	Authentication []byte
+	Authentication []byte	//非对称加密需要成对密钥
 	Encryption     []byte
 }
 

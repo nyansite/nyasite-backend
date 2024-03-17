@@ -38,7 +38,7 @@ func main() {
 		&VideoComment{}, &VideoCommentReply{}, &VideoCommentEmojiRecord{}, &VideoCommentReplyLikeRecord{},
 		&VideoBullet{},
 		&Invitation{}, &Discharge{})
-	db.SetDefaultCacher(caches.NewLRUCacher(caches.NewMemoryStore(), 10000))
+	db.SetDefaultCacher(caches.NewLRUCacher(caches.NewMemoryStore(), 100000))
 	//上面的是sql
 
 	// config := cors.DefaultConfig()
@@ -50,24 +50,30 @@ func main() {
 	s1, _ := rand.Prime(rand.Reader, 256) //最多32字节,也就是256
 	s2, _ := rand.Prime(rand.Reader, 256)
 	secrets = append(secrets, s1.Bytes(), s2.Bytes())
+
+	//大概需要平均每个TTL周期重启一次,因为我懒得拉一个goroutine //TODO 自动更新密钥
 	db.Where("created_at < ?", time.Now().Unix()-TTL).Delete(&SessionSecret{})  //删除过期
 	err = db.Where("created_at >= ?", time.Now().Unix()-TTL).Find(&old_secrets) //没过期的取出来
 	if err != nil {
 		panic("我数据库呢???我那么大一个数据库呢???还我数据库!!!") //数据库连不上会在这里挂,而不是上面
 	}
-	db.Insert(&SessionSecret{Authentication: s1.Bytes(), Encryption: s2.Bytes()}) //新密钥进数据库,避免kill 9
+	db.Insert(&SessionSecret{Authentication: s1.Bytes(), Encryption: s2.Bytes()}) //新密钥进数据库,不用defer避免kill 9
 	for _, v := range old_secrets {
 		secrets = append(secrets, v.Authentication, v.Encryption)
 	}
 	store := cookie.NewStore(secrets...) //密钥成对定义以允许密钥轮换.使用新的密钥加密但是旧的仍然有效
 	store.Options(sessions.Options{
-		Secure:   true, //跟下面那条基本上可以防住csrf了,但是还是稳一点好
+		Secure:   true, //跟下面那条基本上可以防住csrf了,但是还是稳一点好 //TODO 更靠谱的csrf防护
 		HttpOnly: true, //localhost或者https
 		Path:     "/",
 		MaxAge:   TTL,
 		SameSite: http.SameSiteStrictMode})
+
+	//下面是路由
 	r := gin.New()
-	r.Use(gin.LoggerWithFormatter(defaultLogFormatter), gin.Recovery(), sessions.Sessions("session", store))
+	r.Use(gin.LoggerWithFormatter(defaultLogFormatter), gin.Recovery())
+	r.Use(sessions.Sessions("session", store))
+	r.MaxMultipartMemory = 8 << 20 //8mb,默认32,限制每个请求的内存占用,但是不会影响接收大文件
 	group := r.Group("/api")
 	{
 		group.GET("/coffee", CheckPrivilege(11), coffee)
@@ -109,21 +115,10 @@ func main() {
 
 	}
 
-	r2 := gin.New()
-	r2.Use(gin.LoggerWithFormatter(defaultLogFormatter), gin.Recovery())
-	r2.GET("/", func(c *gin.Context) {
-		c.Redirect(http.StatusMovedPermanently, "http://www.google.com/")
-	})
-
-	test()
-
 	//  https://gin-gonic.com/zh-cn/docs/examples/graceful-restart-or-stop/
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", r.ServeHTTP)
-	mux.HandleFunc("baka.localhost/", r2.ServeHTTP) //改host欸
 	srv := &http.Server{
 		Addr:    ":8000",
-		Handler: mux,
+		Handler: r,
 	}
 	go func() {
 		log.Println("服务器启动")
