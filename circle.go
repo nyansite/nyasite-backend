@@ -176,6 +176,43 @@ func GetCircle(c *gin.Context) {
 	})
 }
 
+func GetVideosOfCircle(c *gin.Context) {
+	strId := c.Param("id")
+	strPage := c.Param("page")
+	strMethod := c.Param("method")
+	id, _ := strconv.Atoi(strId)
+	page, _ := strconv.Atoi(strPage)
+	method, err := strconv.Atoi(strMethod)
+	if err != nil {
+		method = 0
+	}
+	var videos []Video
+	var videosReturn []VideoReturn
+	var count int64
+	switch method {
+	case 0:
+		count, _ = db.In("author", id).Limit(20, (page-1)*20).Desc("id").FindAndCount(&videos)
+	case 1:
+		count, _ = db.In("author", id).Limit(20, (page-1)*20).Asc("views").FindAndCount(&videos)
+	default:
+		c.AbortWithStatus(http.StatusBadRequest)
+	}
+	for _, i := range videos {
+		var videoReturn VideoReturn
+		videoReturn.CoverPath = i.CoverPath
+		videoReturn.CreatedAt = i.CreatedAt
+		videoReturn.Id = i.Id
+		videoReturn.Likes = i.Likes
+		videoReturn.Title = i.Title
+		videoReturn.Views = i.Views
+		videosReturn = append(videosReturn, videoReturn)
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"count":   count,
+		"content": videosReturn,
+	})
+}
+
 func DBGetMembersOfCircle(cid int) []UserDataShow {
 	var members []MemberOfCircle
 	var membersDisplay []UserDataShow

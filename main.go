@@ -114,6 +114,7 @@ func main() {
 		group.GET("/get_circle_joined", CheckPrivilege(0), GetCircleJoined)
 		group.GET("/get_circle_subscribed", CheckPrivilege(0), GetCirclesSubscribed)
 		group.POST("/subscribe", CheckPrivilege(0), SubscribeCircle)
+		group.GET("/get_circle_video/:id/:page/:method", GetVideosOfCircle)
 		//circle manage
 		group.GET("/get_circle_members/:cid", CheckPrivilege(0), GetAllMembersOfCircle)
 		group.POST("/invite_new_member", CheckPrivilege(0), InviteMember)
