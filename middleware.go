@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
-	"log"
 	"net/http"
 	"time"
 )
@@ -19,11 +18,11 @@ func CheckPrivilege(level uint8) gin.HandlerFunc {
 		}
 		userid := session.Get("userid")
 		var user User
-		if has, _ := db.ID(userid).Get(&user); !has { //用户不存在
-			ctx.AbortWithStatus(http.StatusBadRequest)
+		if has, _ := db.ID(userid).Get(&user); !has { //用户不存在,可能是由于账户被删除
+			ctx.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
-		if session.Get("pwd-8") != string(user.Passwd[:8]) {
+		if session.Get("pwd-8") != string(user.Passwd[:8]) {//确保改密码会导致所有登陆设备登陆失败
 			ctx.AbortWithStatus(http.StatusBadRequest)
 			return
 		}
@@ -63,9 +62,8 @@ var defaultLogFormatter = func(param gin.LogFormatterParams) string {
 func LimitRequestBody(maxSize int64) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, maxSize) //创建reader并不会立即读取,读取是 reader.Read() 或其他
-		err := c.Request.ParseMultipartForm(maxSize)//尝试读取Request.Body
+		err := c.Request.ParseMultipartForm(maxSize)                            //尝试读取Request.Body
 		if err != nil {
-			log.Println(err)
 			c.AbortWithStatus(http.StatusRequestEntityTooLarge)
 			return
 		}

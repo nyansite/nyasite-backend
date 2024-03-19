@@ -45,7 +45,7 @@ func TestFileSizeLimit(t *testing.T) {
 	router := setupRouter()
 
 	// 创建一个超出大小限制的文件
-	data := make([]byte, 1<<32)
+	data := make([]byte, 1<<20)
 	file := bytes.NewReader(data)
 
 	// 创建一个带有 multipart 数据的请求

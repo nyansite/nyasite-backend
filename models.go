@@ -8,15 +8,6 @@ import (
 	_ "xorm.io/xorm"
 )
 
-const (
-	StatusRepeatUserName   int = 601
-	StatusRepeatEmail      int = 602
-	StatusUserNameNotExist int = 611
-	StatusPasswordError    int = 612
-	StatusAlreadyLogin     int = 613
-	StatusRepeatTag        int = 621
-)
-
 type Model struct {
 	Id        int64 //xorm自动主键
 	CreatedAt int   `xorm:"created"` //使用时间戳而非time.time(字符串)
@@ -36,8 +27,6 @@ type User struct {
 	Email  string `xorm:"unique"`
 	Avatar string
 	Level  uint8 `xorm:"TINYINT default 0"` //4位权限4位等级,所以满级15(要不了这么多)
-	LTCM   int   //LastTimeCheckMessage
-	LTC    int   //LastTimeClockIn
 	Model  `xorm:"extends"`
 }
 

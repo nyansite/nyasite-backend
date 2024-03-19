@@ -81,22 +81,21 @@ func main() {
 		group.GET("/user_status/:id", GetUserData)
 
 		group.POST("/register", Register)
-		group.POST("/logout", QuitLogin)
 		group.POST("/login", Login)
 
-		group.POST("/upload_img", PostImg)
+		group.POST("/upload_img", LimitRequestBody(2<<20), PostImg)
 
 		group.GET("/taglist", EnireTag)
-		group.POST("/new_tag", CheckPrivilege(10), NewTag)
+		group.POST("/new_tag", CheckPrivilege(3), NewTag)
 		//video
 		group.GET("/get_video/:id", GetVideo)
-		group.POST("/upload_video", CheckPrivilege(0), PostVideo)
+		group.POST("/upload_video", CheckPrivilege(1), PostVideo)
 		group.GET("/get_video_tags/:id", GetVideoTags)
 		//comment
 		group.GET("/video_comment/:id/:pg", BrowseVideoComments)
 		group.GET("/video_comment_reply/:id", BrowseVideoCommentReplies)
-		group.POST("/add_video_comment", CheckPrivilege(0), AddVideoComment)
-		group.POST("/add_video_comment_reply", CheckPrivilege(0), AddVideoCommentReply)
+		group.POST("/add_video_comment", CheckPrivilege(1), AddVideoComment)
+		group.POST("/add_video_comment_reply", CheckPrivilege(1), AddVideoCommentReply)
 		group.POST("/click_comment_emoji", ClikckCommentEmoji)
 		group.POST("/click_commentreply_like", ClickCommentReplyLike)
 		group.POST("/add_video_tag", CheckPrivilege(10), AddVideoTag)

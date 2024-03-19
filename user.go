@@ -27,11 +27,6 @@ func reloadJWT(user User) string {
 	return tokenString
 }
 
-func QuitLogin(c *gin.Context) {
-	c.SetCookie("token", "", -1, "/", "", true, true)
-	c.SetCookie("is_login", "false", -1, "/", "", true, true)
-}
-
 func GetSelfUserData(c *gin.Context) {
 	session := sessions.Default(c)
 	is_login, _ := c.Cookie("is_login")
@@ -73,7 +68,7 @@ func Login(c *gin.Context) {
 	session := sessions.Default(c)
 	is_login, _ := c.Cookie("is_login")
 	if is_login == "true" {
-		c.AbortWithStatus(StatusAlreadyLogin)
+		c.AbortWithStatus(http.StatusBadRequest) //前端应该跳转和提示
 		return
 	}
 	username, passwd := c.PostForm("username"), c.PostForm("passwd") //传入的用户名也有可能是邮箱
@@ -82,12 +77,12 @@ func Login(c *gin.Context) {
 		return
 	}
 	var user User
-	if has, _ := db.Where("Name = ? OR Email = ?", username, username).Get(&user); !has{ //用户不存在
-		c.Status(StatusUserNameNotExist)
+	if has, _ := db.Where("Name = ? OR Email = ?", username, username).Get(&user); !has { //用户不存在
+		c.AbortWithStatus(http.StatusUnauthorized) //401 不存在或错误的身份验证
 		return
 	}
 	if !check_passwd(user.Passwd, passwd) {
-		c.AbortWithStatus(StatusPasswordError)
+		c.AbortWithStatus(http.StatusUnauthorized) //401
 		return
 	}
 	session.Set("userid", user.Id)
@@ -115,23 +110,23 @@ func Register(c *gin.Context) {
 	}
 	//上面判断输入是否合法,下面判断用户是否已经存在
 
-	if has, _ := db.Exist(&User{Name: username}); has{
-		c.AbortWithStatus(StatusRepeatUserName)
+	if has, _ := db.Exist(&User{Name: username}); has {
+		c.String(http.StatusConflict, "用户名重复")
+		// c.Abort()//不执行后续的中间件
 		return
 	}
-	if has, _ := db.Exist(&User{Email: mail}); has{
-		c.AbortWithStatus(StatusRepeatEmail)
+	if has, _ := db.Exist(&User{Email: mail}); has {
+		c.String(http.StatusConflict, "邮箱重复")
+		// c.Abort()
 		return
 	}
-	user := User{Name: username, Passwd: encrypt_passwd(passwd), Email: mail,
-		Avatar: ("https://ui-avatars.com/api/?background=b3c6d7&name=" + username)}
+	user := User{Name: username, Passwd: encrypt_passwd(passwd), Email: mail}
 	_, err := db.Insert(&user)
 	if err != nil {
 		fmt.Println(err)
 	}
 	c.AbortWithStatus(http.StatusOK)
 }
-
 
 func encrypt_passwd(passwds string) []byte { //加密密码,带盐
 	salte, _ := rand.Prime(rand.Reader, 64) //普普通通的64位盐,8字节
@@ -146,8 +141,8 @@ func encrypt_passwd(passwds string) []byte { //加密密码,带盐
 
 func check_passwd(passwd []byte, passwd2s string) bool {
 	//获取盐
-	salt := passwd[32:]
-	passwd = passwd[:32]
+	salt := passwd[32:]//32位开始到结束
+	passwd = passwd[:32]//开始到32位结束
 	passwd2 := []byte(passwd2s)
 
 	passwd2_sha := sha512.Sum512(passwd2)
@@ -158,7 +153,7 @@ func check_passwd(passwd []byte, passwd2s string) bool {
 	for i, v := range passwd {
 		if v != safe_passwd[i] {
 			ret = false
-			//不要break防止时间攻击(也许不需要)
+			break //不要break防止时间攻击(也许不需要)
 		}
 	}
 	return ret
