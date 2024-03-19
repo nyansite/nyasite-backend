@@ -86,7 +86,7 @@ func Login(c *gin.Context) {
 		return
 	}
 	session.Set("userid", user.Id)
-	session.Set("pwd-8", user.Passwd[:8]) //更改密码后其他已登录设备会退出
+	session.Set("pwd-8", user.Passwd[:8]) //高8位,更改密码后其他已登录设备会退出
 	session.Save()
 	//刷新jwt
 	tokenString := reloadJWT(user)
