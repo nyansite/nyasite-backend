@@ -118,6 +118,8 @@ func main() {
 		//circle manage
 		group.GET("/get_circle_members/:cid", CheckPrivilege(0), GetAllMembersOfCircle)
 		group.POST("/invite_new_member", CheckPrivilege(0), InviteMember)
+		group.POST("/kick_out", CheckPrivilege(0), KickOut)
+		group.POST("/delete_video", CheckPrivilege(0), DeleteVideo)
 		//search
 		group.POST("/search_video", SearchVideos)
 		//token

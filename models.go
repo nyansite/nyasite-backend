@@ -155,13 +155,14 @@ type VideoPlayedRecord struct {
 }
 
 type VideoReturn struct {
-	Id        int64
-	CoverPath string
-	Title     string
-	Author    SearchCircleReturn
-	Views     int
-	Likes     int
-	CreatedAt int
+	Id         int64
+	CoverPath  string
+	Title      string
+	Author     SearchCircleReturn
+	Views      int
+	Likes      int
+	SelfUpload bool
+	CreatedAt  int
 }
 
 // 视频站评论部分

@@ -183,6 +183,7 @@ func GetVideosOfCircle(c *gin.Context) {
 	id, _ := strconv.Atoi(strId)
 	page, _ := strconv.Atoi(strPage)
 	method, err := strconv.Atoi(strMethod)
+	uid := GetUserIdWithCheck(c)
 	if err != nil {
 		method = 0
 	}
@@ -205,6 +206,7 @@ func GetVideosOfCircle(c *gin.Context) {
 		videoReturn.Likes = i.Likes
 		videoReturn.Title = i.Title
 		videoReturn.Views = i.Views
+		videoReturn.SelfUpload = (uid == i.Upid)
 		videosReturn = append(videosReturn, videoReturn)
 	}
 	c.JSON(http.StatusOK, gin.H{

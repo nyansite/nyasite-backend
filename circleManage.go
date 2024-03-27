@@ -118,3 +118,57 @@ func InviteMember(c *gin.Context) {
 		return
 	}
 }
+
+func KickOut(c *gin.Context) {
+	selfId := GetUserIdWithoutCheck(c)
+	strUid := c.PostForm("uid")
+	strCid := c.PostForm("cid")
+	cid, _ := strconv.Atoi(strCid)
+	uid, _ := strconv.Atoi(strUid)
+	var memberKickedOut MemberOfCircle
+	var memberSelf MemberOfCircle
+	db.Where("uid = ? and cid = ?", uid, cid).Get(&memberKickedOut)
+	db.Where("uid = ? and cid = ?", selfId, cid).Get(&memberSelf)
+	if (uid == 0) && (memberSelf.Permission != 4) {
+		db.Where("uid = ? and cid = ?", selfId, cid).Delete(&MemberOfCircle{})
+		kickOutRecord := Discharge{
+			WhoDischarge:     selfId,
+			WhoBeDischargeed: selfId,
+			Circle:           cid,
+		}
+		db.InsertOne(&kickOutRecord)
+		return
+	} else if ((memberSelf.Permission == 4) && (memberKickedOut.Permission <= 3) && (uid != 0)) ||
+		((memberSelf.Permission == 3) && (memberKickedOut.Permission <= 2)) {
+		db.Where("uid = ? and cid = ?", uid, cid).Delete(&MemberOfCircle{})
+		kickOutRecord := Discharge{
+			WhoDischarge:     selfId,
+			WhoBeDischargeed: uid,
+			Circle:           cid,
+		}
+		db.InsertOne(&kickOutRecord)
+		return
+	} else {
+		c.AbortWithStatus(http.StatusForbidden)
+	}
+}
+
+func DeleteVideo(c *gin.Context) {
+	vidStr := c.PostForm("vid")
+	vid, _ := strconv.Atoi(vidStr)
+	userid := GetUserIdWithoutCheck(c)
+	var video Video
+	db.ID(vid).Get(&video)
+	if video.Upid == userid {
+		db.ID(vid).Delete(&Video{})
+		return
+	} else {
+		var memberOfCircle MemberOfCircle
+		db.Where("uid = ? and cid = ?", userid, video.Author).Get(&memberOfCircle)
+		if memberOfCircle.Permission >= 3 {
+			db.ID(vid).Delete(&Video{})
+		} else {
+			c.AbortWithStatus(http.StatusForbidden)
+		}
+	}
+}
