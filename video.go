@@ -38,6 +38,24 @@ func GetVideo(c *gin.Context) {
 	})
 }
 
+//视频点赞
+
+func LikeVideo(c *gin.Context) {
+	strVid := c.PostForm("vid")
+	uid := GetUserIdWithoutCheck(c)
+	has, _ := db.In("author", uid).In("vid", strVid).Count(&VideoLikeRecord{})
+	if has != 0 {
+		db.In("author", uid).In("vid", strVid).Delete(&VideoLikeRecord{})
+	} else {
+		vid, _ := strconv.Atoi(strVid)
+		videoLike := VideoLikeRecord{
+			Author: uid,
+			Vid:    vid,
+		}
+		db.InsertOne(&videoLike)
+	}
+}
+
 //记录视频播放
 
 func RecordVideoPlay(vid int, uid int) {

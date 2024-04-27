@@ -34,7 +34,7 @@ func main() {
 	}
 
 	db.Sync(&User{}, &Tag{}, &TagModel{}, &SessionSecret{},
-		&VideoNeedToCheck{}, &Video{}, &VideoPlayedRecord{},
+		&VideoNeedToCheck{}, &Video{}, &VideoPlayedRecord{}, &VideoLikeRecord{},
 		&VideoComment{}, &VideoCommentReply{}, &VideoCommentEmojiRecord{}, &VideoCommentReplyLikeRecord{},
 		&VideoBullet{},
 		&Circle{}, &MemberOfCircle{}, &ApplyCircle{}, &VoteOfApplyCircle{},
@@ -93,6 +93,7 @@ func main() {
 		group.POST("/upload_video", CheckPrivilege(0), PostVideo)
 		group.GET("/get_all_videos", GetAllVideos)
 		group.GET("/get_video_tags/:id", GetVideoTags)
+		group.POST("/like_video", CheckPrivilege(0), LikeVideo)
 		//comment
 		group.GET("/video_comment/:id/:pg", BrowseVideoComments)
 		group.GET("/video_comment_reply/:id", BrowseVideoCommentReplies)
