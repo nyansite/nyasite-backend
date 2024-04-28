@@ -11,7 +11,7 @@ import (
 //视频返回
 
 func GetVideo(c *gin.Context) {
-	userid := GetUserIdWithoutCheck(c)
+	userid := GetUserIdWithCheck(c)
 	strVid := c.Param("id")
 	vVid, _ := strconv.Atoi(strVid)
 	var video Video
@@ -23,8 +23,11 @@ func GetVideo(c *gin.Context) {
 	//test data
 	videoPath := "https://customer-f33zs165nr7gyfy4.cloudflarestream.com/6b9e68b07dfee8cc2d116e4c51d6a957/manifest/video.m3u8"
 	//获取作者
-	author := DBGetCircleDataShow(int(video.Id))
+	author := DBGetCircleDataShow(vVid)
 	author.Relation = DBgetRelationToCircle(int(author.Id), c)
+	//获取是否点赞
+	var like VideoLikeRecord
+	isliked, _ := db.In("vid", vVid).In("author", userid).Exist(&like)
 	//刷新历史记录
 	RecordVideoPlay(vVid, userid)
 	c.JSON(http.StatusOK, gin.H{
@@ -35,6 +38,7 @@ func GetVideo(c *gin.Context) {
 		"description": video.Description,
 		"views":       video.Views,
 		"likes":       video.Likes,
+		"isLiked":     isliked,
 	})
 }
 
@@ -43,10 +47,18 @@ func GetVideo(c *gin.Context) {
 func LikeVideo(c *gin.Context) {
 	strVid := c.PostForm("vid")
 	uid := GetUserIdWithoutCheck(c)
-	has, _ := db.In("author", uid).In("vid", strVid).Count(&VideoLikeRecord{})
-	if has != 0 {
+	has, _ := db.In("author", uid).In("vid", strVid).Exist(&VideoLikeRecord{})
+	if has {
+		var video Video
+		db.ID(strVid).Get(&video)
+		video.Likes--
+		db.ID(strVid).Cols("likes").Update(&video)
 		db.In("author", uid).In("vid", strVid).Delete(&VideoLikeRecord{})
 	} else {
+		var video Video
+		db.ID(strVid).Get(&video)
+		video.Likes++
+		db.ID(strVid).Cols("likes").Update(&video)
 		vid, _ := strconv.Atoi(strVid)
 		videoLike := VideoLikeRecord{
 			Author: uid,
@@ -67,7 +79,7 @@ func RecordVideoPlay(vid int, uid int) {
 		if (int(time.Now().Unix()) - videoPlayedRecord.LastPlay) >= 43200 {
 			videoPlayedRecord.LastPlay = int(time.Now().Unix())
 			video.Views++
-			db.In("vid", vid).In("uid", uid).Cols("last_time").Update(&videoPlayedRecord)
+			db.In("vid", vid).In("uid", uid).Cols("last_play").Update(&videoPlayedRecord)
 			db.ID(video.Id).Cols("views").Update(&video)
 		}
 	} else {
@@ -142,7 +154,7 @@ func GetVideoTags(c *gin.Context) {
 		c.AbortWithStatus(http.StatusNotFound)
 		return
 	}
-	db.Where("kind = ? AND pid = ?", 1, id).Find(&tags)
+	db.In("kind", 1).In("pid", id).Find(&tags)
 	var tagModel TagModel
 	var tid int
 	for _, value := range tags {
