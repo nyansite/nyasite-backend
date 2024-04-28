@@ -125,7 +125,7 @@ func Register(c *gin.Context) {
 	}
 	user := User{Name: username, Passwd: encrypt_passwd(passwd), Email: mail,
 		Avatar: ("https://ui-avatars.com/api/?background=b3c6d7&name=" + username)}
-	_, err := db.Insert(&user)
+	_, err := db.InsertOne(&user)
 	if err != nil {
 		fmt.Println(err)
 	}

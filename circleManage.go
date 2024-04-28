@@ -35,11 +35,11 @@ func CheckPremissionOfCircle(c *gin.Context) { //for manage page
 	cid, _ := strconv.Atoi(cidStr)
 	uid := GetUserIdWithoutCheck(c)
 	var memberOfCircle MemberOfCircle
-	has, _ := db.Where("cid = ? and uid = ?", cid, uid).Count(&MemberOfCircle{})
+	has, _ := db.In("cid", cid).In("uid", uid).Count(&MemberOfCircle{})
 	if has == 0 {
 		c.AbortWithStatus(http.StatusForbidden)
 	}
-	db.Where("cid = ? and uid = ?", cid, uid).Get(&memberOfCircle)
+	db.In("cid", cid).In("uid", uid).Get(&memberOfCircle)
 	if memberOfCircle.Permission > 0 {
 		c.String(http.StatusOK, "%v", memberOfCircle.Permission)
 	} else {
@@ -127,10 +127,10 @@ func KickOut(c *gin.Context) {
 	uid, _ := strconv.Atoi(strUid)
 	var memberKickedOut MemberOfCircle
 	var memberSelf MemberOfCircle
-	db.Where("uid = ? and cid = ?", uid, cid).Get(&memberKickedOut)
-	db.Where("uid = ? and cid = ?", selfId, cid).Get(&memberSelf)
+	db.In("uid", uid).In("cid", cid).Get(&memberKickedOut)
+	db.In("uid", selfId).In("cid", cid).Get(&memberSelf)
 	if (uid == 0) && (memberSelf.Permission != 4) {
-		db.Where("uid = ? and cid = ?", selfId, cid).Delete(&MemberOfCircle{})
+		db.In("uid", selfId).In("cid", cid).Delete(&MemberOfCircle{})
 		kickOutRecord := Discharge{
 			WhoDischarge:     selfId,
 			WhoBeDischargeed: selfId,
@@ -140,7 +140,7 @@ func KickOut(c *gin.Context) {
 		return
 	} else if ((memberSelf.Permission == 4) && (memberKickedOut.Permission <= 3) && (uid != 0)) ||
 		((memberSelf.Permission == 3) && (memberKickedOut.Permission <= 2)) {
-		db.Where("uid = ? and cid = ?", uid, cid).Delete(&MemberOfCircle{})
+		db.In("uid", uid).In("cid", cid).Delete(&MemberOfCircle{})
 		kickOutRecord := Discharge{
 			WhoDischarge:     selfId,
 			WhoBeDischargeed: uid,
@@ -164,7 +164,7 @@ func DeleteVideo(c *gin.Context) {
 		return
 	} else {
 		var memberOfCircle MemberOfCircle
-		db.Where("uid = ? and cid = ?", userid, video.Author).Get(&memberOfCircle)
+		db.In("uid", userid).In("cid", video.Author).Get(&memberOfCircle)
 		if memberOfCircle.Permission >= 3 {
 			db.ID(vid).Delete(&Video{})
 		} else {

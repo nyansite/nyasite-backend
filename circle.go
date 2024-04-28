@@ -13,12 +13,12 @@ func GetCirclesSubscribed(c *gin.Context) {
 	userid := GetUserIdWithoutCheck(c)
 	var membersOfCircle []MemberOfCircle
 	var circles []CircleDataShow
-	has, _ := db.Where("permission = 0 and uid = ?", userid).Count(&MemberOfCircle{})
+	has, _ := db.In("permission", 0).In("uid", userid).Count(&MemberOfCircle{})
 	if has == 0 {
 		c.AbortWithStatus(http.StatusNotFound)
 		return
 	}
-	db.Where("permission = 0 and uid = ?", userid).Find(&membersOfCircle)
+	db.In("permission", 0).In("uid", userid).Find(&membersOfCircle)
 	for _, i := range membersOfCircle {
 		circles = append(circles, DBGetCircleDataShow(i.Cid))
 	}
@@ -32,12 +32,12 @@ func GetCircleJoined(c *gin.Context) {
 	userid := GetUserIdWithoutCheck(c)
 	var membersOfCircle []MemberOfCircle
 	var circles []CircleDataShow
-	has, _ := db.Where("permission > 0 and uid = ?", userid).Count(&MemberOfCircle{})
+	has, _ := db.Where("permission > 0").In("uid", userid).Count(&MemberOfCircle{})
 	if has == 0 {
 		c.AbortWithStatus(http.StatusNotFound)
 		return
 	}
-	db.Where("permission > 0 and uid = ?", userid).Find(&membersOfCircle)
+	db.Where("permission > 0").In("uid", userid).Find(&membersOfCircle)
 	for _, i := range membersOfCircle {
 		circle := DBGetCircleDataShow(i.Cid)
 		circles = append(circles, circle)
@@ -66,7 +66,8 @@ func CheckAvailableCircle(c *gin.Context) {
 		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
-	db.Where("uid = ? and permission >= 2", userid).Find(&authorOfCircle)
+
+	db.Where("permission >= 2").In("uid", userid).Find(&authorOfCircle)
 	var circle Circle
 	for _, i := range authorOfCircle {
 		db.ID(i.Cid).Get(&circle)

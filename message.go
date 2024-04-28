@@ -55,8 +55,9 @@ func GetCircleAffairs(c *gin.Context) {
 	var messages []CircleAffairMessage
 	circlesManagedId := DBgetCirclesRelatedTo(userid)
 	for _, i := range circlesManagedId {
+
 		var invitationsCircleUnit []Invitation
-		db.Where("circle = ? and created_at > ?", i, timeLimit).Find(&invitationsCircleUnit)
+		db.In("circle", i).Where("created_at > ?", timeLimit).Find(&invitationsCircleUnit)
 		invitationsCircle = append(invitationsCircle, invitationsCircleUnit...)
 		var membersOfCircle []MemberOfCircle
 		db.Where("cid = ? and uid <> ? and updated_at > ?", i, userid, timeLimit).Find(&membersOfCircle)
@@ -136,14 +137,15 @@ func ReplyInvitation(c *gin.Context) {
 	circleId, _ := strconv.Atoi(circleIdStr)
 	stauts, _ := strconv.ParseBool(stautsStr)
 	var invitation Invitation
-	hasInvitation, _ := db.Where("invitee = ? and circle = ? and stauts = false", inviteeId, circleId).Get(&invitation)
+
+	hasInvitation, _ := db.In("invitee", inviteeId).In("circle", circleId).In("stauts", false).Get(&invitation)
 	if hasInvitation == false {
 		c.AbortWithStatus(http.StatusFailedDependency)
 		return
 	}
 	if stauts {
 		var memberOfCircle MemberOfCircle
-		hasMemberOfCircle, _ := db.Where("uid = ? and cid = ?", inviteeId, circleId).Get(&memberOfCircle)
+		hasMemberOfCircle, _ := db.In("uid", inviteeId).In("cid", circleId).Get(&memberOfCircle)
 		if hasMemberOfCircle == false {
 			memberOfCircle.Uid = inviteeId
 			memberOfCircle.Cid = circleId
@@ -151,12 +153,12 @@ func ReplyInvitation(c *gin.Context) {
 			db.InsertOne(&memberOfCircle)
 		} else {
 			memberOfCircle.Permission = invitation.Kind
-			db.Where("uid = ? and cid = ?", inviteeId, circleId).Cols("permission").Update(&memberOfCircle)
+			db.In("uid", inviteeId).In("cid", circleId).Cols("permission").Update(&memberOfCircle)
 		}
-		db.Where("invitee = ? and circle = ?", inviteeId, circleId).Delete(&Invitation{})
+		db.In("invitee", inviteeId).In("circle", circleId).Delete(&Invitation{})
 	} else {
 		invitation.Stauts = true
-		db.Where("invitee = ? and circle = ?", inviteeId, circleId).Cols("stauts").Update(&invitation)
+		db.In("invitee", inviteeId).In("circle", circleId).Cols("stauts").Update(&invitation)
 	}
 	return
 }

@@ -70,7 +70,7 @@ func BrowseVideoCommentReplies(ctx *gin.Context) {
 		ctx.AbortWithStatus(http.StatusNotFound)
 		return
 	}
-	has1, _ := db.Where("author = ? AND cid = ?", author, comment.Id).Get(&emojiRecord)
+	has1, _ := db.In("author", author).In("cid", comment.Id).Get(&emojiRecord)
 	if !has1 {
 		comment.Choose = 0
 	} else {
@@ -99,7 +99,7 @@ func DBgetVideoComments(vid int, page int, author int) []VideoComment {
 	db.In("vid", vid).Desc("id").Limit(20, (page-1)*20).Find(&comments)
 	for _, i := range comments {
 		var emojiRecord VideoCommentEmojiRecord
-		has, _ := db.Where("author = ? AND cid = ?", author, i.Id).Get(&emojiRecord)
+		has, _ := db.In("author", author).In("cid", i.Id).Get(&emojiRecord)
 		if !has {
 			i.Choose = 0
 		} else {
@@ -117,7 +117,7 @@ func DBgetVideoCommentReplies(cid int, author int) []VideoCommentReply {
 	var commentRepliesReturn []VideoCommentReply
 	db.In("cid", cid).Desc("id").Find(&commentReplies)
 	for _, i := range commentReplies {
-		exist, _ := db.Where("author = ? and crid = ?", author, i.Id).Count(&VideoCommentReplyLikeRecord{})
+		exist, _ := db.In("author", author).In("crid", i.Id).Count(&VideoCommentReplyLikeRecord{})
 		if exist != 0 {
 			i.Like_c = true
 		} else {
@@ -138,7 +138,7 @@ func DBgetVideoCommentRepliesShow(cid int, author int) []VideoCommentReply {
 	var commentRepliesReturn []VideoCommentReply
 	db.In("cid", cid).Desc("id").Limit(3, 0).Find(&commentReplies)
 	for _, i := range commentReplies {
-		exist, _ := db.Where("author = ? AND crid = ?", author, i.Id).Count(&VideoCommentReplyLikeRecord{})
+		exist, _ := db.In("author", author).In("crid", i.Id).Count(&VideoCommentReplyLikeRecord{})
 		if exist != 0 {
 			i.Like_c = true
 		} else {
@@ -163,7 +163,7 @@ func AddVideoComment(ctx *gin.Context) {
 func DBaddVideoComment(vid int, author int, text string) int {
 	comment := VideoComment{Vid: vid, Text: text, Author: author,
 		Like: 1, Dislike: 1, Smile: 1, Celebration: 1, Confused: 1, Heart: 1, Rocket: 1, Eyes: 1}
-	db.Insert(&comment)
+	db.InsertOne(&comment)
 	return int(comment.Id)
 }
 
@@ -179,7 +179,7 @@ func AddVideoCommentReply(ctx *gin.Context) {
 
 func DBaddVideoCommentReply(cid int, author int, text string) int {
 	commentReply := VideoCommentReply{Cid: cid, Text: text, Author: author, Likes: 1}
-	db.Insert(&commentReply)
+	db.InsertOne(&commentReply)
 	return int(commentReply.Id)
 }
 
@@ -189,7 +189,7 @@ func ClikckCommentEmoji(ctx *gin.Context) {
 	vemoji, _ := strconv.Atoi(emoji)
 	uemoji := int8(vemoji)
 	vcid, _ := strconv.Atoi(cid)
-	exist, _ := db.Where("author = ? and cid = ?", uauthor, cid).Count(&VideoCommentEmojiRecord{})
+	exist, _ := db.In("author", uauthor).In("cid", cid).Count(&VideoCommentEmojiRecord{})
 	if vemoji > 8 || vemoji < 1 {
 		ctx.AbortWithStatus(http.StatusBadRequest) //传入的表情编号>7(不存在)
 		return
@@ -232,7 +232,7 @@ func DBaddCommentEmoji(cid int, emoji int8, author int) {
 		comment.Eyes++
 	}
 	emojiRecord := VideoCommentEmojiRecord{Author: author, Cid: cid, Emoji: emoji}
-	db.Insert(&emojiRecord)
+	db.InsertOne(&emojiRecord)
 	db.ID(cid).Update(&comment)
 }
 
@@ -279,7 +279,7 @@ func DBchangeCommentEmoji(cid int, emoji int8, emojiRecord VideoCommentEmojiReco
 	}
 	emojiRecord.Emoji = emoji
 	db.ID(cid).Update(&comment)
-	db.Where("author = ? and cid = ?", emojiRecord.Author, cid).Cols("emoji").Update(&emojiRecord)
+	db.In("author", emojiRecord.Author).In("cid", cid).Cols("emoji").Update(&emojiRecord)
 	return
 }
 
@@ -303,7 +303,7 @@ func DBdeleteCommentEmoji(cid int, emoji int8, author int) {
 		comment.Rocket--
 	}
 	db.ID(cid).Update(&comment)
-	db.Where("author = ? and cid = ?", author, cid).Delete(&VideoCommentEmojiRecord{})
+	db.In("author", author).In("cid", cid).Delete(&VideoCommentEmojiRecord{})
 	return
 }
 
@@ -311,7 +311,7 @@ func ClickCommentReplyLike(ctx *gin.Context) {
 	uauthor := GetUserIdWithoutCheck(ctx)
 	crid := ctx.PostForm("crid")
 	vcrid, _ := strconv.Atoi(crid)
-	count, _ := db.Where("author = ? and crid = ?", uauthor, crid).Count(&VideoCommentReplyLikeRecord{})
+	count, _ := db.In("author", uauthor).In("crid", crid).Count(&VideoCommentReplyLikeRecord{})
 	if count == 0 {
 		DBaddCommentReplyLike(uauthor, vcrid)
 	} else {
@@ -335,7 +335,7 @@ func DBdeleteCommentReplyLike(author int, crid int) {
 	db.ID(crid).Get(&commentReply)
 	println(commentReply.Likes)
 	commentReply.Likes--
-	db.Where("author = ? and crid = ?", author, crid).Delete(&VideoCommentReplyLikeRecord{})
+	db.In("author", author).In("crid", crid).Delete(&VideoCommentReplyLikeRecord{})
 	db.ID(crid).Update(&commentReply)
 	return
 }

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	//"fmt"
 	"net/http"
 	"strconv"
 
@@ -16,7 +16,7 @@ func GetAllCirclesNeedtoCheck(c *gin.Context) {
 	var circlesNeedtoCheckDisplay []ApplyCircle
 	var count int64
 	for _, i := range circlesNeedtoCheck {
-		count, _ = db.Where("acid = ? AND reviewer = ?", i.Id, uauthor).Asc("Id").Count(&VoteOfApplyCircle{})
+		count, _ = db.In("acid", i.Id).In("reviewer", uauthor).Asc("Id").Count(&VoteOfApplyCircle{})
 		if count == 0 {
 			circlesNeedtoCheckDisplay = append(circlesNeedtoCheckDisplay, i)
 		}
@@ -34,8 +34,8 @@ func VoteForCirclesNeedtoCheck(c *gin.Context) {
 	if err5 != nil {
 		c.AbortWithError(http.StatusBadRequest, err5)
 	}
-	agree, _ := db.Where("acid = ? AND agree = ?", acid, true).Count(&VoteOfApplyCircle{})
-	disagree, _ := db.Where("acid = ? AND agree = ?", acid, false).Count(&VoteOfApplyCircle{})
+	agree, _ := db.In("acid", acid).In("agree", true).Count(&VoteOfApplyCircle{})
+	disagree, _ := db.In("acid", acid).In("agree", false).Count(&VoteOfApplyCircle{})
 	var circleNeedToCheck ApplyCircle
 	_, err4 := db.ID(acidNumber).Get(&circleNeedToCheck)
 	if err4 != nil {
@@ -48,7 +48,7 @@ func VoteForCirclesNeedtoCheck(c *gin.Context) {
 			Descrption: circleNeedToCheck.Descrption,
 			Kinds:      circleNeedToCheck.Kinds,
 		}
-		_, err := db.Insert(&circle)
+		_, err := db.InsertOne(&circle)
 		if err != nil {
 			c.AbortWithError(http.StatusInternalServerError, err)
 			return
@@ -58,7 +58,7 @@ func VoteForCirclesNeedtoCheck(c *gin.Context) {
 			Cid:        int(circle.Id),
 			Permission: 4,
 		}
-		_, err2 := db.Insert(&memberOfCircle)
+		_, err2 := db.InsertOne(&memberOfCircle)
 		if err2 != nil {
 			c.AbortWithError(http.StatusInternalServerError, err2)
 			return
@@ -87,7 +87,7 @@ func VoteForCirclesNeedtoCheck(c *gin.Context) {
 			Agree:    altitudeBool,
 			Acid:     acidNumber,
 		}
-		db.Insert(&voteOfApplyCircle)
+		db.InsertOne(&voteOfApplyCircle)
 		return
 	}
 }
@@ -121,7 +121,7 @@ func PassVideo(c *gin.Context) {
 		Caution:     1,
 		Upid:        videoNeedToCheck.Upid,
 	}
-	_, err1 := db.Insert(&video)
+	_, err1 := db.InsertOne(&video)
 	if err1 != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 	}
@@ -130,8 +130,7 @@ func PassVideo(c *gin.Context) {
 			Tid: i,
 			Pid: int(video.Id),
 		}
-		fmt.Println(tag)
-		db.Insert(&tag)
+		db.InsertOne(&tag)
 	}
 	db.ID(videoNeedToCheckId).Delete(&VideoNeedToCheck{})
 	return

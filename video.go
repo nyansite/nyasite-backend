@@ -60,14 +60,14 @@ func LikeVideo(c *gin.Context) {
 
 func RecordVideoPlay(vid int, uid int) {
 	var videoPlayedRecord VideoPlayedRecord
-	has, _ := db.Where("vid = ? and uid = ?", vid, uid).Get(&videoPlayedRecord)
+	has, _ := db.In("vid", vid).In("uid", uid).Get(&videoPlayedRecord)
 	var video Video
 	db.ID(vid).Get(&video)
 	if has {
 		if (int(time.Now().Unix()) - videoPlayedRecord.LastPlay) >= 43200 {
 			videoPlayedRecord.LastPlay = int(time.Now().Unix())
 			video.Views++
-			db.Where("vid = ? and uid = ?", vid, uid).Cols("last_time").Update(&videoPlayedRecord)
+			db.In("vid", vid).In("uid", uid).Cols("last_time").Update(&videoPlayedRecord)
 			db.ID(video.Id).Cols("views").Update(&video)
 		}
 	} else {
@@ -88,7 +88,7 @@ func AddVideoTag(c *gin.Context) {
 	vTagId, _ := strconv.Atoi(strTagId)
 	uTagId := int(vTagId)
 	tag := Tag{Tid: uTagId, Pid: uVid}
-	db.Insert(tag)
+	db.InsertOne(tag)
 	return
 }
 
@@ -136,7 +136,8 @@ func GetVideoTags(c *gin.Context) {
 	}
 	var tags []Tag
 	var tagsDisplay []gin.H
-	count, _ := db.Where("kind = ? AND pid = ?", 1, id).Count(&tags)
+
+	count, _ := db.In("kind", 1).In("pid", id).Count(&tags)
 	if count == 0 {
 		c.AbortWithStatus(http.StatusNotFound)
 		return
