@@ -25,7 +25,7 @@ func GetPICUItoken(c *gin.Context) {
 		return
 	}
 	//PICUItoken from token.go
-	req.Header.Set("Authorization", "Bearer "+PICUItoken)
+	req.Header.Set("Authorization", "Bearer "+"PICUItoken")
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Content-Length", "42")

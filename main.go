@@ -28,9 +28,11 @@ const (
 
 func main() {
 	var err error
-	db, err = xorm.NewEngine("postgres", "postgresql://mbe:114514@localhost:5432/dbs?sslmode=disable")
+	db, _ = xorm.NewEngine("postgres", "postgresql://mbe:114514@localhost:5432/dbs?sslmode=disable")
+	err = db.Ping()
 	if err != nil {
-		panic(err) //连接失败不会在这里挂
+		log.Println("我数据库呢???我那么大一个数据库呢???还我数据库!!!")
+		panic(err)
 	}
 
 	db.Sync(&User{}, &Tag{}, &TagModel{}, &SessionSecret{},
@@ -54,7 +56,7 @@ func main() {
 	db.Where("created_at < ?", time.Now().Unix()-TTL).Delete(&SessionSecret{})  //删除过期
 	err = db.Where("created_at >= ?", time.Now().Unix()-TTL).Find(&old_secrets) //没过期的取出来
 	if err != nil {
-		panic("我数据库呢???我那么大一个数据库呢???还我数据库!!!") //数据库连不上会在这里挂,而不是上面
+		panic(err) //很难相信这里会出问题
 	}
 	db.Insert(&SessionSecret{Authentication: s1.Bytes(), Encryption: s2.Bytes()}) //新密钥进数据库,避免kill 9
 	for _, v := range old_secrets {
