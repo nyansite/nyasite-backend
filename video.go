@@ -36,8 +36,8 @@ func GetVideo(c *gin.Context) {
 		"author":      author,
 		"creatTime":   video.CreatedAt,
 		"description": video.Description,
-		"views":       video.Views,
-		"likes":       video.Likes,
+		"views":       video.Views - 1,
+		"likes":       video.Likes - 1,
 		"isLiked":     isliked,
 	})
 }
