@@ -102,7 +102,7 @@ func PassVideo(c *gin.Context) {
 	videoNeedToCheckId := c.PostForm("vcid")
 	var videoNeedToCheck VideoNeedToCheck
 	bool, err := db.ID(videoNeedToCheckId).Get(&videoNeedToCheck)
-	if bool == false {
+	if !bool{
 		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
@@ -133,7 +133,6 @@ func PassVideo(c *gin.Context) {
 		db.InsertOne(&tag)
 	}
 	db.ID(videoNeedToCheckId).Delete(&VideoNeedToCheck{})
-	return
 }
 
 func RejectVideo(c *gin.Context) {
@@ -151,5 +150,4 @@ func RejectVideo(c *gin.Context) {
 	if err1 != nil {
 		c.AbortWithError(http.StatusInternalServerError, err1)
 	}
-	return
 }

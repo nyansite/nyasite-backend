@@ -18,7 +18,7 @@ func NewTag(c *gin.Context) {
 		return
 	}
 	tagname := c.PostForm("tagname")
-	if has, _ := db.Exist(&TagModel{Text: tagname}); has == true {
+	if has, _ := db.Exist(&TagModel{Text: tagname}); has{
 		c.AbortWithStatus(StatusRepeatTag)
 		return
 	}

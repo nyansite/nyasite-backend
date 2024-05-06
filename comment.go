@@ -13,9 +13,9 @@ import (
 func BrowseVideoComments(ctx *gin.Context) {
 	author := GetUserIdWithCheck(ctx)
 	vvid := ctx.Param("id")
-	vid, err := strconv.Atoi(vvid)
+	vid, _ := strconv.Atoi(vvid)
 	vpg := ctx.Param("pg")
-	pg, err := strconv.Atoi(vpg)
+	pg, _ := strconv.Atoi(vpg)
 	if pg < 1 {
 		ctx.AbortWithStatus(http.StatusBadRequest) //400
 		return
@@ -58,7 +58,7 @@ func BrowseVideoComments(ctx *gin.Context) {
 func BrowseVideoCommentReplies(ctx *gin.Context) {
 	author := GetUserIdWithCheck(ctx)
 	vcid := ctx.Param("id")
-	cid, err := strconv.Atoi(vcid)
+	cid, _ := strconv.Atoi(vcid)
 	var comment VideoComment
 	has, err := db.ID(cid).Get(&comment)
 	var emojiRecord VideoCommentEmojiRecord
@@ -66,7 +66,7 @@ func BrowseVideoCommentReplies(ctx *gin.Context) {
 		ctx.AbortWithError(http.StatusBadRequest, err) //400
 		return
 	}
-	if has == false {
+	if !has{
 		ctx.AbortWithStatus(http.StatusNotFound)
 		return
 	}
@@ -157,7 +157,6 @@ func AddVideoComment(ctx *gin.Context) {
 	uvid := int(vvid)
 	cid := DBaddVideoComment(uvid, uauthor, text)
 	ctx.String(http.StatusOK, "%v", cid)
-	return
 }
 
 func DBaddVideoComment(vid int, author int, text string) int {
@@ -174,7 +173,6 @@ func AddVideoCommentReply(ctx *gin.Context) {
 	ucid := int(vcid)
 	crid := DBaddVideoCommentReply(ucid, uauthor, text)
 	ctx.String(http.StatusOK, "%v", crid)
-	return
 }
 
 func DBaddVideoCommentReply(cid int, author int, text string) int {
@@ -280,7 +278,6 @@ func DBchangeCommentEmoji(cid int, emoji int8, emojiRecord VideoCommentEmojiReco
 	emojiRecord.Emoji = emoji
 	db.ID(cid).Update(&comment)
 	db.In("author", emojiRecord.Author).In("cid", cid).Cols("emoji").Update(&emojiRecord)
-	return
 }
 
 func DBdeleteCommentEmoji(cid int, emoji int8, author int) {
@@ -304,7 +301,6 @@ func DBdeleteCommentEmoji(cid int, emoji int8, author int) {
 	}
 	db.ID(cid).Update(&comment)
 	db.In("author", author).In("cid", cid).Delete(&VideoCommentEmojiRecord{})
-	return
 }
 
 func ClickCommentReplyLike(ctx *gin.Context) {
@@ -317,7 +313,6 @@ func ClickCommentReplyLike(ctx *gin.Context) {
 	} else {
 		DBdeleteCommentReplyLike(uauthor, vcrid)
 	}
-	return
 }
 func DBaddCommentReplyLike(author int, crid int) {
 	var commentReply VideoCommentReply
@@ -327,7 +322,6 @@ func DBaddCommentReplyLike(author int, crid int) {
 	commentReplyLikeRecord := VideoCommentReplyLikeRecord{Author: author, Crid: crid}
 	db.Insert(&commentReplyLikeRecord)
 	db.ID(crid).Update(&commentReply)
-	return
 }
 
 func DBdeleteCommentReplyLike(author int, crid int) {
@@ -337,5 +331,4 @@ func DBdeleteCommentReplyLike(author int, crid int) {
 	commentReply.Likes--
 	db.In("author", author).In("crid", crid).Delete(&VideoCommentReplyLikeRecord{})
 	db.ID(crid).Update(&commentReply)
-	return
 }

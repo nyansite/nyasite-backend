@@ -44,7 +44,6 @@ func GetVideoSubscribe(c *gin.Context) {
 	})
 	user.LTCM = int(time.Now().Unix())
 	db.ID(userid).Cols("l_t_c_m").Update(&user)
-	return
 }
 
 func GetCircleAffairs(c *gin.Context) {
@@ -139,14 +138,14 @@ func ReplyInvitation(c *gin.Context) {
 	var invitation Invitation
 
 	hasInvitation, _ := db.In("invitee", inviteeId).In("circle", circleId).In("stauts", false).Get(&invitation)
-	if hasInvitation == false {
+	if !hasInvitation{
 		c.AbortWithStatus(http.StatusFailedDependency)
 		return
 	}
 	if stauts {
 		var memberOfCircle MemberOfCircle
 		hasMemberOfCircle, _ := db.In("uid", inviteeId).In("cid", circleId).Get(&memberOfCircle)
-		if hasMemberOfCircle == false {
+		if !hasMemberOfCircle{
 			memberOfCircle.Uid = inviteeId
 			memberOfCircle.Cid = circleId
 			memberOfCircle.Permission = invitation.Kind
@@ -160,7 +159,6 @@ func ReplyInvitation(c *gin.Context) {
 		invitation.Stauts = true
 		db.In("invitee", inviteeId).In("circle", circleId).Cols("stauts").Update(&invitation)
 	}
-	return
 }
 
 func GetCheckMessage(c *gin.Context) {
@@ -227,5 +225,4 @@ func GetCheckMessage(c *gin.Context) {
 func DeleteVideoNeedToCheck(c *gin.Context) {
 	vcid := c.PostForm("id")
 	db.ID(vcid).Delete(&VideoNeedToCheck{})
-	return
 }

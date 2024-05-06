@@ -124,7 +124,6 @@ func PostCircleApplication(c *gin.Context) {
 		c.AbortWithError(http.StatusInsufficientStorage, err)
 		return
 	}
-	return
 }
 
 func SubscribeCircle(c *gin.Context) {
@@ -149,7 +148,7 @@ func GetCircle(c *gin.Context) {
 	vCid, _ := strconv.Atoi(strCid)
 	var circle Circle
 	exist, _ := db.ID(vCid).Get(&circle)
-	if exist == false {
+	if !exist{
 		c.AbortWithStatus(http.StatusNotFound)
 	}
 	var videos []Video

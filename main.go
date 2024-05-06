@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/gin-contrib/sessions"
@@ -146,7 +147,7 @@ func main() {
 		c.Redirect(http.StatusMovedPermanently, "http://www.google.com/")
 	})
 
-	//  https://gin-gonic.com/zh-cn/docs/examples/graceful-restart-or-stop/
+	//  https://gin-gonic.com/docs/examples/graceful-restart-or-stop/
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", r.ServeHTTP)
 	mux.HandleFunc("baka.localhost/", r2.ServeHTTP) //改host欸
@@ -160,17 +161,21 @@ func main() {
 			log.Fatalf("listen: %s\n", err)
 		}
 	}()
-	quit := make(chan os.Signal)
-	signal.Notify(quit, os.Interrupt)
+	quit := make(chan os.Signal,1)
+	// kill (no param) default send syscanll.SIGTERM
+	// kill -2 is syscall.SIGINT
+	// kill -9 is syscall.SIGKILL 无法被捕获,也不需要捕获
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit //等待信号,阻塞
 
 	log.Println("服务器关闭中~~~")
-
-	ctx, channel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, channel := context.WithTimeout(context.Background(), 5*time.Second)//关闭等几秒,多线程很有用
 	defer channel()
 	if err := srv.Shutdown(ctx); err != nil {
 		log.Fatal("服务器关闭错误(不用管):", err)
 	}
+
+	// <-ctx.Done()//不想等就把这行干掉
 	log.Println("服务器关闭")
 }
 

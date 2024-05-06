@@ -3,9 +3,8 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
 	"net/http"
-
+	"io"
 	"github.com/gin-gonic/gin"
 )
 
@@ -39,7 +38,7 @@ func GetPICUItoken(c *gin.Context) {
 		c.AbortWithStatus(http.StatusBadGateway)
 	}
 	var tokenJson map[string]interface{}
-	b, err := ioutil.ReadAll(resp.Body)
+	b, err := io.ReadAll(resp.Body)
 	println(string(b))
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
@@ -52,5 +51,4 @@ func GetPICUItoken(c *gin.Context) {
 	}
 	token := tokenJson["data"].(map[string]interface{})["tokens"].([]interface{})[0].(map[string]interface{})["token"].(string)
 	c.String(http.StatusOK, "%v", token)
-	return
 }

@@ -82,7 +82,7 @@ func Login(c *gin.Context) {
 		return
 	}
 	var user User
-	if has, _ := db.Where("Name = ? OR Email = ?", username, username).Get(&user); has == false { //用户不存在
+	if has, _ := db.Where("Name = ? OR Email = ?", username, username).Get(&user); !has{ //用户不存在
 		c.Status(StatusUserNameNotExist)
 		return
 	}
@@ -115,11 +115,11 @@ func Register(c *gin.Context) {
 	}
 	//上面判断输入是否合法,下面判断用户是否已经存在
 
-	if has, _ := db.Exist(&User{Name: username}); has == true {
+	if has, _ := db.Exist(&User{Name: username}); has{
 		c.AbortWithStatus(StatusRepeatUserName)
 		return
 	}
-	if has, _ := db.Exist(&User{Email: mail}); has == true {
+	if has, _ := db.Exist(&User{Email: mail}); has{
 		c.AbortWithStatus(StatusRepeatEmail)
 		return
 	}
@@ -141,7 +141,7 @@ func Refresh(c *gin.Context) {
 		return
 	}
 	var user User
-	if has, _ := db.ID(int(userid.(int64))).Get(&user); has == false { //用户不存在
+	if has, _ := db.ID(int(userid.(int64))).Get(&user); !has{ //用户不存在
 		c.SetCookie("token", "", -1, "/", "", true, true)
 		c.SetCookie("is_login", "false", -1, "/", "", true, true)
 		c.AbortWithStatus(http.StatusBadRequest)
@@ -159,7 +159,6 @@ func Refresh(c *gin.Context) {
 	tokenString := reloadJWT(user)
 	c.SetCookie("token", tokenString, 1200000, "/", "", true, true)
 	c.SetCookie("is_login", "true", 1200000, "/", "", true, true)
-	return
 }
 
 func ClockIn(c *gin.Context) {
@@ -249,7 +248,6 @@ func ChangeAvatar(c *gin.Context) {
 	db.ID(uauthor).Get(&user)
 	user.Avatar = avatar
 	db.ID(uauthor).Update(&user)
-	return
 }
 
 func ChangeName(c *gin.Context) {
@@ -260,5 +258,4 @@ func ChangeName(c *gin.Context) {
 	user.Name = name
 	user.Level = user.Level - 8
 	db.ID(uauthor).Update(&user)
-	return
 }

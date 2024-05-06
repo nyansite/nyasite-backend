@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -16,7 +17,7 @@ func GetVideo(c *gin.Context) {
 	vVid, _ := strconv.Atoi(strVid)
 	var video Video
 	exist, _ := db.ID(vVid).Get(&video)
-	if exist == false {
+	if !exist{
 		c.AbortWithStatus(http.StatusNotFound)
 	}
 	//获取路径
@@ -101,7 +102,6 @@ func AddVideoTag(c *gin.Context) {
 	uTagId := int(vTagId)
 	tag := Tag{Tid: uTagId, Pid: uVid}
 	db.InsertOne(tag)
-	return
 }
 
 //上传视频
@@ -130,7 +130,6 @@ func PostVideo(c *gin.Context) {
 	if err1 != nil {
 		c.AbortWithError(http.StatusInternalServerError, err1)
 	}
-	return
 }
 
 //获取标签
@@ -168,7 +167,6 @@ func GetVideoTags(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"tags": tagsDisplay,
 	})
-	return
 }
 
 //获取所有视频
@@ -190,4 +188,5 @@ func GetAllVideos(c *gin.Context) {
 			"cover":  i.CoverPath,
 		})
 	}
+	log.Println(videosDisplay)
 }
