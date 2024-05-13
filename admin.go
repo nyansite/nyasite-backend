@@ -19,7 +19,7 @@ func NewTag(c *gin.Context) {
 	}
 	tagname := c.PostForm("tagname")
 	if has, _ := db.Exist(&TagModel{Text: tagname}); has{
-		c.AbortWithStatus(StatusRepeatTag)
+		c.AbortWithStatus(http.StatusConflict)//409 请求与当前内容冲突
 		return
 	}
 	db.Insert(&TagModel{Text: tagname})

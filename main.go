@@ -59,19 +59,21 @@ func main() {
 	if err != nil {
 		panic(err) //很难相信这里会出问题
 	}
-	db.Insert(&SessionSecret{Authentication: s1.Bytes(), Encryption: s2.Bytes()}) //新密钥进数据库,避免kill 9
+	db.Insert(&SessionSecret{Authentication: s1.Bytes(), Encryption: s2.Bytes()}) //新密钥进数据库,不用defer避免kill 9
 	for _, v := range old_secrets {
 		secrets = append(secrets, v.Authentication, v.Encryption)
 	}
 	store := cookie.NewStore(secrets...) //密钥成对定义以允许密钥轮换.使用新的密钥加密但是旧的仍然有效
 	store.Options(sessions.Options{
-		Secure:   true, //跟下面那条基本上可以防住csrf了,但是还是稳一点好
+		Secure:   true, //跟下面那条基本上可以防住csrf了,但是还是稳一点好// TODO 更靠谱的csrf防护
 		HttpOnly: true, //localhost或者https
 		Path:     "/",
 		MaxAge:   TTL,
 		SameSite: http.SameSiteStrictMode})
-	r := gin.New()
-	r.Use(gin.LoggerWithFormatter(defaultLogFormatter), gin.Recovery(), sessions.Sessions("session", store))
+
+	//下面是路由
+	r := gin.Default()
+	r.MaxMultipartMemory = 8 << 20 //8mb,默认32,限制每个请求的内存占用,但是不会影响接收大文件
 	group := r.Group("/api")
 	{
 		group.GET("/user_status", GetSelfUserData)
@@ -86,7 +88,6 @@ func main() {
 		group.POST("/logout", QuitLogin)
 		group.POST("/login", Login)
 		group.GET("/refresh", Refresh)
-		group.POST("/clockin", ClockIn)
 
 		group.GET("/check_premission/:cid", CheckPrivilege(0), CheckPremissionOfCircle)
 
@@ -126,8 +127,6 @@ func main() {
 		group.POST("/delete_video", CheckPrivilege(0), DeleteVideo)
 		//search
 		group.POST("/search_video", SearchVideos)
-		//token
-		group.GET("/get_PICUI_token", CheckPrivilege(0), GetPICUItoken)
 		//check
 		group.GET("/get_all_circles_needtocheck", CheckPrivilege(10), GetAllCirclesNeedtoCheck)
 		group.POST("/vote_for_circles_needtocheck", CheckPrivilege(10), VoteForCirclesNeedtoCheck)
@@ -141,19 +140,11 @@ func main() {
 		group.GET("/get_check_messages", CheckPrivilege(0), GetCheckMessage)
 		group.POST("/delete_video_need_to_check", CheckPrivilege(0), DeleteVideoNeedToCheck)
 	}
-	r2 := gin.New()
-	r2.Use(gin.LoggerWithFormatter(defaultLogFormatter), gin.Recovery())
-	r2.GET("/", func(c *gin.Context) {
-		c.Redirect(http.StatusMovedPermanently, "http://www.google.com/")
-	})
 
 	//  https://gin-gonic.com/docs/examples/graceful-restart-or-stop/
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", r.ServeHTTP)
-	mux.HandleFunc("baka.localhost/", r2.ServeHTTP) //改host欸
 	srv := &http.Server{
 		Addr:    ":8000",
-		Handler: mux,
+		Handler: r.Handler(),
 	}
 	go func() {
 		log.Println("服务器启动")
@@ -161,7 +152,7 @@ func main() {
 			log.Fatalf("listen: %s\n", err)
 		}
 	}()
-	quit := make(chan os.Signal,1)
+	quit := make(chan os.Signal, 1)
 	// kill (no param) default send syscanll.SIGTERM
 	// kill -2 is syscall.SIGINT
 	// kill -9 is syscall.SIGKILL 无法被捕获,也不需要捕获
@@ -169,7 +160,7 @@ func main() {
 	<-quit //等待信号,阻塞
 
 	log.Println("服务器关闭中~~~")
-	ctx, channel := context.WithTimeout(context.Background(), 5*time.Second)//关闭等几秒,多线程很有用
+	ctx, channel := context.WithTimeout(context.Background(), 5*time.Second) //关闭等几秒,多线程很有用
 	defer channel()
 	if err := srv.Shutdown(ctx); err != nil {
 		log.Fatal("服务器关闭错误(不用管):", err)

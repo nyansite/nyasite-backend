@@ -8,15 +8,6 @@ import (
 	_ "xorm.io/xorm"
 )
 
-const (
-	StatusRepeatUserName   int = 601
-	StatusRepeatEmail      int = 602
-	StatusUserNameNotExist int = 611
-	StatusPasswordError    int = 612
-	StatusAlreadyLogin     int = 613
-	StatusRepeatTag        int = 621
-)
-
 type Model struct {
 	Id        int64 //xorm自动主键
 	CreatedAt int   `xorm:"created"` //使用时间戳而非time.time(字符串)
@@ -225,8 +216,8 @@ type VideoTranscode struct {
 
 // Session的密钥
 type SessionSecret struct {
-	CreatedAt      int64 `xorm:"created unique pk"` //没错芝士主键
-	Authentication []byte
+	CreatedAt      int64  `xorm:"created unique pk"` //没错芝士主键
+	Authentication []byte //非对称加密需要成对密钥
 	Encryption     []byte
 }
 

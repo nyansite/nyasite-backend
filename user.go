@@ -7,6 +7,7 @@ import (
 
 	"crypto/rand"
 	"crypto/sha512"
+	"crypto/subtle"
 	"regexp"
 	"strconv"
 
@@ -73,7 +74,7 @@ func Login(c *gin.Context) {
 	session := sessions.Default(c)
 	is_login, _ := c.Cookie("is_login")
 	if is_login == "true" {
-		c.AbortWithStatus(StatusAlreadyLogin)
+		c.AbortWithStatus(http.StatusBadRequest) //前端应该跳转,而不是重复请求登入
 		return
 	}
 	username, passwd := c.PostForm("username"), c.PostForm("passwd") //传入的用户名也有可能是邮箱
@@ -82,16 +83,16 @@ func Login(c *gin.Context) {
 		return
 	}
 	var user User
-	if has, _ := db.Where("Name = ? OR Email = ?", username, username).Get(&user); !has{ //用户不存在
-		c.Status(StatusUserNameNotExist)
+	if has, _ := db.Where("Name = ? OR Email = ?", username, username).Get(&user); !has { //用户不存在
+		c.AbortWithStatus(http.StatusUnauthorized) //401 不存在或错误的身份验证
 		return
 	}
 	if !check_passwd(user.Passwd, passwd) {
-		c.AbortWithStatus(StatusPasswordError)
+		c.AbortWithStatus(http.StatusUnauthorized) //401
 		return
 	}
 	session.Set("userid", user.Id)
-	session.Set("pwd-8", user.Passwd[:8]) //更改密码后其他已登录设备会退出
+	session.Set("pwd-8", user.Passwd[:8]) //高8位,更改密码后其他已登录设备会退出
 	session.Save()
 	//刷新jwt
 	tokenString := reloadJWT(user)
@@ -115,23 +116,24 @@ func Register(c *gin.Context) {
 	}
 	//上面判断输入是否合法,下面判断用户是否已经存在
 
-	if has, _ := db.Exist(&User{Name: username}); has{
-		c.AbortWithStatus(StatusRepeatUserName)
+	if has, _ := db.Exist(&User{Name: username}); has {
+		c.String(http.StatusConflict,"用户名重复")
+		c.Abort()
 		return
 	}
-	if has, _ := db.Exist(&User{Email: mail}); has{
-		c.AbortWithStatus(StatusRepeatEmail)
+	if has, _ := db.Exist(&User{Email: mail}); has {
+		c.String(http.StatusConflict,"邮箱重复")
+		c.Abort()
 		return
 	}
-	user := User{Name: username, Passwd: encrypt_passwd(passwd), Email: mail,
-		Avatar: ("https://ui-avatars.com/api/?background=b3c6d7&name=" + username)}
-	_, err := db.InsertOne(&user)
+	user := User{Name: username, Passwd: encrypt_passwd(passwd), Email: mail}
+	_, err := db.Insert(&user)
 	if err != nil {
 		fmt.Println(err)
 	}
 	c.AbortWithStatus(http.StatusOK)
 }
-
+//这玩意应该放在别的地方
 func Refresh(c *gin.Context) {
 	session := sessions.Default(c)
 	userid := session.Get("userid")
@@ -141,7 +143,7 @@ func Refresh(c *gin.Context) {
 		return
 	}
 	var user User
-	if has, _ := db.ID(int(userid.(int64))).Get(&user); !has{ //用户不存在
+	if has, _ := db.ID(int(userid.(int64))).Get(&user); !has { //用户不存在
 		c.SetCookie("token", "", -1, "/", "", true, true)
 		c.SetCookie("is_login", "false", -1, "/", "", true, true)
 		c.AbortWithStatus(http.StatusBadRequest)
@@ -161,20 +163,6 @@ func Refresh(c *gin.Context) {
 	c.SetCookie("is_login", "true", 1200000, "/", "", true, true)
 }
 
-func ClockIn(c *gin.Context) {
-	userid := GetUserIdWithoutCheck(c)
-	timezoneStr := c.PostForm("timezone")
-	timezone, _ := strconv.Atoi(timezoneStr)
-	var user User
-	db.ID(userid).Get(&user)
-	//不在同一天不是一个整数
-	if (int((int(time.Now().Unix())+timezone)/86400) - int((user.LTC+timezone)/86400)) >= 1 {
-		user.Level = user.Level + 1
-		user.LTC = int(time.Now().Unix())
-		db.ID(userid).Update(&user)
-	}
-}
-
 func encrypt_passwd(passwds string) []byte { //加密密码,带盐
 	salte, _ := rand.Prime(rand.Reader, 64) //普普通通的64位盐,8字节
 	salt := salte.Bytes()
@@ -188,22 +176,16 @@ func encrypt_passwd(passwds string) []byte { //加密密码,带盐
 
 func check_passwd(passwd []byte, passwd2s string) bool {
 	//获取盐
-	salt := passwd[32:]
-	passwd = passwd[:32]
+	salt := passwd[32:]  //32位开始到结束
+	passwd = passwd[:32] //开始到32位结束
 	passwd2 := []byte(passwd2s)
 
 	passwd2_sha := sha512.Sum512(passwd2)
 	saltpasswd2 := append(passwd2_sha[:], salt...)
 	safe_passwd := sha512.Sum512_256(saltpasswd2)
 
-	ret := true
-	for i, v := range passwd {
-		if v != safe_passwd[i] {
-			ret = false
-			//不要break防止时间攻击(也许不需要)
-		}
-	}
-	return ret
+	//防止时间差攻击
+	return subtle.ConstantTimeCompare(passwd, safe_passwd[:]) == 1 //甜蜜的go没法直接int>bool
 }
 
 //获取用户id
