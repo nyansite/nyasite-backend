@@ -74,6 +74,7 @@ func main() {
 	//下面是路由
 	r := gin.Default()
 	r.MaxMultipartMemory = 8 << 20 //8mb,默认32,限制每个请求的内存占用,但是不会影响接收大文件
+	r.Static("/img", "./img")
 	group := r.Group("/api")
 	{
 		group.GET("/user_status", GetSelfUserData)
@@ -89,6 +90,8 @@ func main() {
 		group.POST("/login", Login)
 		group.GET("/refresh", Refresh)
 		group.POST("/clockin", ClockIn)
+
+		group.POST("/upload_img", LimitRequestBody(2<<20), PostImg)
 
 		group.GET("/check_premission/:cid", CheckPrivilege(0), CheckPremissionOfCircle)
 
