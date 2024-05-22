@@ -88,6 +88,7 @@ func main() {
 		group.POST("/logout", QuitLogin)
 		group.POST("/login", Login)
 		group.GET("/refresh", Refresh)
+		group.POST("/clockin", ClockIn)
 
 		group.GET("/check_premission/:cid", CheckPrivilege(0), CheckPremissionOfCircle)
 

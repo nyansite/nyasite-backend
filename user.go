@@ -117,12 +117,12 @@ func Register(c *gin.Context) {
 	//上面判断输入是否合法,下面判断用户是否已经存在
 
 	if has, _ := db.Exist(&User{Name: username}); has {
-		c.String(http.StatusConflict,"用户名重复")
+		c.String(http.StatusConflict, "用户名重复")
 		c.Abort()
 		return
 	}
 	if has, _ := db.Exist(&User{Email: mail}); has {
-		c.String(http.StatusConflict,"邮箱重复")
+		c.String(http.StatusConflict, "邮箱重复")
 		c.Abort()
 		return
 	}
@@ -133,7 +133,8 @@ func Register(c *gin.Context) {
 	}
 	c.AbortWithStatus(http.StatusOK)
 }
-//这玩意应该放在别的地方
+
+// 这玩意应该放在别的地方
 func Refresh(c *gin.Context) {
 	session := sessions.Default(c)
 	userid := session.Get("userid")
@@ -161,6 +162,20 @@ func Refresh(c *gin.Context) {
 	tokenString := reloadJWT(user)
 	c.SetCookie("token", tokenString, 1200000, "/", "", true, true)
 	c.SetCookie("is_login", "true", 1200000, "/", "", true, true)
+}
+
+func ClockIn(c *gin.Context) {
+	userid := GetUserIdWithoutCheck(c)
+	timezoneStr := c.PostForm("timezone")
+	timezone, _ := strconv.Atoi(timezoneStr)
+	var user User
+	db.ID(userid).Get(&user)
+	//不在同一天不是一个整数
+	if (int((int(time.Now().Unix())+timezone)/86400) - int((user.LTC+timezone)/86400)) >= 1 {
+		user.Level = user.Level + 1
+		user.LTC = int(time.Now().Unix())
+		db.ID(userid).Update(&user)
+	}
 }
 
 func encrypt_passwd(passwds string) []byte { //加密密码,带盐
