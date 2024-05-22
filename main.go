@@ -128,6 +128,8 @@ func main() {
 		group.POST("/delete_video", CheckPrivilege(0), DeleteVideo)
 		//search
 		group.POST("/search_video", SearchVideos)
+		//token
+		group.GET("/get_PICUI_token", CheckPrivilege(0), GetPICUItoken)
 		//check
 		group.GET("/get_all_circles_needtocheck", CheckPrivilege(10), GetAllCirclesNeedtoCheck)
 		group.POST("/vote_for_circles_needtocheck", CheckPrivilege(10), VoteForCirclesNeedtoCheck)
