@@ -8,7 +8,7 @@ import (
 )
 
 func RankVideos(frequency uint8) {
-	//0:daily 1: every week 2.every year
+	//0:daily 1: every week 2.every month
 	var videos []Video
 	db.Find(&videos)
 	var videosDataToSort []VideoReturn
@@ -54,4 +54,37 @@ func RankVideosTest(c *gin.Context) {
 	}
 	RankVideos(uint8(frequency))
 	return
+}
+
+func GetTrending(c *gin.Context) {
+	dailyTrendingVideos := getTrendingVideosReturn(0)
+	weeklyTrendingVideos := getTrendingVideosReturn(1)
+	monthlyTrendingVideos := getTrendingVideosReturn(2)
+	c.JSON(http.StatusOK, gin.H{
+		"daily":   dailyTrendingVideos,
+		"weekly":  weeklyTrendingVideos,
+		"monthly": monthlyTrendingVideos,
+	})
+}
+
+func getTrendingVideosReturn(frq uint8) []VideoReturn {
+	var trendingVideos []VideoReturn
+	var trending []TrendingRankVideo
+	db.In("type", frq).Find(&trending)
+	for _, i := range trending {
+		var video Video
+		var videoReturn VideoReturn
+		db.ID(i.Vid).Get(&video)
+		author := DBGetCircleDataShow(video.Author)
+		videoReturn.Id = video.Id
+		videoReturn.Views = video.Views
+		videoReturn.Likes = video.Likes
+		videoReturn.Title = video.Title
+		videoReturn.CoverPath = video.CoverPath
+		videoReturn.Author.Id = author.Id
+		videoReturn.Author.Name = author.Name
+		videoReturn.CreatedAt = video.CreatedAt
+		trendingVideos = append(trendingVideos, videoReturn)
+	}
+	return trendingVideos
 }

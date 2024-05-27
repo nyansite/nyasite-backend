@@ -151,6 +151,8 @@ func main() {
 		group.POST("/reply_invitation", CheckPrivilege(0), ReplyInvitation)
 		group.GET("/get_check_messages", CheckPrivilege(0), GetCheckMessage)
 		group.POST("/delete_video_need_to_check", CheckPrivilege(0), DeleteVideoNeedToCheck)
+		//trending
+		group.GET("/get_trending", GetTrending)
 	}
 
 	//  https://gin-gonic.com/docs/examples/graceful-restart-or-stop/
