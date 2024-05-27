@@ -271,3 +271,9 @@ type CheckMessage struct {
 	Time   int
 	Id     int //Key for rendering list
 }
+
+type TrendingRankVideo struct {
+	Vid  int
+	Type uint8 `xorm:"TINYINT"`
+	//0:daily 1: every week 2.every year
+}

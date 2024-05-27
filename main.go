@@ -15,6 +15,7 @@ import (
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
+	"github.com/robfig/cron/v3"
 	"xorm.io/xorm"
 	"xorm.io/xorm/caches"
 )
@@ -35,13 +36,15 @@ func main() {
 		log.Println("我数据库呢???我那么大一个数据库呢???还我数据库!!!")
 		panic(err)
 	}
-
+	c := cron.New()
+	//创建定时任务对象（热榜）
 	db.Sync(&User{}, &Tag{}, &TagModel{}, &SessionSecret{},
 		&VideoNeedToCheck{}, &Video{}, &VideoPlayedRecord{}, &VideoLikeRecord{},
 		&VideoComment{}, &VideoCommentReply{}, &VideoCommentEmojiRecord{}, &VideoCommentReplyLikeRecord{},
 		&VideoBullet{},
 		&Circle{}, &MemberOfCircle{}, &ApplyCircle{}, &VoteOfApplyCircle{},
-		&Invitation{}, &Discharge{})
+		&Invitation{}, &Discharge{},
+		&TrendingRankVideo{})
 	db.SetDefaultCacher(caches.NewLRUCacher(caches.NewMemoryStore(), 10000))
 	//上面的是sql
 
@@ -70,7 +73,10 @@ func main() {
 		Path:     "/",
 		MaxAge:   TTL,
 		SameSite: http.SameSiteStrictMode})
-
+	//下面是定时任务
+	c.AddFunc("@daily", RankVideosDaliy)
+	c.AddFunc("@mouthly", RankVideosMouthly)
+	c.AddFunc("@yearly", RankVideosYearly)
 	//下面是路由
 	r := gin.Default()
 	r.MaxMultipartMemory = 8 << 20 //8mb,默认32,限制每个请求的内存占用,但是不会影响接收大文件
@@ -91,6 +97,9 @@ func main() {
 		group.POST("/clockin", ClockIn)
 
 		group.GET("/check_premission/:cid", CheckPrivilege(0), CheckPremissionOfCircle)
+
+		//trendingTest
+		group.POST("/trendingTest", RankVideosTest)
 
 		group.POST("/new_tag", CheckPrivilege(10), NewTag)
 		//video
@@ -154,6 +163,7 @@ func main() {
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("listen: %s\n", err)
 		}
+		c.Start()
 	}()
 	quit := make(chan os.Signal, 1)
 	// kill (no param) default send syscanll.SIGTERM
@@ -163,6 +173,7 @@ func main() {
 	<-quit //等待信号,阻塞
 
 	log.Println("服务器关闭中~~~")
+	c.Stop()
 	ctx, channel := context.WithTimeout(context.Background(), 5*time.Second) //关闭等几秒,多线程很有用
 	defer channel()
 	if err := srv.Shutdown(ctx); err != nil {

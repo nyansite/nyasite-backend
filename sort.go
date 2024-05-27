@@ -13,21 +13,13 @@ type VideoWrapper struct {
 
 type SortBy func(p, q *VideoReturn) bool
 
-func (vw VideoWrapper) Len() int {
-	return len(vw.videos)
-}
+func (vw VideoWrapper) Len() int { return len(vw.videos) }
 
-func (vw VideoWrapper) Swap(i, j int) {
-	vw.videos[i], vw.videos[j] = vw.videos[j], vw.videos[i]
-}
+func (vw VideoWrapper) Swap(i, j int) { vw.videos[i], vw.videos[j] = vw.videos[j], vw.videos[i] }
 
-func (vw VideoWrapper) Less(i, j int) bool {
-	return vw.by(&vw.videos[i], &vw.videos[j])
-}
+func (vw VideoWrapper) Less(i, j int) bool { return vw.by(&vw.videos[i], &vw.videos[j]) }
 
-func SortVideo(videos []VideoReturn, by SortBy) {
-	sort.Sort(VideoWrapper{videos, by})
-}
+func SortVideo(videos []VideoReturn, by SortBy) { sort.Sort(VideoWrapper{videos, by}) }
 
 //function to sort circle affairs
 
