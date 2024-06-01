@@ -79,7 +79,7 @@ func main() {
 	c.AddFunc("@yearly", RankVideosYearly)
 	//下面是路由
 	r := gin.Default()
-	r.MaxMultipartMemory = 8 << 20 //8mb,默认32,限制每个请求的内存占用,但是不会影响接收大文件
+	r.Use(gin.Recovery(), sessions.Sessions("session", store))
 	group := r.Group("/api")
 	{
 		group.GET("/user_status", GetSelfUserData)
@@ -153,6 +153,8 @@ func main() {
 		group.POST("/delete_video_need_to_check", CheckPrivilege(0), DeleteVideoNeedToCheck)
 		//trending
 		group.GET("/get_trending", GetTrending)
+		//history
+		group.GET("/history/:pg", CheckPrivilege(0), GetHistoryRecord)
 	}
 
 	//  https://gin-gonic.com/docs/examples/graceful-restart-or-stop/
