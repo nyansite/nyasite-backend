@@ -26,9 +26,26 @@ func GetHistoryRecord(c *gin.Context) {
 		c.AbortWithStatus(http.StatusBadRequest)
 	}
 	var history []VideoPlayedRecord
+	var videosReturn []VideoReturn
 	db.In("uid", uid).Desc("last_play").Find(&history)
+	for _, i := range history {
+		var video Video
+		var videoReturn VideoReturn
+		author := DBGetCircleDataShow(i.Uid)
+		db.ID(i.Vid).Get(&video)
+		videoReturn.Id = video.Id
+		videoReturn.Title = video.Title
+		videoReturn.CoverPath = video.CoverPath
+		videoReturn.Views = video.Views
+		videoReturn.Likes = video.Likes
+		videoReturn.Author.Id = author.Id
+		videoReturn.Author.Name = author.Name
+		//用createdAt表示上次观看的时间
+		videoReturn.CreatedAt = i.LastPlay
+		videosReturn = append(videosReturn, videoReturn)
+	}
 	c.JSON(http.StatusOK, gin.H{
 		"count": count,
-		"body":  history,
+		"body":  videosReturn,
 	})
 }
