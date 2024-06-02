@@ -28,7 +28,7 @@ func GetHistoryRecord(c *gin.Context) {
 	var history []VideoPlayedRecord
 	db.In("uid", uid).Desc("last_play").Find(&history)
 	c.JSON(http.StatusOK, gin.H{
-		"Count": count,
-		"Body":  history,
+		"count": count,
+		"body":  history,
 	})
 }
