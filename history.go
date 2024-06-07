@@ -36,8 +36,8 @@ func GetHistoryRecord(c *gin.Context) {
 		videoReturn.Id = video.Id
 		videoReturn.Title = video.Title
 		videoReturn.CoverPath = video.CoverPath
-		videoReturn.Views = video.Views
-		videoReturn.Likes = video.Likes
+		videoReturn.Views = video.Views - 1
+		videoReturn.Likes = video.Likes - 1
 		videoReturn.Author.Id = author.Id
 		videoReturn.Author.Name = author.Name
 		//用createdAt表示上次观看的时间

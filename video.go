@@ -17,7 +17,7 @@ func GetVideo(c *gin.Context) {
 	vVid, _ := strconv.Atoi(strVid)
 	var video Video
 	exist, _ := db.ID(vVid).Get(&video)
-	if !exist{
+	if !exist {
 		c.AbortWithStatus(http.StatusNotFound)
 	}
 	//获取路径
@@ -27,10 +27,12 @@ func GetVideo(c *gin.Context) {
 	author := DBGetCircleDataShow(vVid)
 	author.Relation = DBgetRelationToCircle(int(author.Id), c)
 	//获取是否点赞
-	var like VideoLikeRecord
-	isliked, _ := db.In("vid", vVid).In("author", userid).Exist(&like)
+	isLiked, _ := db.In("vid", vVid).In("author", userid).Exist(&VideoLikeRecord{})
 	//刷新历史记录
 	RecordVideoPlay(vVid, userid)
+	//获取是否收藏，收藏数
+	isMarked, _ := db.In("vid", vVid).In("uid", userid).Exist(&VideoMarkRecord{})
+	countMark, _ := db.In("vid", vVid).Count(&VideoMarkRecord{})
 	c.JSON(http.StatusOK, gin.H{
 		"title":       video.Title,
 		"videoPath":   videoPath,
@@ -39,7 +41,9 @@ func GetVideo(c *gin.Context) {
 		"description": video.Description,
 		"views":       video.Views - 1,
 		"likes":       video.Likes - 1,
-		"isLiked":     isliked,
+		"isLiked":     isLiked,
+		"marks":       countMark,
+		"isMarked":    isMarked,
 	})
 }
 
@@ -66,6 +70,24 @@ func LikeVideo(c *gin.Context) {
 			Vid:    vid,
 		}
 		db.InsertOne(&videoLike)
+	}
+}
+
+//视频收藏
+
+func MarkVideo(c *gin.Context) {
+	strVid := c.PostForm("vid")
+	uid := GetUserIdWithoutCheck(c)
+	has, _ := db.In("uid", uid).In("vid", strVid).Exist(&VideoMarkRecord{})
+	if has {
+		db.In("uid", uid).In("vid", strVid).Exist(&VideoMarkRecord{})
+	} else {
+		vid, _ := strconv.Atoi(strVid)
+		videoMark := VideoMarkRecord{
+			Uid: uid,
+			Vid: vid,
+		}
+		db.InsertOne(&videoMark)
 	}
 }
 

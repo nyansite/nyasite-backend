@@ -139,6 +139,11 @@ type VideoLikeRecord struct {
 	Vid    int
 }
 
+type VideoMarkRecord struct {
+	Uid int
+	Vid int
+}
+
 type VideoPlayedRecord struct {
 	Uid      int
 	Vid      int
@@ -152,6 +157,7 @@ type VideoReturn struct {
 	Author     SearchCircleReturn
 	Views      int
 	Likes      int
+	Marks      int
 	SelfUpload bool
 	CreatedAt  int
 }

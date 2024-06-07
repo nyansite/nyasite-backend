@@ -39,7 +39,7 @@ func main() {
 	c := cron.New()
 	//创建定时任务对象（热榜）
 	db.Sync(&User{}, &Tag{}, &TagModel{}, &SessionSecret{},
-		&VideoNeedToCheck{}, &Video{}, &VideoPlayedRecord{}, &VideoLikeRecord{},
+		&VideoNeedToCheck{}, &Video{}, &VideoPlayedRecord{}, &VideoLikeRecord{}, &VideoMarkRecord{},
 		&VideoComment{}, &VideoCommentReply{}, &VideoCommentEmojiRecord{}, &VideoCommentReplyLikeRecord{},
 		&VideoBullet{},
 		&Circle{}, &MemberOfCircle{}, &ApplyCircle{}, &VoteOfApplyCircle{},
@@ -108,6 +108,7 @@ func main() {
 		group.GET("/get_all_videos", GetAllVideos)
 		group.GET("/get_video_tags/:id", GetVideoTags)
 		group.POST("/like_video", CheckPrivilege(0), LikeVideo)
+		group.POST("/mark_video", CheckPrivilege(0), MarkVideo)
 		//comment
 		group.GET("/video_comment/:id/:pg", BrowseVideoComments)
 		group.GET("/video_comment_reply/:id", BrowseVideoCommentReplies)

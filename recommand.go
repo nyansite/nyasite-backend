@@ -77,8 +77,8 @@ func getTrendingVideosReturn(frq uint8) []VideoReturn {
 		db.ID(i.Vid).Get(&video)
 		author := DBGetCircleDataShow(video.Author)
 		videoReturn.Id = video.Id
-		videoReturn.Views = video.Views
-		videoReturn.Likes = video.Likes
+		videoReturn.Views = video.Views - 1
+		videoReturn.Likes = video.Likes - 1
 		videoReturn.Title = video.Title
 		videoReturn.CoverPath = video.CoverPath
 		videoReturn.Author.Id = author.Id

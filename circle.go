@@ -148,7 +148,7 @@ func GetCircle(c *gin.Context) {
 	vCid, _ := strconv.Atoi(strCid)
 	var circle Circle
 	exist, _ := db.ID(vCid).Get(&circle)
-	if !exist{
+	if !exist {
 		c.AbortWithStatus(http.StatusNotFound)
 	}
 	var videos []Video
@@ -160,7 +160,7 @@ func GetCircle(c *gin.Context) {
 		videoReturn.CreatedAt = i.CreatedAt
 		videoReturn.Id = i.Id
 		videoReturn.Title = i.Title
-		videoReturn.Views = i.Views
+		videoReturn.Views = i.Views - 1
 		videosDisplay = append(videosDisplay, videoReturn)
 	}
 	c.JSON(http.StatusOK, gin.H{
@@ -203,9 +203,9 @@ func GetVideosOfCircle(c *gin.Context) {
 		videoReturn.CoverPath = i.CoverPath
 		videoReturn.CreatedAt = i.CreatedAt
 		videoReturn.Id = i.Id
-		videoReturn.Likes = i.Likes
+		videoReturn.Likes = i.Likes - 1
 		videoReturn.Title = i.Title
-		videoReturn.Views = i.Views
+		videoReturn.Views = i.Views - 1
 		videoReturn.SelfUpload = (uid == i.Upid)
 		videosReturn = append(videosReturn, videoReturn)
 	}
