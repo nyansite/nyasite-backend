@@ -140,8 +140,9 @@ type VideoLikeRecord struct {
 }
 
 type VideoMarkRecord struct {
-	Uid int
-	Vid int
+	Uid       int
+	Vid       int
+	CreatedAt int `xorm:"created"`
 }
 
 type VideoPlayedRecord struct {

@@ -156,6 +156,8 @@ func main() {
 		group.GET("/get_trending", GetTrending)
 		//history
 		group.GET("/history/:pg", CheckPrivilege(0), GetHistoryRecord)
+		//marks
+		group.GET("/marks/:pg", CheckPrivilege(0), GetMarksRecord)
 	}
 
 	//  https://gin-gonic.com/docs/examples/graceful-restart-or-stop/
