@@ -158,8 +158,8 @@ type VideoReturn struct {
 	Author     SearchCircleReturn
 	Views      int
 	Likes      int
-	Marks      int
-	SelfUpload bool
+	Marks      int  //收藏量
+	SelfUpload bool //是否为自己上传
 	CreatedAt  int
 }
 

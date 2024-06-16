@@ -74,7 +74,7 @@ func Login(c *gin.Context) {
 	session := sessions.Default(c)
 	is_login, _ := c.Cookie("is_login")
 	if is_login == "true" {
-		c.AbortWithStatus(http.StatusBadRequest) //前端应该跳转,而不是重复请求登入
+		c.AbortWithStatus(http.StatusForbidden) //前端应该跳转,而不是重复请求登入
 		return
 	}
 	username, passwd := c.PostForm("username"), c.PostForm("passwd") //传入的用户名也有可能是邮箱
@@ -117,12 +117,12 @@ func Register(c *gin.Context) {
 	//上面判断输入是否合法,下面判断用户是否已经存在
 
 	if has, _ := db.Exist(&User{Name: username}); has {
-		c.String(http.StatusConflict, "用户名重复")
+		c.String(http.StatusConflict, "NameUsed")
 		c.Abort()
 		return
 	}
 	if has, _ := db.Exist(&User{Email: mail}); has {
-		c.String(http.StatusConflict, "邮箱重复")
+		c.String(http.StatusConflict, "EmailAddressUsed")
 		c.Abort()
 		return
 	}

@@ -134,6 +134,7 @@ func PostVideo(c *gin.Context) {
 	title := c.PostForm("title")
 	description := c.PostForm("description")
 	cover := c.PostForm("cover")
+	videoPath := c.PostForm("videoPath")
 	strTags := c.PostFormArray("tags")
 	var err error
 	var tags []int
