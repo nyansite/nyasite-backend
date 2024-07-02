@@ -103,10 +103,12 @@ func main() {
 
 		group.POST("/new_tag", CheckPrivilege(10), NewTag)
 		//video
+		group.POST("/get_upload_url", UploadVideoUrl)
 		group.GET("/get_video/:id", GetVideo)
 		group.POST("/upload_video", CheckPrivilege(0), PostVideo)
 		group.GET("/get_all_videos", GetAllVideos)
 		group.GET("/get_video_tags/:id", GetVideoTags)
+		group.GET("/get_video_link/:uid", GetLinkPlaybackHls)
 		group.POST("/like_video", CheckPrivilege(0), LikeVideo)
 		group.POST("/mark_video", CheckPrivilege(0), MarkVideo)
 		//comment

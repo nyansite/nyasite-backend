@@ -102,7 +102,7 @@ func PassVideo(c *gin.Context) {
 	videoNeedToCheckId := c.PostForm("vcid")
 	var videoNeedToCheck VideoNeedToCheck
 	bool, err := db.ID(videoNeedToCheckId).Get(&videoNeedToCheck)
-	if !bool{
+	if !bool {
 		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}

@@ -20,9 +20,6 @@ func GetVideo(c *gin.Context) {
 	if !exist {
 		c.AbortWithStatus(http.StatusNotFound)
 	}
-	//获取路径
-	//test data
-	videoPath := "https://customer-f33zs165nr7gyfy4.cloudflarestream.com/6b9e68b07dfee8cc2d116e4c51d6a957/manifest/video.m3u8"
 	//获取作者
 	author := DBGetCircleDataShow(vVid)
 	author.Relation = DBgetRelationToCircle(int(author.Id), c)
@@ -35,7 +32,7 @@ func GetVideo(c *gin.Context) {
 	countMark, _ := db.In("vid", vVid).Count(&VideoMarkRecord{})
 	c.JSON(http.StatusOK, gin.H{
 		"title":       video.Title,
-		"videoPath":   videoPath,
+		"videoUid":    video.VideoUid,
 		"author":      author,
 		"creatTime":   video.CreatedAt,
 		"description": video.Description,
@@ -134,7 +131,7 @@ func PostVideo(c *gin.Context) {
 	title := c.PostForm("title")
 	description := c.PostForm("description")
 	cover := c.PostForm("cover")
-	videoPath := c.PostForm("videoPath")
+	videoUid := c.PostForm("videoUid")
 	strTags := c.PostFormArray("tags")
 	var err error
 	var tags []int
@@ -146,7 +143,7 @@ func PostVideo(c *gin.Context) {
 		}
 		tags = append(tags, tag)
 	}
-	newVideo := VideoNeedToCheck{Author: uauthor, Upid: GetUserIdWithoutCheck(c),
+	newVideo := VideoNeedToCheck{Author: uauthor, Upid: GetUserIdWithoutCheck(c), VideoUid: videoUid,
 		Title: title, Description: description, CoverPath: cover,
 		Tags: tags, Stauts: false}
 	_, err1 := db.InsertOne(newVideo)
