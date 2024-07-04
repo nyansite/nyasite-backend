@@ -102,7 +102,7 @@ type TagModel struct {
 
 type Tag struct {
 	Id  int64 //xorm自动主键
-	Tid int   `xorm:"SMALLINT"`
+	Tid int   `xorm:"MEDIUMINT"`
 	Pid int
 }
 

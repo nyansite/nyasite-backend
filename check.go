@@ -151,3 +151,35 @@ func RejectVideo(c *gin.Context) {
 		c.AbortWithError(http.StatusInternalServerError, err1)
 	}
 }
+
+func WithdrawVideo(c *gin.Context) {
+	videoWithdrawId := c.PostForm("vid")
+	reason := c.PostForm("reason")
+	vidNumber, _ := strconv.Atoi(videoWithdrawId)
+	var video Video
+	var vntc VideoNeedToCheck
+	_, err := db.ID(vidNumber).Get(&video)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+	}
+	vntc.Author = video.Author
+	vntc.CoverPath = video.CoverPath
+	vntc.Description = video.Description
+	vntc.UpdatedAt = video.CreatedAt
+	vntc.OriginalId = int(video.Id)
+	vntc.Reason = reason
+	vntc.Stauts = true
+	var tags []Tag
+	var taglist []int
+	db.In("pid", video.Id).Find(&tags)
+	for _, i := range tags {
+		taglist = append(taglist, i.Tid)
+	}
+	vntc.Tags = taglist
+	vntc.Title = video.Title
+	vntc.Upid = video.Upid
+	vntc.VideoUid = video.VideoUid
+	db.InsertOne(&vntc)
+	db.ID(vidNumber).Delete(&video)
+	return
+}

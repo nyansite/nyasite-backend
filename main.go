@@ -118,7 +118,7 @@ func main() {
 		group.POST("/add_video_comment_reply", CheckPrivilege(0), AddVideoCommentReply)
 		group.POST("/click_comment_emoji", ClikckCommentEmoji)
 		group.POST("/click_commentreply_like", ClickCommentReplyLike)
-		group.POST("/add_video_tag", CheckPrivilege(10), AddVideoTag)
+		group.POST("/add_video_tag", CheckPrivilege(9), AddVideoTag)
 		//danmaku
 		group.GET("/get_bullets/:id", BrowseBullets)
 		group.POST("/add_video_bullet", CheckPrivilege(0), AddBullet)
@@ -143,11 +143,12 @@ func main() {
 		//token
 		group.GET("/get_PICUI_token", CheckPrivilege(0), GetPICUItoken)
 		//check
-		group.GET("/get_all_circles_needtocheck", CheckPrivilege(10), GetAllCirclesNeedtoCheck)
-		group.POST("/vote_for_circles_needtocheck", CheckPrivilege(10), VoteForCirclesNeedtoCheck)
-		group.GET("/get_all_videos_needtocheck", CheckPrivilege(10), GetAllVideoNeedToChenck)
-		group.POST("/pass_video", CheckPrivilege(10), PassVideo)
-		group.POST("/reject_video", CheckPrivilege(10), RejectVideo)
+		group.GET("/get_all_circles_needtocheck", CheckPrivilege(9), GetAllCirclesNeedtoCheck)
+		group.POST("/vote_for_circles_needtocheck", CheckPrivilege(9), VoteForCirclesNeedtoCheck)
+		group.GET("/get_all_videos_needtocheck", CheckPrivilege(9), GetAllVideoNeedToChenck)
+		group.POST("/pass_video", CheckPrivilege(9), PassVideo)
+		group.POST("/reject_video", CheckPrivilege(9), RejectVideo)
+		group.POST("/withdraw_video", CheckPrivilege(9), WithdrawVideo)
 		//message
 		group.GET("/get_video_subscribed", CheckPrivilege(0), GetVideoSubscribe)
 		group.GET("/get_new_circle_affairs", CheckPrivilege(0), GetCircleAffairs)

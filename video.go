@@ -21,7 +21,7 @@ func GetVideo(c *gin.Context) {
 		c.AbortWithStatus(http.StatusNotFound)
 	}
 	//获取作者
-	author := DBGetCircleDataShow(vVid)
+	author := DBGetCircleDataShow(video.Author)
 	author.Relation = DBgetRelationToCircle(int(author.Id), c)
 	//获取是否点赞
 	isLiked, _ := db.In("vid", vVid).In("author", userid).Exist(&VideoLikeRecord{})
