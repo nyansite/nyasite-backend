@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -193,20 +192,24 @@ func GetVideoTags(c *gin.Context) {
 
 func GetAllVideos(c *gin.Context) {
 	var videos []Video
-	var videosDisplay []gin.H
-	err := db.Desc("id").Find(&videos)
+	var videosDisplay []VideoReturn
+	err := db.Desc("id").Limit(40).Find(&videos)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	var author UserDataShow
 	for _, i := range videos {
-		author = DBGetUserDataShow(i.Author)
-		videosDisplay = append(videosDisplay, gin.H{
-			"id":     i.Id,
-			"author": author,
-			"cover":  i.CoverPath,
-		})
+		author := DBGetCircleDataShow(i.Author)
+		var vd VideoReturn
+		vd.Id = i.Id
+		vd.Author.Id = author.Id
+		vd.Author.Name = author.Name
+		vd.CoverPath = i.CoverPath
+		vd.Title = i.Title
+		vd.Views = i.Views - 1
+		videosDisplay = append(videosDisplay, vd)
 	}
-	log.Println(videosDisplay)
+	c.JSON(http.StatusOK, gin.H{
+		"result": videosDisplay,
+	})
 }

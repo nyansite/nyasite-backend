@@ -44,15 +44,17 @@ func RankVideosTest(c *gin.Context) {
 	frequencyStr := c.PostForm("type")
 	frequency, err := strconv.Atoi(frequencyStr)
 	if err != nil {
-		c.AbortWithStatus(http.StatusBadRequest)
+		c.AbortWithError(http.StatusInternalServerError, err)
 	}
 	if frequency == 3 {
 		RankVideos(0)
 		RankVideos(1)
 		RankVideos(2)
-		return
+	} else if frequency < 3 && frequency >= 0 {
+		RankVideos(uint8(frequency))
+	} else {
+		c.AbortWithStatus(http.StatusBadRequest)
 	}
-	RankVideos(uint8(frequency))
 	return
 }
 
