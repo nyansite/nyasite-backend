@@ -1,4 +1,4 @@
-module cute_site
+module nyasite_backend
 
 go 1.20
 
