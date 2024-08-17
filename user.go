@@ -25,7 +25,7 @@ func reloadJWT(user User) string {
 		"picture":   user.Avatar,
 		"exp":       time.Now().Add(30 * 24 * time.Hour).Unix(),
 	})
-	tokenString, _ := token.SignedString([]byte("nyasite"))
+	tokenString, _ := token.SignedString([]byte(TokenJWTSecret))
 	return tokenString
 }
 

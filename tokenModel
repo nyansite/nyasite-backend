@@ -3,5 +3,6 @@ package main
 const PICUItoken = ""
 const CloudflareStreamToken = ""
 const CloudflareAccount = ""
+const TokenJWTSecret = ""
 
 //copy and rename token.go ,the enter your token here
