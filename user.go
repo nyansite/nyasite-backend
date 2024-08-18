@@ -20,6 +20,7 @@ func reloadJWT(user User) string {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"id":        user.Id,
 		"email":     user.Email,
+		"username":  user.OriginName,
 		"firstname": user.Name,
 		"lastname":  "",
 		"picture":   user.Avatar,
