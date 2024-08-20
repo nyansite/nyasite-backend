@@ -18,13 +18,12 @@ import (
 
 func reloadJWT(user User) string {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"id":        user.Id,
-		"email":     user.Email,
-		"username":  user.OriginName,
-		"firstname": user.Name,
-		"lastname":  "",
-		"picture":   user.Avatar,
-		"exp":       time.Now().Add(30 * 24 * time.Hour).Unix(),
+		"id":       user.Id,
+		"email":    user.Email,
+		"username": user.OriginName,
+		"fullname": user.Name,
+		"picture":  user.Avatar,
+		"exp":      time.Now().Add(30 * 24 * time.Hour).Unix(),
 	})
 	tokenString, _ := token.SignedString([]byte(TokenJWTSecret))
 	return tokenString
