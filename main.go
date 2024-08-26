@@ -91,7 +91,7 @@ func main() {
 		group.GET("/search_users/:name", CheckPrivilege(0), SearchUsers)
 
 		group.POST("/register", Register)
-		group.POST("/logout", QuitLogin)
+		group.GET("/logout", QuitLogin)
 		group.POST("/login", Login)
 		group.GET("/refresh", Refresh)
 		group.POST("/clockin", ClockIn)
