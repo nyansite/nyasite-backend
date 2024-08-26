@@ -170,10 +170,10 @@ func main() {
 	}
 	go func() {
 		log.Println("服务器启动")
+		c.Start()
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("listen: %s\n", err)
 		}
-		c.Start()
 	}()
 	quit := make(chan os.Signal, 1)
 	// kill (no param) default send syscanll.SIGTERM
