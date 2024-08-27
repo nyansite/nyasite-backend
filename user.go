@@ -127,7 +127,7 @@ func Register(c *gin.Context) {
 		c.Abort()
 		return
 	}
-	user := User{Name: username, Passwd: encrypt_passwd(passwd), Email: mail}
+	user := User{Name: username, Passwd: encrypt_passwd(passwd), Email: mail, OriginName: username}
 	_, err := db.Insert(&user)
 	if err != nil {
 		fmt.Println(err)
