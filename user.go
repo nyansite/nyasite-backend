@@ -5,11 +5,14 @@ import (
 	"net/http"
 	"time"
 
+	"crypto/md5"
 	"crypto/rand"
 	"crypto/sha512"
 	"crypto/subtle"
+	"encoding/hex"
 	"regexp"
 	"strconv"
+	"strings"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
@@ -105,7 +108,7 @@ func Login(c *gin.Context) {
 var regCompile = regexp.MustCompile(`\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*`)
 
 func Register(c *gin.Context) {
-	username, passwd, mail := c.PostForm("username"), c.PostForm("passwd"), c.PostForm("email")
+	username, passwd, mail, key := c.PostForm("username"), c.PostForm("passwd"), c.PostForm("email"), c.PostForm("key")
 
 	if username == "" || passwd == "" || mail == "" {
 		c.AbortWithStatus(http.StatusBadRequest) //400
@@ -127,11 +130,18 @@ func Register(c *gin.Context) {
 		c.Abort()
 		return
 	}
+	keyVaildity := VerifyKey(key)
+	if !keyVaildity {
+		c.String(http.StatusConflict, "KeyIsNotVaild")
+		c.Abort()
+		return
+	}
 	user := User{Name: username, Passwd: encrypt_passwd(passwd), Email: mail, OriginName: username}
 	_, err := db.Insert(&user)
 	if err != nil {
 		fmt.Println(err)
 	}
+	db.Insert(&KeyUsed{Key: key})
 	c.AbortWithStatus(http.StatusOK)
 }
 
@@ -256,4 +266,33 @@ func ChangeName(c *gin.Context) {
 	user.Name = name
 	user.Level = user.Level - 8
 	db.ID(uauthor).Update(&user)
+}
+
+func VerifyKey(key string) bool {
+	if len(key) != 6 {
+		return false
+	}
+	//判断第一位是否为数字
+	sN := []string{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "00"}
+	for _, i := range sN {
+		if i == "00" {
+			return false
+		}
+		if strings.HasPrefix(key, i) {
+			break
+		}
+	}
+	exist, _ := db.In("key", key).Exist(&KeyUsed{})
+	if exist {
+		return false
+	}
+	d := []byte(key[1:])
+	m := md5.New()
+	m.Write(d)
+	assign := hex.EncodeToString(m.Sum(nil))
+	if strings.Contains(assign, assginSegment) {
+		return true
+	} else {
+		return false
+	}
 }

@@ -44,7 +44,8 @@ func main() {
 		&VideoBullet{},
 		&Circle{}, &MemberOfCircle{}, &ApplyCircle{}, &VoteOfApplyCircle{},
 		&Invitation{}, &Discharge{},
-		&TrendingRankVideo{})
+		&TrendingRankVideo{},
+		&KeyUsed{})
 	db.SetDefaultCacher(caches.NewLRUCacher(caches.NewMemoryStore(), 10000))
 	//上面的是sql
 

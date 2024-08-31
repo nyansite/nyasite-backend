@@ -285,3 +285,7 @@ type TrendingRankVideo struct {
 	Type uint8 `xorm:"TINYINT"`
 	//0:daily 1: every week 2.every year
 }
+
+type KeyUsed struct {
+	Key string
+}
