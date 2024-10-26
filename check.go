@@ -54,7 +54,7 @@ func VoteForCirclesNeedtoCheck(c *gin.Context) {
 			return
 		}
 		memberOfCircle := MemberOfCircle{
-			Uid:        uauthor,
+			Uid:        circleNeedToCheck.Applicant,
 			Cid:        int(circle.Id),
 			Permission: 4,
 		}
