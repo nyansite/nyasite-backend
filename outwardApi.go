@@ -3,7 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -40,7 +40,7 @@ func GetPICUItoken(c *gin.Context) {
 		c.AbortWithStatus(http.StatusBadGateway)
 	}
 	var tokenJson map[string]interface{}
-	b, err := ioutil.ReadAll(resp.Body)
+	b, err := io.ReadAll(resp.Body)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
@@ -105,7 +105,7 @@ func GetLinkPlaybackHls(c *gin.Context) {
 		c.AbortWithStatus(http.StatusBadGateway)
 	}
 	var linkJson map[string]interface{}
-	b, err := ioutil.ReadAll(resp.Body)
+	b, err := io.ReadAll(resp.Body)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 	}
