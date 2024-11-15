@@ -145,6 +145,25 @@ func Register(c *gin.Context) {
 	c.AbortWithStatus(http.StatusOK)
 }
 
+func ResetPwd(c *gin.Context) {
+	var user User
+	newPwd := c.PostForm("pwd")
+	email := c.PostForm("email")
+	code := c.PostForm("verCode")
+	db.In("email", email).Get(&user)
+	canReset, err := VerifyVerCode(email, code)
+	if canReset {
+		user.Passwd = encrypt_passwd(newPwd)
+		db.In("email", email).Update(&user)
+	} else if err.Error() == "expired" {
+		c.String(http.StatusBadRequest, "expired")
+	} else if err.Error() == "incorrect" {
+		c.String(http.StatusBadRequest, "incorrectVerCode")
+	} else {
+		c.AbortWithStatus(http.StatusBadRequest)
+	}
+}
+
 // 这玩意应该放在别的地方
 func Refresh(c *gin.Context) {
 	session := sessions.Default(c)

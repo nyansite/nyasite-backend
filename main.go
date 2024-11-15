@@ -48,7 +48,8 @@ func main() {
 		&KeyUsed{})
 	db.SetDefaultCacher(caches.NewLRUCacher(caches.NewMemoryStore(), 10000))
 	//上面的是sql
-
+	VerCodeAllocMap = make(map[string]VerCode)
+	//上面的是初始化验证码队列
 	// config := cors.DefaultConfig()
 	// config.AllowOrigins = []string{"http://google.com"}	//允许访问信息的第三方,比如说广告供应商
 	// config.AllowCredentials = true //cookie一并发给跨域请求
@@ -86,19 +87,22 @@ func main() {
 		group.GET("/user_status", GetSelfUserData)
 		group.GET("/user_status/:id", GetUserData)
 
-		group.GET("/coffee", CheckPrivilege(11), coffee)
-		group.GET("/taglist", EnireTag)
-
 		group.GET("/search_users/:name", CheckPrivilege(0), SearchUsers)
 
 		group.POST("/register", Register)
 		group.GET("/logout", QuitLogin)
 		group.POST("/login", Login)
+		group.POST("/reset_pwd", ResetPwd)
 		group.GET("/refresh", Refresh)
+
 		group.POST("/clockin", ClockIn)
 
 		group.GET("/check_premission/:cid", CheckPrivilege(0), CheckPremissionOfCircle)
 
+		group.GET("/coffee", CheckPrivilege(11), coffee)
+		group.GET("/taglist", EnireTag)
+
+		group.POST("/get_ver_code", AllocVerCode)
 		//trendingTest
 		group.POST("/trendingTest", RankVideosTest)
 
