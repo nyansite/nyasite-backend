@@ -88,6 +88,13 @@ func UploadVideoUrl(c *gin.Context) {
 
 // 获取视频hls播放链接
 func GetLinkPlaybackHls(c *gin.Context) {
+	//当请求错误时会有panic错误导致整个程序停止，即使cloudflare也不能保证稳定访问（悲）
+	defer func() {
+		if err := recover(); err != nil {
+			println(err)
+			c.AbortWithStatus(http.StatusInternalServerError)
+		}
+	}()
 	uid := c.Param("uid")
 	endpoint := "https://api.cloudflare.com/client/v4/accounts/" + CloudflareAccount + "/stream/" + uid
 	client := &http.Client{}
