@@ -17,23 +17,27 @@ type VerCode struct {
 
 var VerCodeAllocMap map[string]VerCode
 
-func AllocVerCode(c *gin.Context) {
+func AllocVerCodeResetPwd(c *gin.Context) {
 	email := c.PostForm("email")
-	verCode, isExisted := VerCodeAllocMap[email]
-	if isExisted && (verCode.GenTime+60) >= time.Now().Unix() {
+	IsUserExisted, _ := db.In("email", email).Exist(&User{})
+	if !IsUserExisted {
+		c.String(http.StatusBadRequest, "UserIsNotExisted")
+	}
+	verCode, isCodeExisted := VerCodeAllocMap[email]
+	if isCodeExisted && (verCode.GenTime+60) >= time.Now().Unix() {
 		timeInterval := verCode.GenTime + 60 - time.Now().Unix()
 		c.String(http.StatusBadRequest, strconv.Itoa(int(timeInterval)))
 		//lightsail server itself may send 429 ,so we use 400 instead
 	} else {
 		code := GenVerCode()
 		VerCodeAllocMap[email] = VerCode{Code: code, GenTime: time.Now().Unix()}
-		SendVerEmail(email, code)
+		SendVerEmail(email, code, "重置密码")
 		c.AbortWithStatus(http.StatusOK)
 	}
 }
 
-func SendVerEmail(receiver string, VerCode string) {
-	println(VerCode)
+func SendVerEmail(receiver string, verCode string, reason string) {
+
 }
 
 func VerifyVerCode(email string, code string) (bool, error) {

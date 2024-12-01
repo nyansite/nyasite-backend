@@ -102,7 +102,7 @@ func main() {
 		group.GET("/coffee", CheckPrivilege(11), coffee)
 		group.GET("/taglist", EnireTag)
 
-		group.POST("/get_ver_code", AllocVerCode)
+		group.POST("/get_ver_code_reset_pwd", AllocVerCodeResetPwd)
 		//trendingTest
 		group.POST("/trendingTest", RankVideosTest)
 
