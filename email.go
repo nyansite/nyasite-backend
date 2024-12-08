@@ -68,7 +68,7 @@ func saveToken(path string, token *oauth2.Token) {
 	json.NewEncoder(f).Encode(token)
 }
 
-func GenSvr() (*gmail.Service, error) {
+func GenSrv() (*gmail.Service, error) {
 	ctx := context.Background()
 	b, err := os.ReadFile("credentials.json")
 	if err != nil {

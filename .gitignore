@@ -33,3 +33,4 @@ debug.log
 
 #token
 token.go
+credentials.json
