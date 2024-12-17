@@ -8,9 +8,12 @@ import (
 )
 
 func RankVideos(frequency uint8) {
+	println("rankHappened")
 	//0:daily 1: every week 2.every month
 	var videos []Video
 	db.Find(&videos)
+	//先清除所有的排序
+	db.In("type", frequency).Delete(&TrendingRankVideo{})
 	var videosDataToSort []VideoReturn
 	for _, i := range videos {
 		var videoData VideoReturn
@@ -33,7 +36,6 @@ func RankVideos(frequency uint8) {
 		trendingVideo := TrendingRankVideo{Vid: int(i.Id), Type: frequency}
 		db.InsertOne(&trendingVideo)
 	}
-	return
 }
 
 func RankVideosDaliy()   { RankVideos(0) }
@@ -55,7 +57,6 @@ func RankVideosTest(c *gin.Context) {
 	} else {
 		c.AbortWithStatus(http.StatusBadRequest)
 	}
-	return
 }
 
 func GetTrending(c *gin.Context) {

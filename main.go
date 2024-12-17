@@ -16,12 +16,14 @@ import (
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
 	"github.com/robfig/cron/v3"
+	"google.golang.org/api/gmail/v1"
 	"xorm.io/xorm"
 	"xorm.io/xorm/caches"
 )
 
 var (
-	db *xorm.Engine
+	db       *xorm.Engine
+	emailSrv *gmail.Service
 )
 
 const (
@@ -50,6 +52,11 @@ func main() {
 	//上面的是sql
 	VerCodeAllocMap = make(map[string]VerCode)
 	//上面的是初始化验证码队列
+	emailSrv, err = GenSrv()
+	if err != nil {
+		panic(err)
+	}
+	//
 	// config := cors.DefaultConfig()
 	// config.AllowOrigins = []string{"http://google.com"}	//允许访问信息的第三方,比如说广告供应商
 	// config.AllowCredentials = true //cookie一并发给跨域请求
@@ -102,7 +109,7 @@ func main() {
 		group.GET("/coffee", CheckPrivilege(11), coffee)
 		group.GET("/taglist", EnireTag)
 
-		group.POST("/get_ver_code", AllocVerCode)
+		group.POST("/get_ver_code_reset_pwd", AllocVerCodeResetPwd)
 		//trendingTest
 		group.POST("/trendingTest", RankVideosTest)
 
