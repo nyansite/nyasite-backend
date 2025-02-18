@@ -67,7 +67,7 @@ func CheckAvailableCircle(c *gin.Context) {
 		return
 	}
 
-	db.Where("permission >= 2").In("uid", userid).Find(&authorOfCircle)
+	db.Where("permission >= 1").In("uid", userid).Find(&authorOfCircle)
 	var circle Circle
 	for _, i := range authorOfCircle {
 		db.ID(i.Cid).Get(&circle)
@@ -92,6 +92,7 @@ func PostCircleApplication(c *gin.Context) {
 	name := c.PostForm("name")
 	pastworks := c.PostForm("pastworks")
 	kindsStr := c.PostFormArray("type")
+	agencyStr := c.PostForm("agency")
 	avatar := c.PostForm("avatar")
 	description := c.PostForm("description")
 	var kinds int16
@@ -105,6 +106,10 @@ func PostCircleApplication(c *gin.Context) {
 			kinds = kinds + (1 << 2)
 		}
 	}
+	agency, err1 := strconv.ParseBool(agencyStr)
+	if err1 != nil {
+		c.AbortWithError(http.StatusBadRequest, err1)
+	}
 	has, _ := db.In("name", name).Count(&Circle{})
 	if has > 0 {
 		c.AbortWithStatus(http.StatusInsufficientStorage)
@@ -117,6 +122,7 @@ func PostCircleApplication(c *gin.Context) {
 		ApplyText:  pastworks,
 		Stauts:     false,
 		Kinds:      kinds,
+		Agency:     agency,
 		Applicant:  author,
 	}
 	_, err := db.InsertOne(&circleApplication)
@@ -169,11 +175,19 @@ func GetCircle(c *gin.Context) {
 		"avatar":     circle.Avatar,
 		"descrption": circle.Descrption,
 		"kinds":      circle.Kinds,
+		"agency":     DBisItAgency(int(circle.Id)),
 		"members":    DBGetMembersOfCircle(int(circle.Id)),
 		"relation":   DBgetRelationToCircle(int(circle.Id), c),
 		"videos":     videosDisplay,
 		"createdAt":  circle.CreatedAt,
 	})
+}
+
+// 判断社团是否为代理
+func DBisItAgency(cid int) bool {
+	var memberOfCircle MemberOfCircle
+	db.In("cid", cid).Get(&memberOfCircle)
+	return memberOfCircle.Permission == 1
 }
 
 func GetVideosOfCircle(c *gin.Context) {
@@ -259,4 +273,37 @@ func DBGetCircleDataShow(cid int) CircleDataShow {
 		Avatar: circle.Avatar,
 	}
 	return circleDisplay
+}
+
+func MoveToActualHeader(c *gin.Context) {
+	uid := GetUserIdWithCheck(c)
+	targetStr := c.PostForm("target")
+	cidStr := c.PostForm("cid")
+	target, err := strconv.Atoi(targetStr)
+	if err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+	}
+	cid, err1 := strconv.Atoi(cidStr)
+	if err1 != nil {
+		c.AbortWithError(http.StatusBadRequest, err1)
+	}
+	var selfOnCircle MemberOfCircle
+	db.In("uid", uid).In("cid", cid).Get(selfOnCircle)
+	if selfOnCircle.Permission != 1 {
+		c.AbortWithStatus(http.StatusForbidden)
+	}
+	actualHeader := MemberOfCircle{
+		Uid:        target,
+		Cid:        cid,
+		Permission: 4,
+	}
+	_, err2 := db.Insert(&actualHeader)
+	if err2 != nil {
+		c.AbortWithError(http.StatusInternalServerError, err2)
+	}
+	_, err3 := db.In("uid", uid).In("cid", cid).Delete(&MemberOfCircle{})
+	if err3 != nil {
+		c.AbortWithError(http.StatusInternalServerError, err3)
+	}
+	return
 }

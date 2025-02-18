@@ -86,7 +86,7 @@ func InviteMember(c *gin.Context) {
 	privilege := DBgetRelationToCircle(circleId, c)
 	switch privilege {
 	case 3:
-		if (kind == 1) || (kind == 2) {
+		if kind == 2 {
 			invitation := Invitation{
 				Inviter: inviterId,
 				Invitee: inviteeId,
@@ -100,7 +100,7 @@ func InviteMember(c *gin.Context) {
 		}
 		return
 	case 4:
-		if (kind >= 1) && (kind <= 3) {
+		if (kind >= 2) && (kind <= 3) {
 			invitation := Invitation{
 				Inviter: inviterId,
 				Invitee: inviteeId,
@@ -121,6 +121,7 @@ func InviteMember(c *gin.Context) {
 
 func KickOut(c *gin.Context) {
 	selfId := GetUserIdWithoutCheck(c)
+	//当传入的uid为0时是自己退出
 	strUid := c.PostForm("uid")
 	strCid := c.PostForm("cid")
 	cid, _ := strconv.Atoi(strCid)
@@ -129,7 +130,8 @@ func KickOut(c *gin.Context) {
 	var memberSelf MemberOfCircle
 	db.In("uid", uid).In("cid", cid).Get(&memberKickedOut)
 	db.In("uid", selfId).In("cid", cid).Get(&memberSelf)
-	if (uid == 0) && (memberSelf.Permission != 4) {
+	//自主退出
+	if (uid == 0) && (memberSelf.Permission != 4) && (memberSelf.Permission != 1) {
 		db.In("uid", selfId).In("cid", cid).Delete(&MemberOfCircle{})
 		kickOutRecord := Discharge{
 			WhoDischarge:     selfId,
@@ -138,6 +140,7 @@ func KickOut(c *gin.Context) {
 		}
 		db.InsertOne(&kickOutRecord)
 		return
+		//踢走别人
 	} else if ((memberSelf.Permission == 4) && (memberKickedOut.Permission <= 3) && (uid != 0)) ||
 		((memberSelf.Permission == 3) && (memberKickedOut.Permission <= 2)) {
 		db.In("uid", uid).In("cid", cid).Delete(&MemberOfCircle{})

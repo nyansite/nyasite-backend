@@ -54,6 +54,7 @@ type ApplyCircle struct {
 	Stauts     bool   //false:审核中 true:驳回
 	Kinds      int16  `xorm:"SMALLINT"` //1st bite: video,2nd bite: image,3rd bite: music.
 	Applicant  int
+	Agency     bool
 	ModelLight `xorm:"extends"`
 }
 
@@ -74,7 +75,7 @@ type Circle struct {
 type MemberOfCircle struct {
 	Uid        int   //User.Id
 	Cid        int   //Circle.Id
-	Permission uint8 `xorm:"TINYINT"` //0:Subscribe,1:Staff,2:Creator,3:Maintainer,4:Owner
+	Permission uint8 `xorm:"TINYINT"` //0:Subscribe,1:agency,2:Creator,3:Maintainer,4:Header
 	UpdatedAt  int   `xorm:"updated"`
 }
 
@@ -257,7 +258,7 @@ type Discharge struct {
 type CircleAffairMessage struct {
 	Kind uint8
 	// 0:join 1.discharge 2.quit
-	//(3.invite staff 4.invite creator 5.invite maintianer) self 6.invite staff 7.invite creator 8.invite maintianer
+	//(4.invite creator 5.invite maintianer) self 7.invite creator 8.invite maintianer
 	//9.reject circle
 	SenderId    int
 	SenderName  string

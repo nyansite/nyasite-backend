@@ -41,7 +41,14 @@ func VoteForCirclesNeedtoCheck(c *gin.Context) {
 	if err4 != nil {
 		c.AbortWithError(http.StatusInternalServerError, err4)
 	}
+	//社团通过投票
 	if agree >= 4 && altitudeBool {
+		var permission uint8
+		if circleNeedToCheck.Agency {
+			permission = 1
+		} else {
+			permission = 4
+		}
 		circle := Circle{
 			Name:       circleNeedToCheck.Name,
 			Avatar:     circleNeedToCheck.Avatar,
@@ -56,7 +63,7 @@ func VoteForCirclesNeedtoCheck(c *gin.Context) {
 		memberOfCircle := MemberOfCircle{
 			Uid:        circleNeedToCheck.Applicant,
 			Cid:        int(circle.Id),
-			Permission: 4,
+			Permission: permission,
 		}
 		_, err2 := db.InsertOne(&memberOfCircle)
 		if err2 != nil {
@@ -74,6 +81,7 @@ func VoteForCirclesNeedtoCheck(c *gin.Context) {
 			return
 		}
 		return
+		//社团没能通过投票
 	} else if disagree >= 4 && !altitudeBool {
 		circleNeedToCheck.Stauts = true
 		_, err1 := db.ID("acid").Cols("stauts").Update(&circleNeedToCheck)
