@@ -32,7 +32,7 @@ const (
 
 func main() {
 	var err error
-	db, _ = xorm.NewEngine("postgres", "postgresql://mbe:114514@localhost:5432/dbs?sslmode=disable")
+	db, _ = xorm.NewEngine("postgres", "postgresql://mbe:"+databasePassword+"@localhost:5432/dbs?sslmode=disable")
 	err = db.Ping()
 	if err != nil {
 		log.Println("我数据库呢???我那么大一个数据库呢???还我数据库!!!")
