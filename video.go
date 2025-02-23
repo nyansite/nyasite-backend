@@ -167,12 +167,12 @@ func GetVideoTags(c *gin.Context) {
 	var tags []Tag
 	var tagsDisplay []gin.H
 
-	count, _ := db.In("kind", 1).In("pid", id).Count(&tags)
+	count, _ := db.In("pid", id).Count(&Tag{})
 	if count == 0 {
 		c.AbortWithStatus(http.StatusNotFound)
 		return
 	}
-	db.In("kind", 1).In("pid", id).Find(&tags)
+	db.In("pid", id).Find(&tags)
 	var tagModel TagModel
 	var tid int
 	for _, value := range tags {
