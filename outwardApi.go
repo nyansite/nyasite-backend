@@ -10,8 +10,8 @@ import (
 )
 
 // 申请图床的临时token
-func GetPICUItoken(c *gin.Context) {
-	const url = "https://picui.cn/api/v1/images/tokens"
+func GetHELLOIMGtoken(c *gin.Context) {
+	const url = "https://www.helloimg.com/api/v1/images/tokens"
 	//申请一个token,有效时间10个小时
 	formDataMap := map[string]int{
 		"num":     1,
@@ -25,8 +25,8 @@ func GetPICUItoken(c *gin.Context) {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	//PICUItoken from token.go
-	req.Header.Set("Authorization", "Bearer "+PICUItoken)
+	//HELLOIMGtoken from token.go
+	req.Header.Set("Authorization", "Bearer "+HELLOIMGtoken)
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Content-Length", "42")

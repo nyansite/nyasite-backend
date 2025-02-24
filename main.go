@@ -52,7 +52,7 @@ func main() {
 	//上面的是sql
 	VerCodeAllocMap = make(map[string]VerCode)
 	//上面的是初始化验证码队列
-	emailSrv, err = GenSrv()
+	//emailSrv, err = GenSrv()
 	if err != nil {
 		panic(err)
 	}
@@ -153,7 +153,7 @@ func main() {
 		//search
 		group.POST("/search_video", SearchVideos)
 		//token
-		group.GET("/get_PICUI_token", CheckPrivilege(0), GetPICUItoken)
+		group.GET("/get_HELLOIMG_token", CheckPrivilege(0), GetHELLOIMGtoken)
 		//check
 		group.GET("/get_all_circles_needtocheck", CheckPrivilege(9), GetAllCirclesNeedtoCheck)
 		group.POST("/vote_for_circles_needtocheck", CheckPrivilege(9), VoteForCirclesNeedtoCheck)

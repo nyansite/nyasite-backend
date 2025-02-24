@@ -1,6 +1,6 @@
 package main
 
-const PICUItoken = ""
+const HELLOIMGtoken = ""
 const CloudflareStreamToken = ""
 const CloudflareAccount = ""
 const TokenJWTSecret = ""
