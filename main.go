@@ -52,7 +52,7 @@ func main() {
 	//上面的是sql
 	VerCodeAllocMap = make(map[string]VerCode)
 	//上面的是初始化验证码队列
-	//emailSrv, err = GenSrv()
+	emailSrv, err = GenSrv()
 	if err != nil {
 		panic(err)
 	}
