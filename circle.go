@@ -68,8 +68,8 @@ func CheckAvailableCircle(c *gin.Context) {
 	}
 
 	db.Where("permission >= 1").In("uid", userid).Find(&authorOfCircle)
-	var circle Circle
 	for _, i := range authorOfCircle {
+		var circle Circle
 		db.ID(i.Cid).Get(&circle)
 		if (circle.Kinds & int16(1<<kind)) > 0 { //压位
 			circles = append(circles, gin.H{
