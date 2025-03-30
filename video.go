@@ -173,9 +173,9 @@ func GetVideoTags(c *gin.Context) {
 		return
 	}
 	db.In("pid", id).Find(&tags)
-	var tagModel TagModel
 	var tid int
 	for _, value := range tags {
+		var tagModel TagModel
 		tid = int(value.Tid)
 		db.ID(tid).Get(&tagModel)
 		tagsDisplay = append(tagsDisplay, gin.H{
