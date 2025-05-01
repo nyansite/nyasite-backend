@@ -110,6 +110,7 @@ func main() {
 		group.GET("/taglist", EnireTag)
 
 		group.POST("/get_ver_code_reset_pwd", AllocVerCodeResetPwd)
+		group.POST("/get_ver_code_register", AllocVerCodeRegister)
 		//trendingTest
 		group.POST("/trendingTest", RankVideosTest)
 

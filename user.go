@@ -108,13 +108,13 @@ func Login(c *gin.Context) {
 var regCompile = regexp.MustCompile(`\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*`)
 
 func Register(c *gin.Context) {
-	username, passwd, mail, key := c.PostForm("username"), c.PostForm("passwd"), c.PostForm("email"), c.PostForm("key")
+	username, passwd, email, code := c.PostForm("username"), c.PostForm("passwd"), c.PostForm("email"), c.PostForm("verCode")
 
-	if username == "" || passwd == "" || mail == "" {
+	if username == "" || passwd == "" || email == "" {
 		c.AbortWithStatus(http.StatusBadRequest) //400
 		return
 	}
-	if !regCompile.MatchString(mail) { //检测前端也要做一遍
+	if !regCompile.MatchString(email) { //检测前端也要做一遍
 		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
@@ -125,24 +125,25 @@ func Register(c *gin.Context) {
 		c.Abort()
 		return
 	}
-	if has, _ := db.Exist(&User{Email: mail}); has {
+	if has, _ := db.Exist(&User{Email: email}); has {
 		c.String(http.StatusConflict, "EmailAddressUsed")
 		c.Abort()
 		return
 	}
-	keyVaildity := VerifyKey(key)
-	if !keyVaildity {
-		c.String(http.StatusConflict, "KeyIsNotVaild")
-		c.Abort()
-		return
+	canReset, err := VerifyVerCode(email, code)
+	if canReset {
+		user := User{Name: username, Passwd: encrypt_passwd(passwd), Email: email, OriginName: username}
+		_, err := db.Insert(&user)
+		if err != nil {
+			fmt.Println(err)
+		}
+		c.AbortWithStatus(http.StatusOK)
+	} else if err.Error() == "expired" {
+		c.String(http.StatusBadRequest, "expired")
+	} else if err.Error() == "incorrect" {
+		c.String(http.StatusBadRequest, "incorrectVerCode")
 	}
-	user := User{Name: username, Passwd: encrypt_passwd(passwd), Email: mail, OriginName: username}
-	_, err := db.Insert(&user)
-	if err != nil {
-		fmt.Println(err)
-	}
-	db.Insert(&KeyUsed{Key: key})
-	c.AbortWithStatus(http.StatusOK)
+
 }
 
 func ResetPwd(c *gin.Context) {
