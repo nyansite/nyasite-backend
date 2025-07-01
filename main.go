@@ -88,6 +88,9 @@ func main() {
 	c.AddFunc("@yearly", RankVideosYearly)
 	//下面是路由
 	r := gin.Default()
+	if err := r.SetTrustedProxies([]string{"127.0.0.1", "::1"}); err != nil {
+		log.Fatal(err)
+	}
 	r.Use(gin.Recovery(), sessions.Sessions("session", store))
 	group := r.Group("/api")
 	{
