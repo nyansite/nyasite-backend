@@ -64,7 +64,7 @@ func GenMail(requestType string, OTP string) string {
 	builder.WriteString(OTP)
 	builder.WriteString("</h2><p style='font-size: 0.9em'><strong>一次性验证码的有效期为5分钟</strong><br /><br />如果您没有")
 	builder.WriteString(requestType)
-	builder.WriteString("，请忽略这封电子邮件。请确保你的一次性验证码不会泄漏给任何人<br /><strong>不要把这封电子邮件转发给任何人</strong><br /><br /><strong>感谢您选择喵站</strong><br /></p><hr style='border: none; border-top: 0.5px solid #131111' /><div class='footer'><p>本邮件为自动发送，请不要尝试回复</p><!-- <p>如果想知道更多喵站和您的帐号的信息, visit<strong>[Name]</strong></p> --></div></div></body></html>")
+	builder.WriteString("，请忽略这封电子邮件。请确保你的一次性验证码不会泄漏给任何人<br /><strong>不要把这封电子邮件转发给任何人</strong><br /><br /><strong>感谢您选择喵站</strong><br /></p><hr style='border: none; border-top: 0.5px solid #131111' /><div class='footer'><p>本邮件为自动发送，请不要尝试回复</p><p>喵站官方群, <strong>101051539</strong></p></div></div></body></html>")
 	return builder.String()
 }
 
