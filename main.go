@@ -157,7 +157,7 @@ func main() {
 		//search
 		group.POST("/search_video", SearchVideos)
 		//token
-		group.GET("/get_HELLOIMG_token", CheckPrivilege(0), GetHELLOIMGtoken)
+		group.GET("/get_WMING_token", CheckPrivilege(0), GetWMINGtoken)
 		//check
 		group.GET("/get_all_circles_needtocheck", CheckPrivilege(9), GetAllCirclesNeedtoCheck)
 		group.POST("/vote_for_circles_needtocheck", CheckPrivilege(9), VoteForCirclesNeedtoCheck)

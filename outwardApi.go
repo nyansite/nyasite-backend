@@ -10,8 +10,8 @@ import (
 )
 
 // 申请图床的临时token
-func GetHELLOIMGtoken(c *gin.Context) {
-	const url = "https://www.helloimg.com/api/v1/images/tokens"
+func GetWMINGtoken(c *gin.Context) {
+	const url = "https://wmimg.com/api/v1/images/tokens"
 	//申请一个token,有效时间10个小时
 	formDataMap := map[string]int{
 		"num":     1,
@@ -25,8 +25,8 @@ func GetHELLOIMGtoken(c *gin.Context) {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	//HELLOIMGtoken from token.go
-	req.Header.Set("Authorization", "Bearer "+HELLOIMGtoken)
+	//WMINGtoken from token.go
+	req.Header.Set("Authorization", "Bearer "+WMINGtoken)
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Content-Length", "42")
